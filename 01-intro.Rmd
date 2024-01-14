@@ -1,4 +1,52 @@
 # Early data exploration
+```{r setup, include = FALSE}
+library(tidyverse)
+library(tidymodels)
+library(caret)
+library(sjPlot)
+library(DataExplorer)
+library(visdat)
+library(skimr)
+library(naniar)
+library(ggstats)
+library(ggthemes)
+library(gridExtra)
+library(mgcv)
+library(vcd)
+library(FactoMineR)
+library(factoextra)
+library(colorspace)
+library(missRanger)
+library(rpart)
+library(dlookr)
+library(embed)
+library(pre)
+library(parallel)
+library(doSNOW)
+library(janitor)
+library(rFSA)
+library(bslib)
+library(showtext)
+library(forcats)
+library(interactions)
+library(foreach)
+library(cowplot)
+library(patchwork)
+library(R.utils)
+library(glue)
+library(Matrix)
+library(ranger)
+library(glmnet)
+library(pls)
+
+theme_set(theme_clean(base_size = 10))
+
+unregister <- function() { # Helper function to unregister parallel processes that didn't shut down for some reason
+  env <- foreach:::.foreachGlobals
+  rm(list=ls(name=env), pos=env)
+}
+```
+
 ## Overview of the data
 The data has already been divided into train and test sets so let's load them and get a sense of how the *train* data looks like. We'll also try to be very strict with the machine learning principles and not touch or even look at the *test* data until the end. 
 

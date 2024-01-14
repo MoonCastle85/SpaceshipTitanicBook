@@ -1,6 +1,6 @@
 --- 
-title: "A Minimal Book Example"
-author: "John Doe"
+title: "Spaceship Titanic - A comprehensive guide"
+author: "Vanja Manborg"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 documentclass: book
@@ -8,9 +8,8 @@ bibliography: [book.bib, packages.bib]
 url: https://spaceshiptitanic.manborgconsulting.com
 # cover-image: path to the social sharing image like images/cover.jpg
 description: |
-  This is a minimal example of using the bookdown package to write a book.
-  The HTML output format for this example is bookdown::bs4_book,
-  set in the _output.yml file.
+  This is a comprehensive guide on data preprocessing, feature selection and modelling based on the classification problem of the 
+  Spaceship Titanic from the practice competition on Kaggle. 
 biblio-style: apalike
 csl: chicago-fullnote-bibliography.csl
 ---

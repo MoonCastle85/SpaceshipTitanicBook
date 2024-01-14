@@ -1,57 +1,24 @@
 --- 
-title: "A Minimal Book Example"
-author: "John Doe"
+title: "Spaceship Titanic - A comprehensive guide"
+author: "Vanja Manborg"
 date: "2024-01-14"
 site: bookdown::bookdown_site
 documentclass: book
 bibliography: [book.bib, packages.bib]
-# url: your book url like https://bookdown.org/yihui/bookdown
+url: https://spaceshiptitanic.manborgconsulting.com
 # cover-image: path to the social sharing image like images/cover.jpg
 description: |
-  This is a minimal example of using the bookdown package to write a book.
-  The HTML output format for this example is bookdown::bs4_book,
-  set in the _output.yml file.
+  This is a comprehensive guide on data preprocessing, feature selection and modelling based on the classification problem of the 
+  Spaceship Titanic from the practice competition on Kaggle. 
 biblio-style: apalike
 csl: chicago-fullnote-bibliography.csl
 ---
 
-# About
+# Introduction
+My name is Vanja Manborg and ever since I got to dabble in data science through my (not so much data-science focused) engineering job, I've spent my free time in RStudio instead of things like family, friends and going to the movies. That's still normal, right? 
 
-This is a _sample_ book written in **Markdown**. You can use anything that Pandoc's Markdown supports; for example, a math equation $a^2 + b^2 = c^2$.
+I believe in learning-by-doing methodology so this is my attempt to get relatively high scores for the [Spaceship Titanic competition](https://www.kaggle.com/competitions/spaceship-titanic/data) on Kaggle and learn new concepts and tricks of data-science while I'm at it. The competition is a futuristic version of the Titanic challenge where the goal is to predict with as high accuracy as possible which of the space-faring passengers got transported to another dimension during the spaceships maiden voyage from our solar system to another.
 
-## Usage 
+Note that I won't go into details about the packages or their functions but expect you to check them out for yourself. Also, I imagine that you the reader is following along so when I write "*We* then do x", I mean you and myself and not the voices in my head (although they are there, too). 
 
-Each **bookdown** chapter is an .Rmd file, and each .Rmd file can contain one (and only one) chapter. A chapter *must* start with a first-level heading: `# A good chapter`, and can contain one (and only one) first-level heading.
-
-Use second-level and higher headings within chapters like: `## A short section` or `### An even shorter section`.
-
-The `index.Rmd` file is required, and is also your first book chapter. It will be the homepage when you render the book.
-
-## Render book
-
-You can render the HTML version of this example book without changing anything:
-
-1. Find the **Build** pane in the RStudio IDE, and
-
-1. Click on **Build Book**, then select your output format, or select "All formats" if you'd like to use multiple formats from the same book source files.
-
-Or build the book from the R console:
-
-
-```r
-bookdown::render_book()
-```
-
-To render this example to PDF as a `bookdown::pdf_book`, you'll need to install XeLaTeX. You are recommended to install TinyTeX (which includes XeLaTeX): <https://yihui.org/tinytex/>.
-
-## Preview book
-
-As you work, you may start a local server to live preview this HTML book. This preview will update as you edit the book when you save individual .Rmd files. You can start the server in a work session by using the RStudio add-in "Preview book", or from the R console:
-
-
-```r
-bookdown::serve_book()
-```
-
-
-
+Without further ado, let's dive into it!

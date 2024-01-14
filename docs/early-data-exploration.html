@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Chapter 2 Early data exploration | Spaceship Titanic - A comprehensive guide</title>
+<meta name="author" content="Vanja Manborg">
+<meta name="description" content="2.1 Overview of the data The data has already been divided into train and test sets so let’s load them and get a sense of how the train data looks like. We’ll also try to be very strict with the...">
+<meta name="generator" content="bookdown 0.37 with bs4_book()">
+<meta property="og:title" content="Chapter 2 Early data exploration | Spaceship Titanic - A comprehensive guide">
+<meta property="og:type" content="book">
+<meta property="og:url" content="https://spaceshiptitanic.manborgconsulting.com/early-data-exploration.html">
+<meta property="og:description" content="2.1 Overview of the data The data has already been divided into train and test sets so let’s load them and get a sense of how the train data looks like. We’ll also try to be very strict with the...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chapter 2 Early data exploration | Spaceship Titanic - A comprehensive guide">
+<meta name="twitter:description" content="2.1 Overview of the data The data has already been divided into train and test sets so let’s load them and get a sense of how the train data looks like. We’ll also try to be very strict with the...">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<style type="text/css">
+    /* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+        }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
+  </style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Spaceship Titanic - A comprehensive guide</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> Introduction</a></li>
+<li><a class="active" href="early-data-exploration.html"><span class="header-section-number">2</span> Early data exploration</a></li>
+<li><a class="" href="cross.html"><span class="header-section-number">3</span> Cross-references</a></li>
+<li><a class="" href="parts.html"><span class="header-section-number">4</span> Parts</a></li>
+<li><a class="" href="footnotes-and-citations.html"><span class="header-section-number">5</span> Footnotes and citations</a></li>
+<li><a class="" href="blocks.html"><span class="header-section-number">6</span> Blocks</a></li>
+<li><a class="" href="sharing-your-book.html"><span class="header-section-number">7</span> Sharing your book</a></li>
+<li><a class="" href="references.html">References</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/MoonCastle85/SpaceshipTitanicBook">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="early-data-exploration" class="section level1" number="2">
+<h1>
+<span class="header-section-number">2</span> Early data exploration<a class="anchor" aria-label="anchor" href="#early-data-exploration"><i class="fas fa-link"></i></a>
+</h1>
+<div id="overview-of-the-data" class="section level2" number="2.1">
+<h2>
+<span class="header-section-number">2.1</span> Overview of the data<a class="anchor" aria-label="anchor" href="#overview-of-the-data"><i class="fas fa-link"></i></a>
+</h2>
+<p>The data has already been divided into train and test sets so let’s load them and get a sense of how the <em>train</em> data looks like. We’ll also try to be very strict with the machine learning principles and not touch or even look at the <em>test</em> data until the end.</p>
+<p>Let’s first get a sense of the train data.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"train.csv"</span>, na.strings <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">train</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 'data.frame':    8693 obs. of  14 variables:</span></span>
+<span><span class="co">#&gt;  $ PassengerId : chr  "0001_01" "0002_01" "0003_01" "0003_02" ...</span></span>
+<span><span class="co">#&gt;  $ HomePlanet  : chr  "Europa" "Earth" "Europa" "Europa" ...</span></span>
+<span><span class="co">#&gt;  $ CryoSleep   : chr  "False" "False" "False" "False" ...</span></span>
+<span><span class="co">#&gt;  $ Cabin       : chr  "B/0/P" "F/0/S" "A/0/S" "A/0/S" ...</span></span>
+<span><span class="co">#&gt;  $ Destination : chr  "TRAPPIST-1e" "TRAPPIST-1e" "TRAPPIST-1e" "TRAPPIST-1e" ...</span></span>
+<span><span class="co">#&gt;  $ Age         : num  39 24 58 33 16 44 26 28 35 14 ...</span></span>
+<span><span class="co">#&gt;  $ VIP         : chr  "False" "False" "True" "False" ...</span></span>
+<span><span class="co">#&gt;  $ RoomService : num  0 109 43 0 303 0 42 0 0 0 ...</span></span>
+<span><span class="co">#&gt;  $ FoodCourt   : num  0 9 3576 1283 70 ...</span></span>
+<span><span class="co">#&gt;  $ ShoppingMall: num  0 25 0 371 151 0 3 0 17 0 ...</span></span>
+<span><span class="co">#&gt;  $ Spa         : num  0 549 6715 3329 565 ...</span></span>
+<span><span class="co">#&gt;  $ VRDeck      : num  0 44 49 193 2 0 0 NA 0 0 ...</span></span>
+<span><span class="co">#&gt;  $ Name        : chr  "Maham Ofracculy" "Juanna Vines" "Altark Susent" "Solam Susent" ...</span></span>
+<span><span class="co">#&gt;  $ Transported : chr  "False" "True" "False" "False" ...</span></span></code></pre></div>
+<p>There are 8693 observations and 14 variables where “Transported” is the target variable. The specifics on the different variables are explained in detail on the competition website so I won’t repeat them here. It’s enough to note that there is a mix of categorical and continuous variables and that our target variable is expressed as True/False in a character vector.</p>
+</div>
+<div id="do-some-variables-have-zero-or-near-zero-variance" class="section level2" number="2.2">
+<h2>
+<span class="header-section-number">2.2</span> Do some variables have zero or near-zero variance?<a class="anchor" aria-label="anchor" href="#do-some-variables-have-zero-or-near-zero-variance"><i class="fas fa-link"></i></a>
+</h2>
+<p>One of the first things that might be useful to check is whether any of the variables have zero or near-zero variance. A zero variance variable is one where all rows have the same value (imagine a variable where all rows are just the number 1). Such variables are not useful for prediction since they don’t change regardless of how the target variable changes.</p>
+<p>Their close cousin are the near-zero variances where a high percentage of the rows have the same value but some don’t. This can be particularly problematic when we want to do repeated cross validation where we divide the data into subdata to test our models. Some of these subdata might then have zero variance while other subdata might get a high variance for the same variable.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">nearZeroVar</span><span class="op">(</span><span class="va">train</span>, saveMetrics <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">rownames_to_column</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">nzv</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   rowname freqRatio percentUnique zeroVar  nzv</span></span>
+<span><span class="co">#&gt; 1     VIP  41.66332    0.02300702   FALSE TRUE</span></span></code></pre></div>
+<p>Only the VIP variable has near-zero variation (2.3% of all rows). We’ll deal with this later.</p>
+</div>
+<div id="frequency-distribution-of-all-variables" class="section level2" number="2.3">
+<h2>
+<span class="header-section-number">2.3</span> Frequency distribution of all variables<a class="anchor" aria-label="anchor" href="#frequency-distribution-of-all-variables"><i class="fas fa-link"></i></a>
+</h2>
+<p>Let’s see how the values of the different variables are distributed.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">plot_frq</span><span class="op">(</span><span class="va">train</span>, <span class="va">Transported</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-1"></span>
+<img src="01-intro_files/figure-html/frequencies-1.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.1: Distribution of the variables against the response
+</p>
+</div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">plot_frq</span><span class="op">(</span><span class="va">train</span>, <span class="op">-</span><span class="va">Transported</span>, type <span class="op">=</span> <span class="st">"histogram"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-2"></span>
+<img src="01-intro_files/figure-html/frequencies-2.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.2: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-3"></span>
+<img src="01-intro_files/figure-html/frequencies-3.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.3: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-4"></span>
+<img src="01-intro_files/figure-html/frequencies-4.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.4: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-5"></span>
+<img src="01-intro_files/figure-html/frequencies-5.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.5: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-6"></span>
+<img src="01-intro_files/figure-html/frequencies-6.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.6: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-7"></span>
+<img src="01-intro_files/figure-html/frequencies-7.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.7: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-8"></span>
+<img src="01-intro_files/figure-html/frequencies-8.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.8: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-9"></span>
+<img src="01-intro_files/figure-html/frequencies-9.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.9: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-10"></span>
+<img src="01-intro_files/figure-html/frequencies-10.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.10: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-11"></span>
+<img src="01-intro_files/figure-html/frequencies-11.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.11: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-12"></span>
+<img src="01-intro_files/figure-html/frequencies-12.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.12: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-13"></span>
+<img src="01-intro_files/figure-html/frequencies-13.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.13: Distribution of the variables against the response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:frequencies-14"></span>
+<img src="01-intro_files/figure-html/frequencies-14.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+Figure 2.14: Distribution of the variables against the response
+</p>
+</div>
+<p>The target variable is balanced which is preferable. An unbalanced distribution of the target variable (meaning that the share of one outcome vastly outweighs the other) can skew the predictive results of some algorithms. Fortunately, we do not have to apply any resampling or downsampling methods to balance it.</p>
+<p>The numeric variables are right-skewed, meaning they have outliers to the right of the horizontal axis and the amenities (RoomService, FoodCourt etc) have a high proportion of zero values. The difference in scales is also large. We will need to apply some kind of preproces to scale them to help out models like K-nearest-neighbors (KNN). We might also need to add binary features (yes/no or 1/0) for the amenities that are zero.</p>
+<p>The Cabin and Name variables have a near uniform distribution which implies that they either won’t have much predictive power by themselves or could even reduce the accuracy by introducing unnecessary noise to the model. We will either have to derive features from these variables or not include them in the models.</p>
+</div>
+<div id="correlation-between-the-variables" class="section level2" number="2.4">
+<h2>
+<span class="header-section-number">2.4</span> Correlation between the variables<a class="anchor" aria-label="anchor" href="#correlation-between-the-variables"><i class="fas fa-link"></i></a>
+</h2>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html">na.omit</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span><span class="fu">plot_correlation</span><span class="op">(</span><span class="va">.</span>, type <span class="op">=</span> <span class="st">"all"</span>,</span>
+<span>                 geom_text_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>                 theme_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 3 features with more than 20 categories ignored!</span></span>
+<span><span class="co">#&gt; PassengerId: 6606 categories</span></span>
+<span><span class="co">#&gt; Cabin: 5305 categories</span></span>
+<span><span class="co">#&gt; Name: 6590 categories</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:correlation"></span>
+<img src="01-intro_files/figure-html/correlation-1.png" alt="Correlation between numerical variables" width="672"><p class="caption">
+Figure 2.15: Correlation between numerical variables
+</p>
+</div>
+<p>We see that there’s some relatively high correlation between homeplanets and destinations as well as a moderate correlation between CryoSleep and Transported which already gives us a hint that CryoSleep might be important. Otherwise, the cariables seem relatively uncorrelated which is a good thing since some models cannot handle variables that are too correlated.</p>
+</div>
+<div id="overview-of-missing-values" class="section level2" number="2.5">
+<h2>
+<span class="header-section-number">2.5</span> Overview of missing values<a class="anchor" aria-label="anchor" href="#overview-of-missing-values"><i class="fas fa-link"></i></a>
+</h2>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">plot_na_hclust</span><span class="op">(</span><span class="va">train</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:missing"></span>
+<img src="01-intro_files/figure-html/missing-1.png" alt="Missing values overview" width="672"><p class="caption">
+Figure 2.16: Missing values overview
+</p>
+</div>
+<p>All predictor variables are missing to the amount of 2% which is relatively low. When we cluster the missing values, we can also see that most don’t overlap which suggests that they’re missing at random and not due to some specific pattern. This tells us that we can probably find a suitable algorithm to help us impute the missing values based on the non-missing values. Had there been a pattern or clusters of missing data, we’d have to explore further to uncover the reasons for such non-random missingness.</p>
+
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="index.html"><span class="header-section-number">1</span> Introduction</a></div>
+<div class="next"><a href="cross.html"><span class="header-section-number">3</span> Cross-references</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#early-data-exploration"><span class="header-section-number">2</span> Early data exploration</a></li>
+<li><a class="nav-link" href="#overview-of-the-data"><span class="header-section-number">2.1</span> Overview of the data</a></li>
+<li><a class="nav-link" href="#do-some-variables-have-zero-or-near-zero-variance"><span class="header-section-number">2.2</span> Do some variables have zero or near-zero variance?</a></li>
+<li><a class="nav-link" href="#frequency-distribution-of-all-variables"><span class="header-section-number">2.3</span> Frequency distribution of all variables</a></li>
+<li><a class="nav-link" href="#correlation-between-the-variables"><span class="header-section-number">2.4</span> Correlation between the variables</a></li>
+<li><a class="nav-link" href="#overview-of-missing-values"><span class="header-section-number">2.5</span> Overview of missing values</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/blob/master/01-intro.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/edit/master/01-intro.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-14.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>
