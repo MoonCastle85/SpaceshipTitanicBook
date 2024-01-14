@@ -1,7 +1,7 @@
 --- 
 title: "Spaceship Titanic - A comprehensive guide"
 author: "Vanja Manborg"
-date: "`r Sys.Date()`"
+date: "2024-01-14"
 site: bookdown::bookdown_site
 documentclass: book
 bibliography: [book.bib, packages.bib]
@@ -23,51 +23,4 @@ Note that I won't go into details about the packages or their functions but expe
 
 Without further ado, let's dive into it!
 
-```{r setup, include = FALSE}
-library(tidyverse)
-library(tidymodels)
-library(caret)
-library(sjPlot)
-library(DataExplorer)
-library(visdat)
-library(skimr)
-library(naniar)
-library(ggstats)
-library(ggthemes)
-library(gridExtra)
-library(mgcv)
-library(vcd)
-library(FactoMineR)
-library(factoextra)
-library(colorspace)
-library(missRanger)
-library(rpart)
-library(dlookr)
-library(embed)
-library(pre)
-library(parallel)
-library(doSNOW)
-library(janitor)
-library(rFSA)
-library(bslib)
-library(showtext)
-library(forcats)
-library(interactions)
-library(foreach)
-library(cowplot)
-library(patchwork)
-library(R.utils)
-library(glue)
-library(Matrix)
-library(ranger)
-library(glmnet)
-library(pls)
-library(gifski)
 
-theme_set(theme_clean(base_size = 24))
-
-unregister <- function() { # Helper function to unregister parallel processes that didn't shut down for some reason
-  env <- foreach:::.foreachGlobals
-  rm(list=ls(name=env), pos=env)
-}
-```

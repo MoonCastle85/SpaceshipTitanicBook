@@ -68,7 +68,7 @@
         <ul class="book-toc list-unstyled">
 <li><a class="" href="index.html"><span class="header-section-number">1</span> Introduction</a></li>
 <li><a class="active" href="early-data-exploration.html"><span class="header-section-number">2</span> Early data exploration</a></li>
-<li><a class="" href="cross.html"><span class="header-section-number">3</span> Cross-references</a></li>
+<li><a class="" href="handle-missing-data.html"><span class="header-section-number">3</span> Handle missing data</a></li>
 <li><a class="" href="parts.html"><span class="header-section-number">4</span> Parts</a></li>
 <li><a class="" href="footnotes-and-citations.html"><span class="header-section-number">5</span> Footnotes and citations</a></li>
 <li><a class="" href="blocks.html"><span class="header-section-number">6</span> Blocks</a></li>
@@ -129,91 +129,12 @@
 </h2>
 <p>Let’s see how the values of the different variables are distributed.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">plot_frq</span><span class="op">(</span><span class="va">train</span>, <span class="va">Transported</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">plot_frq</span><span class="op">(</span><span class="va">train</span>, <span class="va">Transported</span><span class="op">)</span></span>
+<span><span class="fu">plot_frq</span><span class="op">(</span><span class="va">train</span>, <span class="op">-</span><span class="va">Transported</span>, type <span class="op">=</span> <span class="st">"histogram"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<span style="display:block;" id="fig:frequencies-1"></span>
-<img src="01-intro_files/figure-html/frequencies-1.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
+<span style="display:block;" id="fig:frequencies"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/frequencies-.gif" alt="Distribution of the variables against the response" width="672"><p class="caption">
 Figure 2.1: Distribution of the variables against the response
-</p>
-</div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">plot_frq</span><span class="op">(</span><span class="va">train</span>, <span class="op">-</span><span class="va">Transported</span>, type <span class="op">=</span> <span class="st">"histogram"</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-2"></span>
-<img src="01-intro_files/figure-html/frequencies-2.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.2: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-3"></span>
-<img src="01-intro_files/figure-html/frequencies-3.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.3: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-4"></span>
-<img src="01-intro_files/figure-html/frequencies-4.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.4: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-5"></span>
-<img src="01-intro_files/figure-html/frequencies-5.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.5: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-6"></span>
-<img src="01-intro_files/figure-html/frequencies-6.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.6: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-7"></span>
-<img src="01-intro_files/figure-html/frequencies-7.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.7: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-8"></span>
-<img src="01-intro_files/figure-html/frequencies-8.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.8: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-9"></span>
-<img src="01-intro_files/figure-html/frequencies-9.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.9: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-10"></span>
-<img src="01-intro_files/figure-html/frequencies-10.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.10: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-11"></span>
-<img src="01-intro_files/figure-html/frequencies-11.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.11: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-12"></span>
-<img src="01-intro_files/figure-html/frequencies-12.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.12: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-13"></span>
-<img src="01-intro_files/figure-html/frequencies-13.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.13: Distribution of the variables against the response
-</p>
-</div>
-<div class="figure">
-<span style="display:block;" id="fig:frequencies-14"></span>
-<img src="01-intro_files/figure-html/frequencies-14.png" alt="Distribution of the variables against the response" width="672"><p class="caption">
-Figure 2.14: Distribution of the variables against the response
 </p>
 </div>
 <p>The target variable is balanced which is preferable. An unbalanced distribution of the target variable (meaning that the share of one outcome vastly outweighs the other) can skew the predictive results of some algorithms. Fortunately, we do not have to apply any resampling or downsampling methods to balance it.</p>
@@ -224,20 +145,18 @@ Figure 2.14: Distribution of the variables against the response
 <h2>
 <span class="header-section-number">2.4</span> Correlation between the variables<a class="anchor" aria-label="anchor" href="#correlation-between-the-variables"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html">na.omit</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span><span class="fu">plot_correlation</span><span class="op">(</span><span class="va">.</span>, type <span class="op">=</span> <span class="st">"all"</span>,</span>
-<span>                 geom_text_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
-<span>                 theme_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">plot_correlation</span><span class="op">(</span><span class="va">.</span>, type <span class="op">=</span> <span class="st">"all"</span>, theme_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 3 features with more than 20 categories ignored!</span></span>
 <span><span class="co">#&gt; PassengerId: 6606 categories</span></span>
 <span><span class="co">#&gt; Cabin: 5305 categories</span></span>
 <span><span class="co">#&gt; Name: 6590 categories</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:correlation"></span>
-<img src="01-intro_files/figure-html/correlation-1.png" alt="Correlation between numerical variables" width="672"><p class="caption">
-Figure 2.15: Correlation between numerical variables
+<img src="SpaceshipTitanicBook_files/figure-html/correlation-1.png" alt="Correlation between numerical variables" width="672"><p class="caption">
+Figure 2.2: Correlation between numerical variables
 </p>
 </div>
 <p>We see that there’s some relatively high correlation between homeplanets and destinations as well as a moderate correlation between CryoSleep and Transported which already gives us a hint that CryoSleep might be important. Otherwise, the cariables seem relatively uncorrelated which is a good thing since some models cannot handle variables that are too correlated.</p>
@@ -246,12 +165,12 @@ Figure 2.15: Correlation between numerical variables
 <h2>
 <span class="header-section-number">2.5</span> Overview of missing values<a class="anchor" aria-label="anchor" href="#overview-of-missing-values"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">plot_na_hclust</span><span class="op">(</span><span class="va">train</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:missing"></span>
-<img src="01-intro_files/figure-html/missing-1.png" alt="Missing values overview" width="672"><p class="caption">
-Figure 2.16: Missing values overview
+<img src="SpaceshipTitanicBook_files/figure-html/missing-1.png" alt="Missing values overview" width="672"><p class="caption">
+Figure 2.3: Missing values overview
 </p>
 </div>
 <p>All predictor variables are missing to the amount of 2% which is relatively low. When we cluster the missing values, we can also see that most don’t overlap which suggests that they’re missing at random and not due to some specific pattern. This tells us that we can probably find a suitable algorithm to help us impute the missing values based on the non-missing values. Had there been a pattern or clusters of missing data, we’d have to explore further to uncover the reasons for such non-random missingness.</p>
@@ -260,7 +179,7 @@ Figure 2.16: Missing values overview
 </div>
   <div class="chapter-nav">
 <div class="prev"><a href="index.html"><span class="header-section-number">1</span> Introduction</a></div>
-<div class="next"><a href="cross.html"><span class="header-section-number">3</span> Cross-references</a></div>
+<div class="next"><a href="handle-missing-data.html"><span class="header-section-number">3</span> Handle missing data</a></div>
 </div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
     <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
       <ul class="nav navbar-nav">
@@ -274,8 +193,8 @@ Figure 2.16: Missing values overview
 
       <div class="book-extra">
         <ul class="list-unstyled">
-<li><a id="book-source" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/blob/master/01-intro.Rmd">View source <i class="fab fa-github"></i></a></li>
-          <li><a id="book-edit" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/edit/master/01-intro.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+<li><a id="book-source" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/blob/master/01-overview.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/edit/master/01-overview.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
         </ul>
 </div>
     </nav>

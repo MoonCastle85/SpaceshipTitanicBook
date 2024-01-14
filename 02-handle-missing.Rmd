@@ -1,0 +1,380 @@
+# Handle missing data
+Before we get into more advanced exploration of the data, let's first visualize the data in different ways to get a better sense of it.
+
+## Simple but useful features
+We're given several useful bits of information about the data on the [competition website](https://www.kaggle.com/competitions/spaceship-titanic/data) that we can apply to create some useful features. By features, I mean new variables that are derived from existing ones. For example, Cabin is comprised of information about the cabin number, the deck and the side and PassengerId contains the passenger group id.
+
+I've created a function that derives these new variables from existing ones. I've also created features that count the number of unique categories of different variables when related to the passenger group so that we can filter our visualizations and answer questions like 'Is any passenger group travelling from different home planets?'
+```{r useful_features}
+useful_features <- function(x) {
+  x2 <- x %>%
+    mutate(PassengerGroup = str_split_i(PassengerId, "_", 1),
+           LastName = word(Name, -1),
+           Deck = str_split_i(Cabin, "/", 1),
+           CabinNumber = str_split_i(Cabin, "/", 2),
+           Side = str_split_i(Cabin, "/", 3),
+           TotalSpent = RoomService + FoodCourt + ShoppingMall + Spa + VRDeck,
+           PassengerCount = 1) %>% # I added this to use as a count variable in visualizations
+    group_by(PassengerGroup) %>%
+    add_count(PassengerGroup, name = "PassengerGroupSize") %>%
+    mutate(HomePlanetsPerGroup = n_distinct(HomePlanet, na.rm = TRUE),
+           DestinationsPerGroup = n_distinct(Destination, na.rm = TRUE),
+           CabinsPerGroup = n_distinct(Cabin, na.rm = TRUE),
+           TotalSpentPerGroup = sum(TotalSpent, na.rm = TRUE),
+           CryoSleepsPerGroup = n_distinct(CryoSleep, na.rm = TRUE),
+           VIPsPerGroup = n_distinct(VIP, na.rm = TRUE),
+           LastNamesPerGroup = n_distinct(LastName, na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(across(.cols = c(HomePlanet, CryoSleep, Destination, VIP, Transported, Deck, Side, HomePlanetsPerGroup,
+                            PassengerGroupSize, DestinationsPerGroup, CabinsPerGroup, CryoSleepsPerGroup, VIPsPerGroup,
+                            LastNamesPerGroup, PassengerGroup, PassengerId),
+                  .fns = as.factor)) %>%
+    mutate(across(.cols = c(CabinNumber, Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
+                  .fns = as.integer))
+  return(x2)
+}
+
+train2 <- useful_features(train)
+```
+
+## Closer look at missing values
+A closer look at each variable with missing values gives us more insights. For example, every passenger group always starts from the same home planet. We can use this information to replace missing HomePlanet values for passengers belonging to a group with a known home planet. This will leave us only with passengers who are travelling alone.
+```{r missing_homeplanet, fig.cap = "Missing values for HomePlanet"}
+train2 %>%
+  group_by(PassengerGroup) %>%
+  filter(any(is.na(HomePlanet))) %>%
+  ungroup() %>%
+  slice_sample(n = 100) %>%
+  ggplot(., mapping = aes(x = PassengerGroup, y = PassengerCount, fill = HomePlanet)) +
+    geom_col()  +
+    labs(title = "Example missing HomePlanet", x = "Passenger group", y = "Number of passengers") +
+    scale_y_continuous(breaks = seq(0, 9000, 50)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+We can also see that groups with two or more travelers are never housed in the same cabins as other (non-solo) groups. In other words, a group with two or more passengers can be spread out across several cabins but never share those cabins with other groups of two or more passengers. I only show an example below for starboard and deck G but the same relationship applies to the entire spaceship. We can use this information to replace missing cabin values.
+```{r missing_cabin, warning = FALSE, fig.cap = "Missing values for Cabin"}
+train2 %>%
+  filter(PassengerGroupSize != 1 & Side == "S" & Deck == "G") %>%
+  slice_sample(n = 100) %>%
+  ggplot(., mapping = aes(x = as.factor(CabinNumber), y = PassengerCount, fill = PassengerGroup)) +
+  geom_col() +
+  labs(title = "Example missing CabinNumber", x = "Cabin number", y = "Number of passengers") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = "none")
+```
+
+When we look at Deck we can see that some decks seem dedicated to passengers from a specific home planet. We can use this information both to replace even more missing HomePlanet.
+```{r missing_deck, fig.cap = "Missing values for Deck"}
+train2 %>%
+  group_by(Deck) %>%
+  filter(any(is.na(HomePlanet))) %>%
+  ungroup() %>%
+  ggplot(., mapping = aes(x = Deck, y = PassengerCount, fill = HomePlanet)) +
+  geom_col() +
+  labs(title = "Missing HomePlanet by Deck", x = "Deck", y = "Number of passengers") +
+  scale_y_continuous(breaks = seq(0, 9000, 200)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+We can also see that there aren't any VIPs travelling from Earth.
+```{r missing_vip, fig.cap = "Missing values for VIP"}
+train2 %>%
+  ggplot(., mapping = aes(x = HomePlanet, y = PassengerCount, fill = VIP)) +
+  geom_col() +
+  labs(title = "Missing VIP by HomePlanet", x = "HomePlanet", y = "Number of passengers") +
+  scale_y_continuous(breaks = seq(0, 9000, 200)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+In the description of the data we are told that passengers that are in cryosleep are confined to their cabins. We must assume that this means that they cannot spend any credits on amenities and that we therefore can replace missing amenities with zeroes for these passengers. The reverse is also true: if a passenger has spent credits, the passenger cannot be in cryosleep.
+
+When we look at Age values and plot them against amenities, we can see that passengers 12 years of age or under don't spend any credits and we can therefore use this to replace even more missing values for amenities.
+```{r missing_age, warning = FALSE, fig.cap = "Missing values for ameneties"}
+train2 %>%
+  ggplot(., mapping = aes(x = Age, y = TotalSpent)) +
+  geom_col() +
+  labs(title = "Missing Age", x = "Age of passengers", y = "TotalSpent") +
+  scale_y_continuous(breaks = seq(0, 500000, 50000)) +
+  scale_x_continuous(breaks = seq(0, 100, 2)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+## Replace data with manual rules
+I've summed up all of these replacement rules in the function below.
+```{r manual_imputation}
+my_na_replace <- function(d) {
+  d2 <- d %>%
+    # Replace HomePlanet for passengers in groups where the homeplanet is known from the other passengers
+    group_by(PassengerGroup) %>% 
+    fill(HomePlanet, .direction = "downup") %>% 
+    
+    # Replace Cabin by group cabin for groups with group count > 1. Update the Deck, CabinNumber and Side variables.
+    mutate(Cabin2 = Cabin) %>%
+    fill(data = ., Cabin2, .direction = "downup") %>%
+    ungroup() %>%
+    mutate(Cabin = if_else(is.na(Cabin) & PassengerGroupSize != 1, Cabin2, Cabin)) %>%
+    select(-Cabin2) %>%
+    
+    # Replace HomePlanet if the passenger is housed on a dedicated Deck
+    mutate(HomePlanet = if_else(is.na(HomePlanet) & Deck == "G", "Earth", HomePlanet),
+           HomePlanet = if_else(is.na(HomePlanet) & Deck %in% c("A", "B", "C"), "Europa", HomePlanet)) %>%
+    
+    # Replace all of VIPs from Earth to FALSE
+    mutate(VIP = if_else(is.na(VIP) & HomePlanet == "Earth", "False", VIP)) %>%
+    
+    # Replace amenities with zero if CryoSleep is TRUE or if Age <= 12
+    # Replace CryoSleep with FALSE if the passenger has spent credits
+    mutate(across(.cols = c(RoomService, FoodCourt, ShoppingMall, Spa, VRDeck), 
+                  .fns = ~ if_else(condition = CryoSleep == "True" | Age <= 12, true = 0, false = .x, missing = .x)),
+           CryoSleep = if_else(TotalSpent > 0 & is.na(CryoSleep), "False", CryoSleep))
+  return(d2)
+}
+
+train3 <- my_na_replace(train2)
+train3 <- useful_features(train3)
+
+plot_na_hclust(train3)
+```
+
+We've halved the amount of missing values with our manual replacements. The rest we can handle with imputation.
+
+## Replace data with imputation
+Most algorithms require no missing data at all and since we cannot find any more patterns for the missing data, we can use some imputational algorithms to do the replacement. I've used two: `MissRanger` from the `missRanger`-package and `KNN` from the `tidymodels`-package. Since especially KNN is sensitive to the scale of data, I've normalized the numeric data to avoid possible issues with outliers affecting the imputation.
+
+(I've also tried the `imputate_na` function from the `dlookr`-package but it was too slow.)
+
+### MissRanger - Chained Random Forests
+```{r missranger_imputation, warning = FALSE}
+rev_normalization <- function(v, rec) { # Custom function that will "unnormalise" numeric values inside mutate(across())
+  tidy_rec <- tidy(rec, number = 1)
+  v2 <- v * filter(tidy_rec, terms == cur_column() & statistic == "sd")$value + 
+    filter(tidy_rec, terms == cur_column() & statistic == "mean")$value
+  v3 <- round(v2, 0)
+  return(v3)
+}
+
+# ranger_norm <- recipe(Transported ~ ., data = train3) %>%
+#   step_normalize(all_numeric_predictors()) %>%
+#   prep()
+# 
+# train3_ranger <- ranger_norm %>%
+#   bake(new_data = NULL) %>%
+#   select(-c(Cabin, Name, LastName, PassengerCount))
+# 
+# ranger <- missRanger(train3_ranger, formula = . ~ . -PassengerId, seed = 8584, verbose = 0)
+# 
+# ranger_unnorm <- ranger %>%
+#   mutate(across(.cols = c(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
+#                 .fns = ~ rev_normalization(.x, ranger_norm)))
+# 
+# ranger2 <- train3 %>%
+#   select(PassengerId, Cabin, Name, LastName, PassengerCount) %>%
+#   left_join(ranger_unnorm, ., by = "PassengerId")
+# 
+# save(ranger2, file = "MissRanger.RData")
+load("MissRanger.RData")
+```
+
+The missRanger algorithm can impute all of the variables at the same time and there is an option to select an id variable that will be included in the data but not used for imputation. Again, I have excluded the Name variables to improve computation time.
+
+### KNN - K-Nearest Neighbors
+```{r knn_imputation, warning = FALSE}
+# knn_norm <- recipe(Transported ~ ., data = train3) %>%
+#   step_normalize(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck) %>%
+#   prep()
+# 
+# train3_knn <- knn_norm %>%
+#   bake(new_data = NULL)
+# 
+# train3_knn_noNA <- train3_knn %>%
+#   na.omit()
+# 
+# vars_to_impute <- c("HomePlanet", "CryoSleep", "Destination", "Age", "VIP", "RoomService", "FoodCourt", "ShoppingMall",
+#                     "Spa", "VRDeck", "Deck", "Side", "CabinNumber", "LastName")
+# vars_for_imputing <- c("HomePlanet", "CryoSleep", "Destination", "Age", "VIP", "RoomService", "FoodCourt",
+#                               "ShoppingMall", "Spa", "VRDeck", "PassengerGroup", "Deck", "Side", "CabinNumber",
+#                               "PassengerGroupSize", "HomePlanetsPerGroup", "DestinationsPerGroup", "CabinsPerGroup",
+#                               "CryoSleepsPerGroup", "VIPsPerGroup", "LastNamesPerGroup")
+# 
+# imp_knn_rec <- recipe(Transported ~ ., data = train3_knn_noNA) %>%
+#   step_impute_knn(recipe = ., all_of(vars_to_impute), impute_with = imp_vars(all_of(vars_for_imputing)),
+#                   neighbors = 5) %>%
+#   prep()
+# 
+# knn <- bake(imp_knn_rec, new_data = train3_knn)
+# 
+# knn_unnorm <- knn %>%
+#   mutate(across(.cols = c(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
+#                 .fns = ~ rev_normalization(.x, knn_norm)))
+# 
+# save(knn_unnorm, file = "KNN.RData")
+load("KNN.RData")
+```
+
+The KNN-algorithm is very fast and can impute multiple variables at the same time. It can also be relatively easily tuned by changing the number of neighbors the imputation is based on.
+
+### Comparison of imputation algorithms - numerical variables
+```{r imputation_evaluation_num, fig.cap = "Comparisson of standard deviation for numerical values before and after imputation"}
+my_skim <- skim_with(numeric = sfl(min = ~min(., na.rm = TRUE), median = ~median(., na.rm = TRUE), 
+                                   mean = ~mean(., na.rm = TRUE), max = ~max(., na.rm = TRUE), 
+                                   sd = ~sd(., na.rm = TRUE)), append = FALSE)
+
+no_imp_skim <- train3 %>%
+  select(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, CabinNumber) %>%
+  my_skim(.)
+
+ranger_skim <- ranger2 %>%
+  select(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, CabinNumber) %>%
+  my_skim(.)
+
+knn_skim <- knn_unnorm %>%
+  select(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, CabinNumber) %>%
+  my_skim(.)
+
+sd_skim <- bind_cols("Variable" = no_imp_skim$skim_variable, "No imp" = no_imp_skim$numeric.sd, 
+                     "MissRanger" = ranger_skim$numeric.sd,  "KNN" = knn_skim$numeric.sd) %>%
+  pivot_longer(., cols = !Variable, names_to = "Metric", values_to = "Standard_deviation")
+
+mean_skim <- bind_cols("Variable" = no_imp_skim$skim_variable, "No imp" = no_imp_skim$numeric.mean, 
+                     "missRanger" = ranger_skim$numeric.mean, "KNN" = knn_skim$numeric.mean) %>%
+  pivot_longer(., cols = !Variable, names_to = "Metric", values_to = "Mean")
+
+sd_skim %>%
+  filter(Metric != "No imp") %>%
+  ggplot(., mapping = aes(x = Metric, y = Standard_deviation)) +
+  geom_point() +
+  geom_hline(data = sd_skim %>% filter(Metric == "No imp"), aes(yintercept = Standard_deviation, colour = "orange")) +
+  lims(y = c(0, NA)) +
+  facet_wrap(~Variable, scales = "free") +
+  scale_colour_discrete(name = "Non-imputed", labels = "sd", type = "orange")
+```
+
+```{r imputation_evaluation_num2, fig.cap = "Comparisson of mean for numerical values before and after imputation"}
+mean_skim %>%
+  filter(Metric != "No imp") %>%
+  ggplot(., mapping = aes(x = Metric, y = Mean)) +
+  facet_wrap(~Variable, scales = "free") +
+  geom_point() +
+  geom_hline(data = mean_skim %>% filter(Metric == "No imp"), aes(yintercept = Mean, colour = "green")) +
+  lims(y = c(0, NA)) +
+  scale_colour_discrete(name = "Non-imputed", labels = "mean", type = "green")
+```
+
+There is barely any difference between the algorithms so I will use the KNN-algorithm because it already has a recipe step in the `recipe`-package that we'll use for modelling.
+
+### Comparison of imputation algorithms - categorical variables
+To make it easier to compare the results from the algorithms with the non-imputed values, I've created some helpful functions to iterate over the different variables and plot the results.
+```{r imputation_evaluation_cat, echo = FALSE, fig.cap = "Imputed distribution for categorical variables with all three methods against no imputation"}
+my_prop_plot <- function(df, v, t) {
+  g <- ggplot(data = df, mapping = aes(x = !!sym(t), fill = !!sym(v))) +
+    geom_bar() +
+    geom_text(aes(by = !!sym(t)), stat = "prop", position = position_stack(vjust = 0.5)) +
+    labs(title = deparse(substitute(df)), x = t, y = "Number of passengers") +
+    scale_y_continuous(breaks = seq(0, 9000, 500)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.key.size = unit(0.4, 'cm'))
+  return(g)
+}
+
+my_prop_grid_plot <- function(df_na, df_ranger, df_knn, v, target) {
+  g1 <- my_prop_plot(df_na, v, target)
+  g2 <- my_prop_plot(df_ranger, v, target)
+  g3 <- my_prop_plot(df_knn, v, target)
+  
+  g <- wrap_plots(g1, g2, g3, guides = "collect")
+  print(g)
+}
+
+train3 %>%
+  select(HomePlanet, CryoSleep) %>%
+  names() %>%
+  walk(.x = ., .f = \(my_vars) my_prop_grid_plot(df_na = train3, df_ranger = ranger2, df_knn = knn_unnorm,
+                                                         v = my_vars, target = "Transported"))
+```
+
+Perhaps expected since the amount of missing data was so low but it's good to confirm visually that the imputations haven't done anything crazy.
+
+### Do the imputated values break any "rules"?
+One last thing we must do before we accept the imputed values is to check whether the imputation has managed to adhere to the 'rules' we discovered with our manual exploration. Here I use a modified version of the `useful_features`-function to update the simple features.
+```{r imputation_evaluation}
+useful_features2 <- function(x) {
+  x2 <- x %>%
+    mutate(TotalSpent = RoomService + FoodCourt + ShoppingMall + Spa + VRDeck) %>%
+    group_by(PassengerGroup) %>%
+    add_count(PassengerGroup, name = "PassengerGroupSize") %>%
+    mutate(HomePlanetsPerGroup = n_distinct(HomePlanet, na.rm = TRUE),
+           DestinationsPerGroup = n_distinct(Destination, na.rm = TRUE),
+           CabinsPerGroup = n_distinct(Cabin, na.rm = TRUE),
+           TotalSpentPerGroup = sum(TotalSpent, na.rm = TRUE),
+           CryoSleepsPerGroup = n_distinct(CryoSleep, na.rm = TRUE),
+           VIPsPerGroup = n_distinct(VIP, na.rm = TRUE),
+           LastNamesPerGroup = n_distinct(LastName, na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(across(.cols = c(HomePlanet, CryoSleep, Destination, VIP, Transported, Deck, Side, HomePlanetsPerGroup,
+                            PassengerGroupSize, DestinationsPerGroup, CabinsPerGroup, CryoSleepsPerGroup, VIPsPerGroup,
+                            LastNamesPerGroup, PassengerGroup, PassengerId),
+                  .fns = as.factor)) %>%
+    mutate(across(.cols = c(CabinNumber, Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
+                  .fns = as.integer))
+  return(x2)
+}
+
+check_knn <- useful_features2(knn_unnorm)
+
+check_knn %>%
+  filter(HomePlanetsPerGroup != 1) %>%
+  select(PassengerId, HomePlanet, HomePlanetsPerGroup)
+
+check_knn %>%
+  filter(Deck %in% c("A", "B", "C") & HomePlanet != "Europa" | Deck == "G" & HomePlanet != "Earth") %>%
+  select(PassengerId, HomePlanet, Deck)
+
+check_knn %>%
+  filter(CryoSleep == TRUE & TotalSpent > 0) %>%
+  select(PassengerId, CryoSleep, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent)
+
+check_knn %>%
+  filter(Age <= 12 & TotalSpent > 0) %>%
+  select(PassengerId, CryoSleep, Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent)
+
+check_knn %>%
+  filter(VIP == TRUE & HomePlanet == "Earth") %>%
+  select(PassengerId, HomePlanet, VIP)
+```
+
+We can note several issues: 
+1. Passengers in group 7336 both had missing values for HomePlanet but the imputation has given them different home planets, something that breaks the 'rule' we discovered earlier that all passenger groups travel from the same home planet
+2. Passenger 0770-02 had a missing value for Age but the algorithm has set it to 4 even though the passenger has spent credits and thus should be older than 12.
+
+We can deal with the first issue if we make a rule that sets the homeplanet of the entire group based on one of the member's homeplanets if the group has more than one homeplanet. The second issue is trickier but we can replace it with the mean age of passengers on the same deck and with the same cryosleep status.
+
+```{r manual_imp_correction, fig.cap = "Missing values overview after imputation"}
+amenities_summary <- check_knn %>%
+  filter(Age > 12 & TotalSpent > 0) %>%
+  summarise(mean_age = round(mean(Age), 0), .by = c(CryoSleep, Deck))
+
+wrong_age <- check_knn %>%
+  filter(Age <= 12 & TotalSpent > 0) %>%
+  left_join(., amenities_summary, by = c("CryoSleep", "Deck")) %>%
+  select(PassengerId, mean_age)
+
+wrong_planet <- check_knn %>%
+  filter(HomePlanetsPerGroup != 1) %>%
+  select(PassengerId, PassengerGroup, HomePlanet) %>%
+  group_by(PassengerGroup) %>%
+  mutate(HomePlanet_correct = first(HomePlanet)) %>%
+  ungroup() %>%
+  select(PassengerId, HomePlanet_correct)
+
+fix_knn <- check_knn %>%
+  left_join(., wrong_age, by = "PassengerId") %>%
+  left_join(., wrong_planet, by = "PassengerId") %>%
+  mutate(Age = if_else(Age <= 12 & TotalSpent > 0, mean_age, Age),
+         HomePlanet = if_else(HomePlanetsPerGroup != 1, HomePlanet_correct, HomePlanet)) %>%
+  select(-mean_age, -HomePlanet_correct)
+
+train4 <- useful_features2(fix_knn)
+
+plot_na_hclust(train4)
+```
+
+The only missing values are now in the variables that we won't use for modelling (we'll use features derived from them instead).

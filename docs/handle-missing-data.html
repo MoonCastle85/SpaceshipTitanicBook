@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Chapter 3 Handle missing data | Spaceship Titanic - A comprehensive guide</title>
+<meta name="author" content="Vanja Manborg">
+<meta name="description" content="Before we get into more advanced exploration of the data, let’s first visualize the data in different ways to get a better sense of it.  3.1 Simple but useful features We’re given several useful...">
+<meta name="generator" content="bookdown 0.37 with bs4_book()">
+<meta property="og:title" content="Chapter 3 Handle missing data | Spaceship Titanic - A comprehensive guide">
+<meta property="og:type" content="book">
+<meta property="og:url" content="https://spaceshiptitanic.manborgconsulting.com/handle-missing-data.html">
+<meta property="og:description" content="Before we get into more advanced exploration of the data, let’s first visualize the data in different ways to get a better sense of it.  3.1 Simple but useful features We’re given several useful...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chapter 3 Handle missing data | Spaceship Titanic - A comprehensive guide">
+<meta name="twitter:description" content="Before we get into more advanced exploration of the data, let’s first visualize the data in different ways to get a better sense of it.  3.1 Simple but useful features We’re given several useful...">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<style type="text/css">
+    /* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+        }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
+  </style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Spaceship Titanic - A comprehensive guide</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> Introduction</a></li>
+<li><a class="" href="early-data-exploration.html"><span class="header-section-number">2</span> Early data exploration</a></li>
+<li><a class="active" href="handle-missing-data.html"><span class="header-section-number">3</span> Handle missing data</a></li>
+<li><a class="" href="parts.html"><span class="header-section-number">4</span> Parts</a></li>
+<li><a class="" href="footnotes-and-citations.html"><span class="header-section-number">5</span> Footnotes and citations</a></li>
+<li><a class="" href="blocks.html"><span class="header-section-number">6</span> Blocks</a></li>
+<li><a class="" href="sharing-your-book.html"><span class="header-section-number">7</span> Sharing your book</a></li>
+<li><a class="" href="references.html">References</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/MoonCastle85/SpaceshipTitanicBook">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="handle-missing-data" class="section level1" number="3">
+<h1>
+<span class="header-section-number">3</span> Handle missing data<a class="anchor" aria-label="anchor" href="#handle-missing-data"><i class="fas fa-link"></i></a>
+</h1>
+<p>Before we get into more advanced exploration of the data, let’s first visualize the data in different ways to get a better sense of it.</p>
+<div id="simple-but-useful-features" class="section level2" number="3.1">
+<h2>
+<span class="header-section-number">3.1</span> Simple but useful features<a class="anchor" aria-label="anchor" href="#simple-but-useful-features"><i class="fas fa-link"></i></a>
+</h2>
+<p>We’re given several useful bits of information about the data on the <a href="https://www.kaggle.com/competitions/spaceship-titanic/data">competition website</a> that we can apply to create some useful features. By features, I mean new variables that are derived from existing ones. For example, Cabin is comprised of information about the cabin number, the deck and the side and PassengerId contains the passenger group id.</p>
+<p>I’ve created a function that derives these new variables from existing ones. I’ve also created features that count the number of unique categories of different variables when related to the passenger group so that we can filter our visualizations and answer questions like ‘Is any passenger group travelling from different home planets?’</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">useful_features</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">x2</span> <span class="op">&lt;-</span> <span class="va">x</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>PassengerGroup <span class="op">=</span> <span class="fu">str_split_i</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="st">"_"</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>           LastName <span class="op">=</span> <span class="fu">word</span><span class="op">(</span><span class="va">Name</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>,</span>
+<span>           Deck <span class="op">=</span> <span class="fu">str_split_i</span><span class="op">(</span><span class="va">Cabin</span>, <span class="st">"/"</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>           CabinNumber <span class="op">=</span> <span class="fu">str_split_i</span><span class="op">(</span><span class="va">Cabin</span>, <span class="st">"/"</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>           Side <span class="op">=</span> <span class="fu">str_split_i</span><span class="op">(</span><span class="va">Cabin</span>, <span class="st">"/"</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>           TotalSpent <span class="op">=</span> <span class="va">RoomService</span> <span class="op">+</span> <span class="va">FoodCourt</span> <span class="op">+</span> <span class="va">ShoppingMall</span> <span class="op">+</span> <span class="va">Spa</span> <span class="op">+</span> <span class="va">VRDeck</span>,</span>
+<span>           PassengerCount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="co"># I added this to use as a count variable in visualizations</span></span>
+<span>    <span class="fu">group_by</span><span class="op">(</span><span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">add_count</span><span class="op">(</span><span class="va">PassengerGroup</span>, name <span class="op">=</span> <span class="st">"PassengerGroupSize"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>HomePlanetsPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">HomePlanet</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           DestinationsPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">Destination</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           CabinsPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">Cabin</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           TotalSpentPerGroup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">TotalSpent</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           CryoSleepsPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">CryoSleep</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           VIPsPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">VIP</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           LastNamesPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">LastName</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">HomePlanet</span>, <span class="va">CryoSleep</span>, <span class="va">Destination</span>, <span class="va">VIP</span>, <span class="va">Transported</span>, <span class="va">Deck</span>, <span class="va">Side</span>, <span class="va">HomePlanetsPerGroup</span>,</span>
+<span>                            <span class="va">PassengerGroupSize</span>, <span class="va">DestinationsPerGroup</span>, <span class="va">CabinsPerGroup</span>, <span class="va">CryoSleepsPerGroup</span>, <span class="va">VIPsPerGroup</span>,</span>
+<span>                            <span class="va">LastNamesPerGroup</span>, <span class="va">PassengerGroup</span>, <span class="va">PassengerId</span><span class="op">)</span>,</span>
+<span>                  .fns <span class="op">=</span> <span class="va">as.factor</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">CabinNumber</span>, <span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span><span class="op">)</span>,</span>
+<span>                  .fns <span class="op">=</span> <span class="va">as.integer</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">x2</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">train2</span> <span class="op">&lt;-</span> <span class="fu">useful_features</span><span class="op">(</span><span class="va">train</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div id="closer-look-at-missing-values" class="section level2" number="3.2">
+<h2>
+<span class="header-section-number">3.2</span> Closer look at missing values<a class="anchor" aria-label="anchor" href="#closer-look-at-missing-values"><i class="fas fa-link"></i></a>
+</h2>
+<p>A closer look at each variable with missing values gives us more insights. For example, every passenger group always starts from the same home planet. We can use this information to replace missing HomePlanet values for passengers belonging to a group with a known home planet. This will leave us only with passengers who are travelling alone.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">HomePlanet</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">PassengerGroup</span>, y <span class="op">=</span> <span class="va">PassengerCount</span>, fill <span class="op">=</span> <span class="va">HomePlanet</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span>  <span class="op">+</span></span>
+<span>    <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Example missing HomePlanet"</span>, x <span class="op">=</span> <span class="st">"Passenger group"</span>, y <span class="op">=</span> <span class="st">"Number of passengers"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">scale_y_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">9000</span>, <span class="fl">50</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="SpaceshipTitanicBook_files/figure-html/missing_homeplanet-1.png" alt="Missing values for HomePlanet" width="672"><p class="caption">
+(#fig:missing_homeplanet)Missing values for HomePlanet
+</p>
+</div>
+<p>We can also see that groups with two or more travelers are never housed in the same cabins as other (non-solo) groups. In other words, a group with two or more passengers can be spread out across several cabins but never share those cabins with other groups of two or more passengers. I only show an example below for starboard and deck G but the same relationship applies to the entire spaceship. We can use this information to replace missing cabin values.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">PassengerGroupSize</span> <span class="op">!=</span> <span class="fl">1</span> <span class="op">&amp;</span> <span class="va">Side</span> <span class="op">==</span> <span class="st">"S"</span> <span class="op">&amp;</span> <span class="va">Deck</span> <span class="op">==</span> <span class="st">"G"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">CabinNumber</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">PassengerCount</span>, fill <span class="op">=</span> <span class="va">PassengerGroup</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Example missing CabinNumber"</span>, x <span class="op">=</span> <span class="st">"Cabin number"</span>, y <span class="op">=</span> <span class="st">"Number of passengers"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="SpaceshipTitanicBook_files/figure-html/missing_cabin-1.png" alt="Missing values for Cabin" width="672"><p class="caption">
+(#fig:missing_cabin)Missing values for Cabin
+</p>
+</div>
+<p>When we look at Deck we can see that some decks seem dedicated to passengers from a specific home planet. We can use this information both to replace even more missing HomePlanet.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Deck</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">HomePlanet</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Deck</span>, y <span class="op">=</span> <span class="va">PassengerCount</span>, fill <span class="op">=</span> <span class="va">HomePlanet</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Missing HomePlanet by Deck"</span>, x <span class="op">=</span> <span class="st">"Deck"</span>, y <span class="op">=</span> <span class="st">"Number of passengers"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">9000</span>, <span class="fl">200</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="SpaceshipTitanicBook_files/figure-html/missing_deck-1.png" alt="Missing values for Deck" width="672"><p class="caption">
+(#fig:missing_deck)Missing values for Deck
+</p>
+</div>
+<p>We can also see that there aren’t any VIPs travelling from Earth.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">HomePlanet</span>, y <span class="op">=</span> <span class="va">PassengerCount</span>, fill <span class="op">=</span> <span class="va">VIP</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Missing VIP by HomePlanet"</span>, x <span class="op">=</span> <span class="st">"HomePlanet"</span>, y <span class="op">=</span> <span class="st">"Number of passengers"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">9000</span>, <span class="fl">200</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="SpaceshipTitanicBook_files/figure-html/missing_vip-1.png" alt="Missing values for VIP" width="672"><p class="caption">
+(#fig:missing_vip)Missing values for VIP
+</p>
+</div>
+<p>In the description of the data we are told that passengers that are in cryosleep are confined to their cabins. We must assume that this means that they cannot spend any credits on amenities and that we therefore can replace missing amenities with zeroes for these passengers. The reverse is also true: if a passenger has spent credits, the passenger cannot be in cryosleep.</p>
+<p>When we look at Age values and plot them against amenities, we can see that passengers 12 years of age or under don’t spend any credits and we can therefore use this to replace even more missing values for amenities.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Age</span>, y <span class="op">=</span> <span class="va">TotalSpent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Missing Age"</span>, x <span class="op">=</span> <span class="st">"Age of passengers"</span>, y <span class="op">=</span> <span class="st">"TotalSpent"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">500000</span>, <span class="fl">50000</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="SpaceshipTitanicBook_files/figure-html/missing_age-1.png" alt="Missing values for ameneties" width="672"><p class="caption">
+(#fig:missing_age)Missing values for ameneties
+</p>
+</div>
+</div>
+<div id="replace-data-with-manual-rules" class="section level2" number="3.3">
+<h2>
+<span class="header-section-number">3.3</span> Replace data with manual rules<a class="anchor" aria-label="anchor" href="#replace-data-with-manual-rules"><i class="fas fa-link"></i></a>
+</h2>
+<p>I’ve summed up all of these replacement rules in the function below.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_na_replace</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">d2</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="co"># Replace HomePlanet for passengers in groups where the homeplanet is known from the other passengers</span></span>
+<span>    <span class="fu">group_by</span><span class="op">(</span><span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>    <span class="fu">fill</span><span class="op">(</span><span class="va">HomePlanet</span>, .direction <span class="op">=</span> <span class="st">"downup"</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>    </span>
+<span>    <span class="co"># Replace Cabin by group cabin for groups with group count &gt; 1. Update the Deck, CabinNumber and Side variables.</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>Cabin2 <span class="op">=</span> <span class="va">Cabin</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">fill</span><span class="op">(</span>data <span class="op">=</span> <span class="va">.</span>, <span class="va">Cabin2</span>, .direction <span class="op">=</span> <span class="st">"downup"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>Cabin <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">Cabin</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">PassengerGroupSize</span> <span class="op">!=</span> <span class="fl">1</span>, <span class="va">Cabin2</span>, <span class="va">Cabin</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">Cabin2</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    </span>
+<span>    <span class="co"># Replace HomePlanet if the passenger is housed on a dedicated Deck</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>HomePlanet <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">HomePlanet</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">Deck</span> <span class="op">==</span> <span class="st">"G"</span>, <span class="st">"Earth"</span>, <span class="va">HomePlanet</span><span class="op">)</span>,</span>
+<span>           HomePlanet <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">HomePlanet</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">Deck</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span>, <span class="st">"Europa"</span>, <span class="va">HomePlanet</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    </span>
+<span>    <span class="co"># Replace all of VIPs from Earth to FALSE</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>VIP <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">VIP</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">HomePlanet</span> <span class="op">==</span> <span class="st">"Earth"</span>, <span class="st">"False"</span>, <span class="va">VIP</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    </span>
+<span>    <span class="co"># Replace amenities with zero if CryoSleep is TRUE or if Age &lt;= 12</span></span>
+<span>    <span class="co"># Replace CryoSleep with FALSE if the passenger has spent credits</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span><span class="op">)</span>, </span>
+<span>                  .fns <span class="op">=</span> <span class="op">~</span> <span class="fu">if_else</span><span class="op">(</span>condition <span class="op">=</span> <span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"True"</span> <span class="op">|</span> <span class="va">Age</span> <span class="op">&lt;=</span> <span class="fl">12</span>, true <span class="op">=</span> <span class="fl">0</span>, false <span class="op">=</span> <span class="va">.x</span>, missing <span class="op">=</span> <span class="va">.x</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>           CryoSleep <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">TotalSpent</span> <span class="op">&gt;</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">CryoSleep</span><span class="op">)</span>, <span class="st">"False"</span>, <span class="va">CryoSleep</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">d2</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">train3</span> <span class="op">&lt;-</span> <span class="fu">my_na_replace</span><span class="op">(</span><span class="va">train2</span><span class="op">)</span></span>
+<span><span class="va">train3</span> <span class="op">&lt;-</span> <span class="fu">useful_features</span><span class="op">(</span><span class="va">train3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">plot_na_hclust</span><span class="op">(</span><span class="va">train3</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/manual_imputation-1.png" width="672"></div>
+<p>We’ve halved the amount of missing values with our manual replacements. The rest we can handle with imputation.</p>
+</div>
+<div id="replace-data-with-imputation" class="section level2" number="3.4">
+<h2>
+<span class="header-section-number">3.4</span> Replace data with imputation<a class="anchor" aria-label="anchor" href="#replace-data-with-imputation"><i class="fas fa-link"></i></a>
+</h2>
+<p>Most algorithms require no missing data at all and since we cannot find any more patterns for the missing data, we can use some imputational algorithms to do the replacement. I’ve used two: <code>MissRanger</code> from the <code>missRanger</code>-package and <code>KNN</code> from the <code>tidymodels</code>-package. Since especially KNN is sensitive to the scale of data, I’ve normalized the numeric data to avoid possible issues with outliers affecting the imputation.</p>
+<p>(I’ve also tried the <code>imputate_na</code> function from the <code>dlookr</code>-package but it was too slow.)</p>
+<div id="missranger---chained-random-forests" class="section level3" number="3.4.1">
+<h3>
+<span class="header-section-number">3.4.1</span> MissRanger - Chained Random Forests<a class="anchor" aria-label="anchor" href="#missranger---chained-random-forests"><i class="fas fa-link"></i></a>
+</h3>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rev_normalization</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">v</span>, <span class="va">rec</span><span class="op">)</span> <span class="op">{</span> <span class="co"># Custom function that will "unnormalise" numeric values inside mutate(across())</span></span>
+<span>  <span class="va">tidy_rec</span> <span class="op">&lt;-</span> <span class="fu">tidy</span><span class="op">(</span><span class="va">rec</span>, number <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="va">v2</span> <span class="op">&lt;-</span> <span class="va">v</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">tidy_rec</span>, <span class="va">terms</span> <span class="op">==</span> <span class="fu">cur_column</span><span class="op">(</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">statistic</span> <span class="op">==</span> <span class="st">"sd"</span><span class="op">)</span><span class="op">$</span><span class="va">value</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">tidy_rec</span>, <span class="va">terms</span> <span class="op">==</span> <span class="fu">cur_column</span><span class="op">(</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">statistic</span> <span class="op">==</span> <span class="st">"mean"</span><span class="op">)</span><span class="op">$</span><span class="va">value</span></span>
+<span>  <span class="va">v3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">v2</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">v3</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># ranger_norm &lt;- recipe(Transported ~ ., data = train3) %&gt;%</span></span>
+<span><span class="co">#   step_normalize(all_numeric_predictors()) %&gt;%</span></span>
+<span><span class="co">#   prep()</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># train3_ranger &lt;- ranger_norm %&gt;%</span></span>
+<span><span class="co">#   bake(new_data = NULL) %&gt;%</span></span>
+<span><span class="co">#   select(-c(Cabin, Name, LastName, PassengerCount))</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># ranger &lt;- missRanger(train3_ranger, formula = . ~ . -PassengerId, seed = 8584, verbose = 0)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># ranger_unnorm &lt;- ranger %&gt;%</span></span>
+<span><span class="co">#   mutate(across(.cols = c(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),</span></span>
+<span><span class="co">#                 .fns = ~ rev_normalization(.x, ranger_norm)))</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># ranger2 &lt;- train3 %&gt;%</span></span>
+<span><span class="co">#   select(PassengerId, Cabin, Name, LastName, PassengerCount) %&gt;%</span></span>
+<span><span class="co">#   left_join(ranger_unnorm, ., by = "PassengerId")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># save(ranger2, file = "MissRanger.RData")</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"MissRanger.RData"</span><span class="op">)</span></span></code></pre></div>
+<p>The missRanger algorithm can impute all of the variables at the same time and there is an option to select an id variable that will be included in the data but not used for imputation. Again, I have excluded the Name variables to improve computation time.</p>
+</div>
+<div id="knn---k-nearest-neighbors" class="section level3" number="3.4.2">
+<h3>
+<span class="header-section-number">3.4.2</span> KNN - K-Nearest Neighbors<a class="anchor" aria-label="anchor" href="#knn---k-nearest-neighbors"><i class="fas fa-link"></i></a>
+</h3>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># knn_norm &lt;- recipe(Transported ~ ., data = train3) %&gt;%</span></span>
+<span><span class="co">#   step_normalize(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck) %&gt;%</span></span>
+<span><span class="co">#   prep()</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># train3_knn &lt;- knn_norm %&gt;%</span></span>
+<span><span class="co">#   bake(new_data = NULL)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># train3_knn_noNA &lt;- train3_knn %&gt;%</span></span>
+<span><span class="co">#   na.omit()</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># vars_to_impute &lt;- c("HomePlanet", "CryoSleep", "Destination", "Age", "VIP", "RoomService", "FoodCourt", "ShoppingMall",</span></span>
+<span><span class="co">#                     "Spa", "VRDeck", "Deck", "Side", "CabinNumber", "LastName")</span></span>
+<span><span class="co"># vars_for_imputing &lt;- c("HomePlanet", "CryoSleep", "Destination", "Age", "VIP", "RoomService", "FoodCourt",</span></span>
+<span><span class="co">#                               "ShoppingMall", "Spa", "VRDeck", "PassengerGroup", "Deck", "Side", "CabinNumber",</span></span>
+<span><span class="co">#                               "PassengerGroupSize", "HomePlanetsPerGroup", "DestinationsPerGroup", "CabinsPerGroup",</span></span>
+<span><span class="co">#                               "CryoSleepsPerGroup", "VIPsPerGroup", "LastNamesPerGroup")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># imp_knn_rec &lt;- recipe(Transported ~ ., data = train3_knn_noNA) %&gt;%</span></span>
+<span><span class="co">#   step_impute_knn(recipe = ., all_of(vars_to_impute), impute_with = imp_vars(all_of(vars_for_imputing)),</span></span>
+<span><span class="co">#                   neighbors = 5) %&gt;%</span></span>
+<span><span class="co">#   prep()</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># knn &lt;- bake(imp_knn_rec, new_data = train3_knn)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># knn_unnorm &lt;- knn %&gt;%</span></span>
+<span><span class="co">#   mutate(across(.cols = c(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),</span></span>
+<span><span class="co">#                 .fns = ~ rev_normalization(.x, knn_norm)))</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># save(knn_unnorm, file = "KNN.RData")</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"KNN.RData"</span><span class="op">)</span></span></code></pre></div>
+<p>The KNN-algorithm is very fast and can impute multiple variables at the same time. It can also be relatively easily tuned by changing the number of neighbors the imputation is based on.</p>
+</div>
+<div id="comparison-of-imputation-algorithms---numerical-variables" class="section level3" number="3.4.3">
+<h3>
+<span class="header-section-number">3.4.3</span> Comparison of imputation algorithms - numerical variables<a class="anchor" aria-label="anchor" href="#comparison-of-imputation-algorithms---numerical-variables"><i class="fas fa-link"></i></a>
+</h3>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_skim</span> <span class="op">&lt;-</span> <span class="fu">skim_with</span><span class="op">(</span>numeric <span class="op">=</span> <span class="fu">sfl</span><span class="op">(</span>min <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">.</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, median <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">.</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, </span>
+<span>                                   mean <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">.</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, max <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">.</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, </span>
+<span>                                   sd <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">.</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>, append <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">no_imp_skim</span> <span class="op">&lt;-</span> <span class="va">train3</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">CabinNumber</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">my_skim</span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ranger_skim</span> <span class="op">&lt;-</span> <span class="va">ranger2</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">CabinNumber</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">my_skim</span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">knn_skim</span> <span class="op">&lt;-</span> <span class="va">knn_unnorm</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">CabinNumber</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">my_skim</span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sd_skim</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span><span class="st">"Variable"</span> <span class="op">=</span> <span class="va">no_imp_skim</span><span class="op">$</span><span class="va">skim_variable</span>, <span class="st">"No imp"</span> <span class="op">=</span> <span class="va">no_imp_skim</span><span class="op">$</span><span class="va">numeric.sd</span>, </span>
+<span>                     <span class="st">"MissRanger"</span> <span class="op">=</span> <span class="va">ranger_skim</span><span class="op">$</span><span class="va">numeric.sd</span>,  <span class="st">"KNN"</span> <span class="op">=</span> <span class="va">knn_skim</span><span class="op">$</span><span class="va">numeric.sd</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">pivot_longer</span><span class="op">(</span><span class="va">.</span>, cols <span class="op">=</span> <span class="op">!</span><span class="va">Variable</span>, names_to <span class="op">=</span> <span class="st">"Metric"</span>, values_to <span class="op">=</span> <span class="st">"Standard_deviation"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mean_skim</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span><span class="st">"Variable"</span> <span class="op">=</span> <span class="va">no_imp_skim</span><span class="op">$</span><span class="va">skim_variable</span>, <span class="st">"No imp"</span> <span class="op">=</span> <span class="va">no_imp_skim</span><span class="op">$</span><span class="va">numeric.mean</span>, </span>
+<span>                     <span class="st">"missRanger"</span> <span class="op">=</span> <span class="va">ranger_skim</span><span class="op">$</span><span class="va">numeric.mean</span>, <span class="st">"KNN"</span> <span class="op">=</span> <span class="va">knn_skim</span><span class="op">$</span><span class="va">numeric.mean</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">pivot_longer</span><span class="op">(</span><span class="va">.</span>, cols <span class="op">=</span> <span class="op">!</span><span class="va">Variable</span>, names_to <span class="op">=</span> <span class="st">"Metric"</span>, values_to <span class="op">=</span> <span class="st">"Mean"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sd_skim</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Metric</span> <span class="op">!=</span> <span class="st">"No imp"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Metric</span>, y <span class="op">=</span> <span class="va">Standard_deviation</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_hline</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sd_skim</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Metric</span> <span class="op">==</span> <span class="st">"No imp"</span><span class="op">)</span>, <span class="fu">aes</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="va">Standard_deviation</span>, colour <span class="op">=</span> <span class="st">"orange"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">lims</span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">Variable</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_colour_discrete</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Non-imputed"</span>, labels <span class="op">=</span> <span class="st">"sd"</span>, type <span class="op">=</span> <span class="st">"orange"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="SpaceshipTitanicBook_files/figure-html/imputation_evaluation_num-1.png" alt="Comparisson of standard deviation for numerical values before and after imputation" width="672"><p class="caption">
+(#fig:imputation_evaluation_num)Comparisson of standard deviation for numerical values before and after imputation
+</p>
+</div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mean_skim</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Metric</span> <span class="op">!=</span> <span class="st">"No imp"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Metric</span>, y <span class="op">=</span> <span class="va">Mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">Variable</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_hline</span><span class="op">(</span>data <span class="op">=</span> <span class="va">mean_skim</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Metric</span> <span class="op">==</span> <span class="st">"No imp"</span><span class="op">)</span>, <span class="fu">aes</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="va">Mean</span>, colour <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">lims</span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_colour_discrete</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Non-imputed"</span>, labels <span class="op">=</span> <span class="st">"mean"</span>, type <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="SpaceshipTitanicBook_files/figure-html/imputation_evaluation_num2-1.png" alt="Comparisson of mean for numerical values before and after imputation" width="672"><p class="caption">
+(#fig:imputation_evaluation_num2)Comparisson of mean for numerical values before and after imputation
+</p>
+</div>
+<p>There is barely any difference between the algorithms so I will use the KNN-algorithm because it already has a recipe step in the <code>recipe</code>-package that we’ll use for modelling.</p>
+</div>
+<div id="comparison-of-imputation-algorithms---categorical-variables" class="section level3" number="3.4.4">
+<h3>
+<span class="header-section-number">3.4.4</span> Comparison of imputation algorithms - categorical variables<a class="anchor" aria-label="anchor" href="#comparison-of-imputation-algorithms---categorical-variables"><i class="fas fa-link"></i></a>
+</h3>
+To make it easier to compare the results from the algorithms with the non-imputed values, I’ve created some helpful functions to iterate over the different variables and plot the results.
+<div class="figure">
+<img src="SpaceshipTitanicBook_files/figure-html/imputation_evaluation_cat-1.png" alt="Imputed distribution for categorical variables with all three methods against no imputation" width="672"><p class="caption">
+(#fig:imputation_evaluation_cat-1)Imputed distribution for categorical variables with all three methods against no imputation
+</p>
+</div>
+<div class="figure">
+<img src="SpaceshipTitanicBook_files/figure-html/imputation_evaluation_cat-2.png" alt="Imputed distribution for categorical variables with all three methods against no imputation" width="672"><p class="caption">
+(#fig:imputation_evaluation_cat-2)Imputed distribution for categorical variables with all three methods against no imputation
+</p>
+</div>
+<p>Perhaps expected since the amount of missing data was so low but it’s good to confirm visually that the imputations haven’t done anything crazy.</p>
+</div>
+<div id="do-the-imputated-values-break-any-rules" class="section level3" number="3.4.5">
+<h3>
+<span class="header-section-number">3.4.5</span> Do the imputated values break any “rules”?<a class="anchor" aria-label="anchor" href="#do-the-imputated-values-break-any-rules"><i class="fas fa-link"></i></a>
+</h3>
+<p>One last thing we must do before we accept the imputed values is to check whether the imputation has managed to adhere to the ‘rules’ we discovered with our manual exploration. Here I use a modified version of the <code>useful_features</code>-function to update the simple features.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">useful_features2</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">x2</span> <span class="op">&lt;-</span> <span class="va">x</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>TotalSpent <span class="op">=</span> <span class="va">RoomService</span> <span class="op">+</span> <span class="va">FoodCourt</span> <span class="op">+</span> <span class="va">ShoppingMall</span> <span class="op">+</span> <span class="va">Spa</span> <span class="op">+</span> <span class="va">VRDeck</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">group_by</span><span class="op">(</span><span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">add_count</span><span class="op">(</span><span class="va">PassengerGroup</span>, name <span class="op">=</span> <span class="st">"PassengerGroupSize"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>HomePlanetsPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">HomePlanet</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           DestinationsPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">Destination</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           CabinsPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">Cabin</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           TotalSpentPerGroup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">TotalSpent</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           CryoSleepsPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">CryoSleep</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           VIPsPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">VIP</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>           LastNamesPerGroup <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">LastName</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">HomePlanet</span>, <span class="va">CryoSleep</span>, <span class="va">Destination</span>, <span class="va">VIP</span>, <span class="va">Transported</span>, <span class="va">Deck</span>, <span class="va">Side</span>, <span class="va">HomePlanetsPerGroup</span>,</span>
+<span>                            <span class="va">PassengerGroupSize</span>, <span class="va">DestinationsPerGroup</span>, <span class="va">CabinsPerGroup</span>, <span class="va">CryoSleepsPerGroup</span>, <span class="va">VIPsPerGroup</span>,</span>
+<span>                            <span class="va">LastNamesPerGroup</span>, <span class="va">PassengerGroup</span>, <span class="va">PassengerId</span><span class="op">)</span>,</span>
+<span>                  .fns <span class="op">=</span> <span class="va">as.factor</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">CabinNumber</span>, <span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span><span class="op">)</span>,</span>
+<span>                  .fns <span class="op">=</span> <span class="va">as.integer</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">x2</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">check_knn</span> <span class="op">&lt;-</span> <span class="fu">useful_features2</span><span class="op">(</span><span class="va">knn_unnorm</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">check_knn</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">HomePlanetsPerGroup</span> <span class="op">!=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">HomePlanet</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 3</span></span>
+<span><span class="co">#&gt;   PassengerId HomePlanet HomePlanetsPerGroup</span></span>
+<span><span class="co">#&gt;   &lt;fct&gt;       &lt;fct&gt;      &lt;fct&gt;              </span></span>
+<span><span class="co">#&gt; 1 7336_01     Earth      2                  </span></span>
+<span><span class="co">#&gt; 2 7336_02     Mars       2</span></span>
+<span></span>
+<span><span class="va">check_knn</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Deck</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">HomePlanet</span> <span class="op">!=</span> <span class="st">"Europa"</span> <span class="op">|</span> <span class="va">Deck</span> <span class="op">==</span> <span class="st">"G"</span> <span class="op">&amp;</span> <span class="va">HomePlanet</span> <span class="op">!=</span> <span class="st">"Earth"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">HomePlanet</span>, <span class="va">Deck</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 0 × 3</span></span>
+<span><span class="co">#&gt; # ℹ 3 variables: PassengerId &lt;fct&gt;, HomePlanet &lt;fct&gt;,</span></span>
+<span><span class="co">#&gt; #   Deck &lt;fct&gt;</span></span>
+<span></span>
+<span><span class="va">check_knn</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="cn">TRUE</span> <span class="op">&amp;</span> <span class="va">TotalSpent</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">CryoSleep</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">TotalSpent</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 0 × 8</span></span>
+<span><span class="co">#&gt; # ℹ 8 variables: PassengerId &lt;fct&gt;, CryoSleep &lt;fct&gt;,</span></span>
+<span><span class="co">#&gt; #   RoomService &lt;int&gt;, FoodCourt &lt;int&gt;, ShoppingMall &lt;int&gt;,</span></span>
+<span><span class="co">#&gt; #   Spa &lt;int&gt;, VRDeck &lt;int&gt;, TotalSpent &lt;dbl&gt;</span></span>
+<span></span>
+<span><span class="va">check_knn</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Age</span> <span class="op">&lt;=</span> <span class="fl">12</span> <span class="op">&amp;</span> <span class="va">TotalSpent</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">CryoSleep</span>, <span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">TotalSpent</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 9</span></span>
+<span><span class="co">#&gt;   PassengerId CryoSleep   Age RoomService FoodCourt</span></span>
+<span><span class="co">#&gt;   &lt;fct&gt;       &lt;fct&gt;     &lt;int&gt;       &lt;int&gt;     &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1 0770_02     False         4           0       715</span></span>
+<span><span class="co">#&gt; # ℹ 4 more variables: ShoppingMall &lt;int&gt;, Spa &lt;int&gt;,</span></span>
+<span><span class="co">#&gt; #   VRDeck &lt;int&gt;, TotalSpent &lt;dbl&gt;</span></span>
+<span></span>
+<span><span class="va">check_knn</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">VIP</span> <span class="op">==</span> <span class="cn">TRUE</span> <span class="op">&amp;</span> <span class="va">HomePlanet</span> <span class="op">==</span> <span class="st">"Earth"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">HomePlanet</span>, <span class="va">VIP</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 0 × 3</span></span>
+<span><span class="co">#&gt; # ℹ 3 variables: PassengerId &lt;fct&gt;, HomePlanet &lt;fct&gt;,</span></span>
+<span><span class="co">#&gt; #   VIP &lt;fct&gt;</span></span></code></pre></div>
+<p>We can note several issues:
+1. Passengers in group 7336 both had missing values for HomePlanet but the imputation has given them different home planets, something that breaks the ‘rule’ we discovered earlier that all passenger groups travel from the same home planet
+2. Passenger 0770-02 had a missing value for Age but the algorithm has set it to 4 even though the passenger has spent credits and thus should be older than 12.</p>
+<p>We can deal with the first issue if we make a rule that sets the homeplanet of the entire group based on one of the member’s homeplanets if the group has more than one homeplanet. The second issue is trickier but we can replace it with the mean age of passengers on the same deck and with the same cryosleep status.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">amenities_summary</span> <span class="op">&lt;-</span> <span class="va">check_knn</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Age</span> <span class="op">&gt;</span> <span class="fl">12</span> <span class="op">&amp;</span> <span class="va">TotalSpent</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>mean_age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">Age</span><span class="op">)</span>, <span class="fl">0</span><span class="op">)</span>, .by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">CryoSleep</span>, <span class="va">Deck</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">wrong_age</span> <span class="op">&lt;-</span> <span class="va">check_knn</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Age</span> <span class="op">&lt;=</span> <span class="fl">12</span> <span class="op">&amp;</span> <span class="va">TotalSpent</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">left_join</span><span class="op">(</span><span class="va">.</span>, <span class="va">amenities_summary</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CryoSleep"</span>, <span class="st">"Deck"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">mean_age</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">wrong_planet</span> <span class="op">&lt;-</span> <span class="va">check_knn</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">HomePlanetsPerGroup</span> <span class="op">!=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">PassengerGroup</span>, <span class="va">HomePlanet</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>HomePlanet_correct <span class="op">=</span> <span class="fu">first</span><span class="op">(</span><span class="va">HomePlanet</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">HomePlanet_correct</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fix_knn</span> <span class="op">&lt;-</span> <span class="va">check_knn</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">left_join</span><span class="op">(</span><span class="va">.</span>, <span class="va">wrong_age</span>, by <span class="op">=</span> <span class="st">"PassengerId"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">left_join</span><span class="op">(</span><span class="va">.</span>, <span class="va">wrong_planet</span>, by <span class="op">=</span> <span class="st">"PassengerId"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Age <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Age</span> <span class="op">&lt;=</span> <span class="fl">12</span> <span class="op">&amp;</span> <span class="va">TotalSpent</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="va">mean_age</span>, <span class="va">Age</span><span class="op">)</span>,</span>
+<span>         HomePlanet <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">HomePlanetsPerGroup</span> <span class="op">!=</span> <span class="fl">1</span>, <span class="va">HomePlanet_correct</span>, <span class="va">HomePlanet</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">mean_age</span>, <span class="op">-</span><span class="va">HomePlanet_correct</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">train4</span> <span class="op">&lt;-</span> <span class="fu">useful_features2</span><span class="op">(</span><span class="va">fix_knn</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">plot_na_hclust</span><span class="op">(</span><span class="va">train4</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="SpaceshipTitanicBook_files/figure-html/manual_imp_correction-1.png" alt="Missing values overview after imputation" width="672"><p class="caption">
+(#fig:manual_imp_correction)Missing values overview after imputation
+</p>
+</div>
+<p>The only missing values are now in the variables that we won’t use for modelling (we’ll use features derived from them instead).</p>
+
+</div>
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="early-data-exploration.html"><span class="header-section-number">2</span> Early data exploration</a></div>
+<div class="next"><a href="parts.html"><span class="header-section-number">4</span> Parts</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#handle-missing-data"><span class="header-section-number">3</span> Handle missing data</a></li>
+<li><a class="nav-link" href="#simple-but-useful-features"><span class="header-section-number">3.1</span> Simple but useful features</a></li>
+<li><a class="nav-link" href="#closer-look-at-missing-values"><span class="header-section-number">3.2</span> Closer look at missing values</a></li>
+<li><a class="nav-link" href="#replace-data-with-manual-rules"><span class="header-section-number">3.3</span> Replace data with manual rules</a></li>
+<li>
+<a class="nav-link" href="#replace-data-with-imputation"><span class="header-section-number">3.4</span> Replace data with imputation</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#missranger---chained-random-forests"><span class="header-section-number">3.4.1</span> MissRanger - Chained Random Forests</a></li>
+<li><a class="nav-link" href="#knn---k-nearest-neighbors"><span class="header-section-number">3.4.2</span> KNN - K-Nearest Neighbors</a></li>
+<li><a class="nav-link" href="#comparison-of-imputation-algorithms---numerical-variables"><span class="header-section-number">3.4.3</span> Comparison of imputation algorithms - numerical variables</a></li>
+<li><a class="nav-link" href="#comparison-of-imputation-algorithms---categorical-variables"><span class="header-section-number">3.4.4</span> Comparison of imputation algorithms - categorical variables</a></li>
+<li><a class="nav-link" href="#do-the-imputated-values-break-any-rules"><span class="header-section-number">3.4.5</span> Do the imputated values break any “rules”?</a></li>
+</ul>
+</li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/blob/master/02-handle-missing.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/edit/master/02-handle-missing.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-14.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>
