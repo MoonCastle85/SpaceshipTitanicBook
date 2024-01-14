@@ -1,5 +1,5 @@
 bookdown::bs4_book:
   css: style.css
-  theme:
-    primary: "#096B72"
+  theme: 
+    bootswatch: yeti
   repo: https://github.com/MoonCastle85/SpaceshipTitanicBook
