@@ -77,7 +77,7 @@ train2 %>%
 ```
 
 We can also see that there aren't any VIPs travelling from Earth.
-```{r missing_vip, fig.cap = "Missing values for VIP"}
+```{r missing-vip, fig.cap = "Missing values for VIP"}
 train2 %>%
   ggplot(., mapping = aes(x = HomePlanet, y = PassengerCount, fill = VIP)) +
   geom_col() +

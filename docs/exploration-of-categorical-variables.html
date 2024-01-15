@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Chapter 4 Exploration of categorical variables | Spaceship Titanic - A comprehensive guide</title>
+<meta name="author" content="Vanja Manborg">
+<meta name="description" content="4.1 Chi-squared tests The traditional statistical test between two categorical values is the chi^2 test, which compares the actual frequencies of each combination of categorical variables to a...">
+<meta name="generator" content="bookdown 0.37 with bs4_book()">
+<meta property="og:title" content="Chapter 4 Exploration of categorical variables | Spaceship Titanic - A comprehensive guide">
+<meta property="og:type" content="book">
+<meta property="og:url" content="https://spaceshiptitanic.manborgconsulting.com/exploration-of-categorical-variables.html">
+<meta property="og:description" content="4.1 Chi-squared tests The traditional statistical test between two categorical values is the chi^2 test, which compares the actual frequencies of each combination of categorical variables to a...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chapter 4 Exploration of categorical variables | Spaceship Titanic - A comprehensive guide">
+<meta name="twitter:description" content="4.1 Chi-squared tests The traditional statistical test between two categorical values is the chi^2 test, which compares the actual frequencies of each combination of categorical variables to a...">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<style type="text/css">
+    /* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+        }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
+  </style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Spaceship Titanic - A comprehensive guide</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> Introduction</a></li>
+<li><a class="" href="early-data-exploration.html"><span class="header-section-number">2</span> Early data exploration</a></li>
+<li><a class="" href="handle-missing-data.html"><span class="header-section-number">3</span> Handle missing data</a></li>
+<li><a class="active" href="exploration-of-categorical-variables.html"><span class="header-section-number">4</span> Exploration of categorical variables</a></li>
+<li><a class="" href="footnotes-and-citations.html"><span class="header-section-number">5</span> Footnotes and citations</a></li>
+<li><a class="" href="blocks.html"><span class="header-section-number">6</span> Blocks</a></li>
+<li><a class="" href="sharing-your-book.html"><span class="header-section-number">7</span> Sharing your book</a></li>
+<li><a class="" href="references.html">References</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/MoonCastle85/SpaceshipTitanicBook">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="exploration-of-categorical-variables" class="section level1" number="4">
+<h1>
+<span class="header-section-number">4</span> Exploration of categorical variables<a class="anchor" aria-label="anchor" href="#exploration-of-categorical-variables"><i class="fas fa-link"></i></a>
+</h1>
+<div id="chi-squared-tests" class="section level2" number="4.1">
+<h2>
+<span class="header-section-number">4.1</span> Chi-squared tests<a class="anchor" aria-label="anchor" href="#chi-squared-tests"><i class="fas fa-link"></i></a>
+</h2>
+<p>The traditional statistical test between two categorical values is the chi^2 test, which compares the actual frequencies of each combination of categorical variables to a perfectly independent frequency (a frequency that would occur if each combination had the same ratio as the overall ratio for one variable). The null hypothesis for the chi^2 test is that there is no relationship between the variables.</p>
+<p>I use a set of helper functions to iterate over the different categorical variables and then summarize the results in tables.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_chisq_test</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">var1</span>, <span class="va">var2</span><span class="op">)</span> <span class="op">{</span> <span class="co"># Test and extract Chi^2 statistics</span></span>
+<span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">rstatix</span><span class="fu">::</span><span class="fu"><a href="https://rpkgs.datanovia.com/rstatix/reference/chisq_test.html">chisq_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">var1</span>, y <span class="op">=</span> <span class="va">var2</span><span class="op">)</span></span>
+<span>  <span class="va">ex_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>chi <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">statistic</span>, pval <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">p</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">ex_res</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">chi_sqr_res</span> <span class="op">&lt;-</span> <span class="va">train4</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">HomePlanet</span>, <span class="va">Destination</span>, <span class="va">Deck</span>, <span class="va">Side</span>, <span class="va">CryoSleep</span>, <span class="va">VIP</span>, <span class="va">LastName</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>chi_stats <span class="op">=</span> <span class="fu">map</span><span class="op">(</span>.x <span class="op">=</span> <span class="fu">across</span><span class="op">(</span><span class="fu">everything</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">map</span><span class="op">(</span>.x <span class="op">=</span> <span class="fu">across</span><span class="op">(</span><span class="fu">everything</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="fu">my_chisq_test</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">chi_sqr_res2</span> <span class="op">&lt;-</span> <span class="va">chi_sqr_res</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">unnest</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">unnest_wider</span><span class="op">(</span>col <span class="op">=</span> <span class="fu">everything</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">rename</span><span class="op">(</span>chi_sqr <span class="op">=</span> <span class="va">`chi.X-squared`</span>, p_value <span class="op">=</span> <span class="va">pval</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>Var1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"HomePlanet"</span>, <span class="st">"Destination"</span>, <span class="st">"Deck"</span>, <span class="st">"Side"</span>, <span class="st">"CryoSleep"</span>, <span class="st">"VIP"</span>, <span class="st">"LastName"</span><span class="op">)</span>, </span>
+<span>                        Var2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"HomePlanet"</span>, <span class="st">"Destination"</span>, <span class="st">"Deck"</span>, <span class="st">"Side"</span>, <span class="st">"CryoSleep"</span>, <span class="st">"VIP"</span>, <span class="st">"LastName"</span><span class="op">)</span><span class="op">)</span>, <span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">chi_sqr_res2</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Var1</span>, <span class="va">Var2</span>, <span class="va">chi_sqr</span>, <span class="va">p_value</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">p_value</span> <span class="op">&gt;</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="va">Var1</span> <span class="op">!=</span> <span class="va">Var2</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">distinct</span><span class="op">(</span><span class="va">chi_sqr</span>, .keep_all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">Var1</span><span class="op">)</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">p_value</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Var1        Var2   chi_sqr p_value</span></span>
+<span><span class="co">#&gt; 1 Side Destination 1.8404686   0.398</span></span>
+<span><span class="co">#&gt; 2  VIP        Side 0.5665735   0.452</span></span>
+<span></span>
+<span><span class="va">signif_chi</span> <span class="op">&lt;-</span> <span class="va">chi_sqr_res2</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Var1</span>, <span class="va">Var2</span>, <span class="va">chi_sqr</span>, <span class="va">p_value</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">p_value</span> <span class="op">&lt;=</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="va">Var1</span> <span class="op">!=</span> <span class="va">Var2</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">distinct</span><span class="op">(</span><span class="va">chi_sqr</span>, .keep_all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">Var1</span><span class="op">)</span>, <span class="va">p_value</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">signif_chi</span></span>
+<span><span class="co">#&gt;           Var1        Var2      chi_sqr   p_value</span></span>
+<span><span class="co">#&gt; 1    CryoSleep        Deck   958.609427 1.05e-202</span></span>
+<span><span class="co">#&gt; 2    CryoSleep  HomePlanet   133.118221  1.24e-29</span></span>
+<span><span class="co">#&gt; 3    CryoSleep Destination   122.814210  2.14e-27</span></span>
+<span><span class="co">#&gt; 4    CryoSleep        Side     3.881402  4.88e-02</span></span>
+<span><span class="co">#&gt; 5         Deck  HomePlanet  9878.009675  0.00e+00</span></span>
+<span><span class="co">#&gt; 6         Deck Destination  1062.024007 7.63e-218</span></span>
+<span><span class="co">#&gt; 7  Destination  HomePlanet  1193.608145 3.87e-257</span></span>
+<span><span class="co">#&gt; 8   HomePlanet    LastName 17334.504780  0.00e+00</span></span>
+<span><span class="co">#&gt; 9     LastName  HomePlanet 17334.504780  0.00e+00</span></span>
+<span><span class="co">#&gt; 10    LastName        Deck 32789.874777  0.00e+00</span></span>
+<span><span class="co">#&gt; 11    LastName        Side  3558.755751  4.63e-66</span></span>
+<span><span class="co">#&gt; 12    LastName         VIP  2955.861816  3.30e-24</span></span>
+<span><span class="co">#&gt; 13    LastName Destination  5355.196945  1.72e-20</span></span>
+<span><span class="co">#&gt; 14    LastName   CryoSleep  2412.444594  2.00e-03</span></span>
+<span><span class="co">#&gt; 15        Side  HomePlanet    16.958475  2.08e-04</span></span>
+<span><span class="co">#&gt; 16        Side        Deck    21.947019  2.59e-03</span></span>
+<span><span class="co">#&gt; 17         VIP        Deck   342.809204  4.26e-70</span></span>
+<span><span class="co">#&gt; 18         VIP  HomePlanet   264.988247  2.87e-58</span></span>
+<span><span class="co">#&gt; 19         VIP   CryoSleep    55.188417  1.10e-13</span></span>
+<span><span class="co">#&gt; 20         VIP Destination    19.034316  7.36e-05</span></span></code></pre></div>
+<p>If we use the typical 95% confidence interval as a cut-off point for comparison, we can see that only two pairs of variables have p-values higher than 5%, which means that these variables are independent of each other. All other variables are related in some way. One way we can explore this further is to visualize the levels of the categorical variables in mosaic plots.</p>
+</div>
+<div id="mosaic-plots" class="section level2" number="4.2">
+<h2>
+<span class="header-section-number">4.2</span> Mosaic plots<a class="anchor" aria-label="anchor" href="#mosaic-plots"><i class="fas fa-link"></i></a>
+</h2>
+<p>Here I use a custom function from Kuhn’s and Johnsson’s code to improve the default mosaic plot and plot the categorical variables against each other with the help of contigency tables for each pair. I’ve left out LastName since it has too many levels.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_mosaic</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">dtab</span><span class="op">)</span> <span class="op">{</span> </span>
+<span>  <span class="fu">mosaic</span><span class="op">(</span><span class="va">dtab</span>, pop <span class="op">=</span> <span class="cn">FALSE</span>, highlighting <span class="op">=</span> <span class="cn">TRUE</span>, highlighting_fill <span class="op">=</span> <span class="va">rainbow_hcl</span>, margins <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">8</span><span class="op">)</span>, <span class="st">"lines"</span><span class="op">)</span>,</span>
+<span>         labeling <span class="op">=</span> <span class="fu">labeling_border</span><span class="op">(</span>rot_labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">90</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>, just_labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"right"</span>, <span class="st">"center"</span>,  <span class="st">"right"</span><span class="op">)</span>,</span>
+<span>                                    offset_varnames <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"lines"</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>         keep_aspect_ratio <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Produces too many plots at once but it's useful to see all interactions at once</span></span>
+<span><span class="co"># train4 %&gt;% </span></span>
+<span><span class="co">#   select(HomePlanet, Destination, Deck, Side, VIP, CryoSleep, Transported) %&gt;%</span></span>
+<span><span class="co">#   mutate(walk(.x = across(everything()), .f = \(x) walk(.x = across(everything()), .f = \(y) my_mosaic(base::table(x, y)))))</span></span>
+<span></span>
+<span><span class="fu">my_mosaic</span><span class="op">(</span><span class="fu">base</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span>Destination <span class="op">=</span> <span class="va">train4</span><span class="op">$</span><span class="va">Destination</span>, Deck <span class="op">=</span> <span class="va">train4</span><span class="op">$</span><span class="va">Deck</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:mosaic"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/mosaic-1.png" alt="Mosaic plots to visualize the relationships between categorical variables" width="672"><p class="caption">
+Figure 4.1: Mosaic plots to visualize the relationships between categorical variables
+</p>
+</div>
+<p>If we take a look at some of the variable pairs, we can see that the height of the coloured bars changes when we move across horisontally. For example, the share of passengers that are in cryosleep changes with the deck and since the p-value from the Chi^2 test is very low, the change is significant. This is harder to see visually for CryoSleep and Side and this is also reflected in the p-value that is almost at our threshold of 5%.</p>
+<p>We also see that destinations are clearly connected to homeplanets which we might want to use to create a feature HomeDestination that perhaps adds predictive power to the model. Whether it does will depend on whether a specific HomeDestination is more important to why the passenger was transported than HomePlanet and Destination by themselves.</p>
+</div>
+<div id="correspondence-analysis" class="section level2" number="4.3">
+<h2>
+<span class="header-section-number">4.3</span> Correspondence Analysis<a class="anchor" aria-label="anchor" href="#correspondence-analysis"><i class="fas fa-link"></i></a>
+</h2>
+<p>Correspondence analysis uses the residuals from the contingency table of two variables compared to the frequency table the variables would’ve had if they were unrelated to
+Kuhn and Johnson also recommend the <code>CA</code> function from the <code>FactoMineR</code>-package that performs a correspondence analysis which maps the levels of the categorical variables into a two-dimensional space. It is similar to a principal component analysis.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">CA</span><span class="op">(</span><span class="fu">base</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span>Deck <span class="op">=</span> <span class="va">train4</span><span class="op">$</span><span class="va">Deck</span>, Destination <span class="op">=</span> <span class="va">train4</span><span class="op">$</span><span class="va">Destination</span><span class="op">)</span>, graph <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, title <span class="op">=</span> <span class="st">"Destination and Deck"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:correspondense-analysis-1"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/correspondense-analysis-1.png" alt="Correspondance analysis of categorical variables that have more than two categories" width="672"><p class="caption">
+Figure 4.2: Correspondance analysis of categorical variables that have more than two categories
+</p>
+</div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">CA</span><span class="op">(</span><span class="fu">base</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span>Deck <span class="op">=</span> <span class="va">train4</span><span class="op">$</span><span class="va">Deck</span>, HomePlanet <span class="op">=</span> <span class="va">train4</span><span class="op">$</span><span class="va">HomePlanet</span><span class="op">)</span>, graph <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, title <span class="op">=</span> <span class="st">"HomePlanet and Deck"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:correspondense-analysis-2"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/correspondense-analysis-2.png" alt="Correspondance analysis of categorical variables that have more than two categories" width="672"><p class="caption">
+Figure 4.3: Correspondance analysis of categorical variables that have more than two categories
+</p>
+</div>
+<p>The way to read these plots is as follows:
+- The horizontal and vertical components show the amount of the Chi^2 statistic that each respective component accounts for. Another way to think of this is what amount of information from the original variables is explained by either the horizontal or vertical direction. The eigenvalues inside the parenthesis gives us a sense of which component is more important. For example, the horizontal axis is much more important in both our cases.
+- The distance from the origin in either direction tells us how rare the particular category is. For example, Deck T has only five passengers so it’s very rare.
+- Categories from the same variable that are close together (particularly along the horizontal axis in our case) suggest similarities between the categories. For example, decks A-C seem to have a similar variation.
+- Categories from different variables that are close together suggest a dependence and especially if the distance from the origin is large. A trick to see the strength of the relationship is to imagine a straight line from one category to the orgin and then to the other category. The greater the distance and the smaller the angle, the stronger the relationship. For example, if we draw a line from deck A to the origin and then to Cancri, we get a relatively long line and a small angle.</p>
+<p>We can check if these insights make sense in our mosaic plot above. For example, decks A-C do seem to an unusually high proportion of passengers that travel to Cancri, compared to (what we can visually imagine) is the average for the entire dataset. Decks D-G do seem to be more common for travellers to Trappist but the relationship is relatively moderate (again, compared to the average).</p>
+<p>What is the main takeaway? It might make sense to either pool some groups, like decks A-C into a single category to reduce the noise our models need to deal with.</p>
+</div>
+<div id="relationships-between-categorical-variables-and-the-outcome" class="section level2" number="4.4">
+<h2>
+<span class="header-section-number">4.4</span> Relationships between categorical variables and the outcome<a class="anchor" aria-label="anchor" href="#relationships-between-categorical-variables-and-the-outcome"><i class="fas fa-link"></i></a>
+</h2>
+<p>So far, we’ve only look at relationships between the categoric predictors but not how they are related to the response. We can explore this with a binominal proportion test (again, the code is heavily borrowed from Kuhn and Johnson). This is in a sense similar to the chi^2 test in that it compares the actual proportions within a group to some given or expected proportion, in this case the proportion of those that were transported from the total number of passengers.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">response_rate</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">train4</span><span class="op">$</span><span class="va">Transported</span> <span class="op">==</span> <span class="st">"True"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_binom</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">t</span><span class="op">)</span> <span class="op">{</span> <span class="co"># Test whether the differences in proportions (of transported) are significant</span></span>
+<span>  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">infer</span><span class="fu">::</span><span class="fu"><a href="https://infer.tidymodels.org/reference/prop_test.html">prop_test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">df</span>, response <span class="op">=</span> <span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">df2</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>Lower <span class="op">=</span> <span class="va">p</span><span class="op">$</span><span class="va">lower_ci</span>, </span>
+<span>           Upper <span class="op">=</span> <span class="va">p</span><span class="op">$</span><span class="va">upper_ci</span>,</span>
+<span>           Proportion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="op">==</span> <span class="st">"True"</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">df2</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">my_binom_plot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">v</span>, <span class="va">t</span><span class="op">)</span> <span class="op">{</span> <span class="co"># Applies the proportion test to different categories of a variable and plots the results</span></span>
+<span>  <span class="va">df</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">group_split</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">map</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">.</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="fu">my_binom</span><span class="op">(</span><span class="va">df</span>, <span class="va">t</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">bind_rows</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>my_var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">v</span><span class="op">)</span>, <span class="va">Proportion</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">my_var</span>, y <span class="op">=</span> <span class="va">Proportion</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_errorbar</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>ymin <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="va">Lower</span>, ymax <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="va">Upper</span><span class="op">)</span>, width <span class="op">=</span> <span class="fl">.1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="va">response_rate</span>, col <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">.35</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">scale_y_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0.1</span><span class="op">)</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">theme</span><span class="op">(</span>axis.text <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, title <span class="op">=</span> <span class="va">v</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">train4</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerGroupSize</span>, <span class="va">DestinationsPerGroup</span>, <span class="va">CabinsPerGroup</span>, <span class="va">VIPsPerGroup</span>, <span class="va">LastNamesPerGroup</span>, <span class="va">Transported</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="op">-</span><span class="va">Transported</span>, .fns <span class="op">=</span> <span class="va">list</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">iwalk</span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu">my_binom_plot</span><span class="op">(</span><span class="va">train4</span>, <span class="va">.y</span>, <span class="st">"Transported"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:binominal-1"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/binominal-1.png" alt="Binominal distribution plots for categorical variables and the average response" width="672"><p class="caption">
+Figure 4.4: Binominal distribution plots for categorical variables and the average response
+</p>
+</div>
+<pre><code>#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.
+#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.
+#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.
+#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</code></pre>
+<div class="figure">
+<span style="display:block;" id="fig:binominal-2"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/binominal-2.png" alt="Binominal distribution plots for categorical variables and the average response" width="672"><p class="caption">
+Figure 4.5: Binominal distribution plots for categorical variables and the average response
+</p>
+</div>
+<pre><code>#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.
+#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</code></pre>
+<div class="figure">
+<span style="display:block;" id="fig:binominal-3"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/binominal-3.png" alt="Binominal distribution plots for categorical variables and the average response" width="672"><p class="caption">
+Figure 4.6: Binominal distribution plots for categorical variables and the average response
+</p>
+</div>
+<pre><code>#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.
+#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.
+#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.
+#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</code></pre>
+<div class="figure">
+<span style="display:block;" id="fig:binominal-4"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/binominal-4.png" alt="Binominal distribution plots for categorical variables and the average response" width="672"><p class="caption">
+Figure 4.7: Binominal distribution plots for categorical variables and the average response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:binominal-5"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/binominal-5.png" alt="Binominal distribution plots for categorical variables and the average response" width="672"><p class="caption">
+Figure 4.8: Binominal distribution plots for categorical variables and the average response
+</p>
+</div>
+<p>We’re already explored the core variables so here I want to focus on some of the simple features we’ve derived by counting categories per group.
+1. PassengerGroupSize suggests that there might be a difference between passengers who travel alone and those who don’t. We might also want to create a variable for large groups &gt; 7 although this might overfit the data since only around 1% of passengers would be in this category in the train data.
+2. DestinationsPerGroup suggests that there might be some slight difference between groups of passengers that all travelled to the same destination and those that didn’t.
+3. CabinsPerGroup doesn’t seem to add much value
+4. VIPsPerGroup suggests that the chances of being transported are higher for passengers who are in a group where another passenger has a VIP ticket. We’ll explore this a bit more below since it seems to go against what we can see from the VIP variable where having a VIP ticket seems to reduce the chance of transportation.
+5. CabinsPerGroup doesn’t seem to add much value</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train5</span> <span class="op">&lt;-</span> <span class="va">train4</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Solo <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">PassengerGroup</span> <span class="op">==</span> <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>,</span>
+<span>         LargeGroup <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">7</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>,</span>
+<span>         TravelTogether <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">DestinationsPerGroup</span> <span class="op">==</span> <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><br>
+Let’s explore the VIP variables a bit more.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train5</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">VIP</span>, <span class="va">VIPsPerGroup</span>, <span class="va">Transported</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="op">-</span><span class="va">Transported</span>, .fns <span class="op">=</span> <span class="va">list</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">iwalk</span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu">my_binom_plot</span><span class="op">(</span><span class="va">train4</span>, <span class="va">.y</span>, <span class="st">"Transported"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span>
+<span><span class="co">#&gt; No `p` argument was hypothesized, so the test will assume a null hypothesis `p = .5`.</span></span></code></pre></div>
+<p><img src="SpaceshipTitanicBook_files/figure-html/VIP-variable-1.png" width="672"><img src="SpaceshipTitanicBook_files/figure-html/VIP-variable-2.png" width="672"></p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="va">g1</span> <span class="op">&lt;-</span> <span class="va">train5</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">CryoSleep</span>, <span class="va">Transported</span>, <span class="va">VIPsPerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">CryoSleep</span>, fill <span class="op">=</span> <span class="va">Transported</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_bar</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_text</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>by <span class="op">=</span> <span class="va">CryoSleep</span><span class="op">)</span>, stat <span class="op">=</span> <span class="st">"prop"</span>, position <span class="op">=</span> <span class="fu">position_stack</span><span class="op">(</span>vjust <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">VIPsPerGroup</span>, labeller <span class="op">=</span> <span class="st">"label_both"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"CryoSleep share with different VIPsPerGroup"</span>, x <span class="op">=</span> <span class="st">"CryoSleep"</span>, y <span class="op">=</span> <span class="st">"Number of passengers"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">g2</span> <span class="op">&lt;-</span> <span class="va">train5</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">CryoSleep</span>, <span class="va">Transported</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">CryoSleep</span>, fill <span class="op">=</span> <span class="va">Transported</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_bar</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_text</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>by <span class="op">=</span> <span class="va">CryoSleep</span><span class="op">)</span>, stat <span class="op">=</span> <span class="st">"prop"</span>, position <span class="op">=</span> <span class="fu">position_stack</span><span class="op">(</span>vjust <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"CryoSleep share of total data"</span>, x <span class="op">=</span> <span class="st">"CryoSleep"</span>, y <span class="op">=</span> <span class="st">"Number of passengers"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">g3</span> <span class="op">&lt;-</span> <span class="va">train5</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">VIP</span> <span class="op">==</span> <span class="st">"True"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">CryoSleep</span>, <span class="va">Transported</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">CryoSleep</span>, fill <span class="op">=</span> <span class="va">Transported</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_bar</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_text</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>by <span class="op">=</span> <span class="va">CryoSleep</span><span class="op">)</span>, stat <span class="op">=</span> <span class="st">"prop"</span>, position <span class="op">=</span> <span class="fu">position_stack</span><span class="op">(</span>vjust <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"CryoSleep share for those with VIP"</span>, x <span class="op">=</span> <span class="st">"CryoSleep"</span>, y <span class="op">=</span> <span class="st">"Number of passengers"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">g1</span> <span class="op">+</span> <span class="va">g2</span> <span class="op">+</span> <span class="va">g3</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/VIP-variable-3.png" width="672"></div>
+<p>The proportion of people transported seems to be higher for groups with more than a single VIP-ticket even when we control for CryoSleep. On the other hand, passengers with VIP-tickets seem slightly less likely to be transported which suggests that we should keep both variables for modelling.</p>
+
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="handle-missing-data.html"><span class="header-section-number">3</span> Handle missing data</a></div>
+<div class="next"><a href="footnotes-and-citations.html"><span class="header-section-number">5</span> Footnotes and citations</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#exploration-of-categorical-variables"><span class="header-section-number">4</span> Exploration of categorical variables</a></li>
+<li><a class="nav-link" href="#chi-squared-tests"><span class="header-section-number">4.1</span> Chi-squared tests</a></li>
+<li><a class="nav-link" href="#mosaic-plots"><span class="header-section-number">4.2</span> Mosaic plots</a></li>
+<li><a class="nav-link" href="#correspondence-analysis"><span class="header-section-number">4.3</span> Correspondence Analysis</a></li>
+<li><a class="nav-link" href="#relationships-between-categorical-variables-and-the-outcome"><span class="header-section-number">4.4</span> Relationships between categorical variables and the outcome</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/blob/master/03-categorical.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/edit/master/03-categorical.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-15.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>
