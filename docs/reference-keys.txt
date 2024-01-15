@@ -1,6 +1,13 @@
 fig:frequencies
 fig:correlation
 fig:missing
+fig:missing-homeplanet
+fig:missing-cabin
+fig:missing-deck
+fig:missing-age
+fig:imputation-evaluation-cat-1
+fig:imputation-evaluation-cat-2
+fig:manual-imp-correction
 eq:binom
 thm:tri
 introduction
