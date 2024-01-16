@@ -214,7 +214,7 @@ load("KNN.RData")
 The KNN-algorithm is very fast and can impute multiple variables at the same time. It can also be relatively easily tuned by changing the number of neighbors the imputation is based on.
 
 ### Comparison of imputation algorithms - numerical variables
-```{r imputation-evaluation_num, fig.cap = "Comparisson of standard deviation for numerical values before and after imputation"}
+```{r imputation-evaluation-num, fig.cap = "Comparisson of standard deviation for numerical values before and after imputation"}
 my_skim <- skim_with(numeric = sfl(min = ~min(., na.rm = TRUE), median = ~median(., na.rm = TRUE), 
                                    mean = ~mean(., na.rm = TRUE), max = ~max(., na.rm = TRUE), 
                                    sd = ~sd(., na.rm = TRUE)), append = FALSE)
@@ -249,7 +249,7 @@ sd_skim %>%
   scale_colour_discrete(name = "Non-imputed", labels = "sd", type = "orange")
 ```
 
-```{r imputation-evaluation_num2, fig.cap = "Comparisson of mean for numerical values before and after imputation"}
+```{r imputation-evaluation-num2, fig.cap = "Comparisson of mean for numerical values before and after imputation"}
 mean_skim %>%
   filter(Metric != "No imp") %>%
   ggplot(., mapping = aes(x = Metric, y = Mean)) +

@@ -1,0 +1,92 @@
+# Exploration of numerical variables
+We've so far been focused on the categorical variables but now we turn to our numerical variables to see how they affect the response.
+
+## Name variable
+First, however, let's transform the name variable into numerical values. We can assume that there is no rank order of the names based on the fact that the variable distribution is uniform (see \@ref(fig:frequencies)). Here I use a very simple encoding to convert the names into numbers.
+```{r name, warning = FALSE}
+encode_cat_to_numeric <- function(x) {
+  x <- factor(x, ordered = FALSE)
+  x <- unclass(x)
+  return(x)
+}
+
+train6 <- train5 %>%
+  mutate(LastNameAsNumber = encode_cat_to_numeric(LastName)) %>%
+  add_count(x = ., LastNameAsNumber, name = "LastNameCount") %>%
+  mutate(across(.cols = c(PassengerGroup, LastNameAsNumber), .fns = as.integer))
+```
+
+## Age, CabinNumber and LastNames
+Kuhn and Johnson propose a smoothing function using `gam` from the `mgcv`-package to fit generalized additive models for numeric variables against the response. I've modified their function somewhat.
+```{r smooth, results = "hide", fig.cap = "Smoothed plots that show probability distribution of continuous variables against the average response"}
+my_smooth_plot <- function(d, v) {
+  TransportedRate <- mean(d$Transported == "True")
+  
+  my_df <- d %>% 
+    select(!!sym(v), Transported) %>%
+    arrange(!!sym(v))
+  
+  my_df_small <- my_df %>%
+    distinct(!!sym(v))
+
+  gam_model <- gam(as.formula(paste("Transported", "~ s(", v, ")")), data = my_df, family = binomial())
+ 
+  my_df_small <- my_df_small %>%
+    mutate(
+      link = predict(gam_model, my_df_small, type = "link"),
+      se = predict(gam_model, my_df_small, type = "link", se.fit = TRUE)$se.fit,
+      upper = link + qnorm(.975) * se,
+      lower = link - qnorm(.975) * se,
+      lower = binomial()$linkinv(lower),
+      upper = binomial()$linkinv(upper),
+      probability = binomial()$linkinv(link)
+    )
+  
+  g <- ggplot(my_df_small, aes(x = !!sym(v))) + 
+        geom_line(aes(y = probability)) + 
+        geom_ribbon(aes(ymin = lower, ymax = upper), fill = "grey", alpha = .5) + 
+        geom_hline(yintercept = TransportedRate, col = "red", alpha = .35, lty = 2)  + 
+        scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0, 1)) +
+        labs(x = v, title = paste("Smoothed", v))
+
+  return(g)
+}
+
+train6 %>%
+  select(Age, PassengerGroup, CabinNumber, LastNameAsNumber) %>%
+  names(.) %>%
+  map(.x = ., .f = \(varz) my_smooth_plot(train6, varz))
+```
+
+## Amenities
+The amenity variables that are zero might reflect the fact that the passenger is in cryosleep so let's filter that out.
+```{r amenities}
+train6 %>%
+  filter(CryoSleep == FALSE) %>%
+  select(RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent) %>%
+  names(.) %>%
+  map(.x = ., .f = \(varz) my_smooth_plot(train6, varz))
+```
+
+## Correlations
+Finally, we can see if our new numerical variables correlate highly with some others.
+```{r correlation-numeric}
+train6 %>%
+  select(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, CabinNumber, LastNameAsNumber, PassengerGroup) %>%
+  plot_correlation(., type = "continuous", geom_text_args = list(size = 10), 
+                   theme_config = list(text = element_text(size = 15), axis.text.x = element_text(angle = 90)))
+```
+
+We can note several interesting things: 
+
+1. Passengers younger that 15 years of age seem to have a higher chance to be transported, with the effect being more significant the younger the passenger is. For the rest of the passengers, age doesn't seem to matter much.
+
+2. Passenger groups seem to have some effect although the variable is correlated with CabinNumber which, in turn, is likely correlated to Deck that might explain the differences
+
+3. CabinNumber shows some effect but if we look at the Deck for the numbers that seem to make the biggest difference, we see that all those cabins are in decks F and G.
+
+4. LastName seemes to have no effect.
+
+5. Passengers who spent credits on RoomService, Spa and VRDeck seem to have been less likely to be transported while the opposite is true for those that spent credits at the FoodCourt or ShoppingMall. 
+
+6. Our TotalSpent variable probably smooths out the effects of individual amenities and might reduce model performance. We should be prepared to remove it from our models.

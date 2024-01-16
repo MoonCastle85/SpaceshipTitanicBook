@@ -6,6 +6,8 @@ fig:missing-cabin
 fig:missing-deck
 fig:missing-vip
 fig:missing-age
+fig:imputation-evaluation-num
+fig:imputation-evaluation-num2
 fig:imputation-evaluation-cat-1
 fig:imputation-evaluation-cat-2
 fig:manual-imp-correction
@@ -17,6 +19,10 @@ fig:binominal-2
 fig:binominal-3
 fig:binominal-4
 fig:binominal-5
+fig:smooth-1
+fig:smooth-2
+fig:smooth-3
+fig:smooth-4
 eq:binom
 thm:tri
 introduction
@@ -41,9 +47,11 @@ chi-squared-tests
 mosaic-plots
 correspondence-analysis
 relationships-between-categorical-variables-and-the-outcome
-footnotes-and-citations
-footnotes
-citations
+exploration-of-numerical-variables
+name-variable
+age-cabinnumber-and-lastnames
+amenities
+correlations
 blocks
 equations
 theorems-and-proofs

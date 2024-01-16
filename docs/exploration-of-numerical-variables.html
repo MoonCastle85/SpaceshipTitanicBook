@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Chapter 5 Exploration of numerical variables | Spaceship Titanic - A comprehensive guide</title>
+<meta name="author" content="Vanja Manborg">
+<meta name="description" content="We’ve so far been focused on the categorical variables but now we turn to our numerical variables to see how they affect the response.  5.1 Name variable First, however, let’s transform the name...">
+<meta name="generator" content="bookdown 0.37 with bs4_book()">
+<meta property="og:title" content="Chapter 5 Exploration of numerical variables | Spaceship Titanic - A comprehensive guide">
+<meta property="og:type" content="book">
+<meta property="og:url" content="https://spaceshiptitanic.manborgconsulting.com/exploration-of-numerical-variables.html">
+<meta property="og:description" content="We’ve so far been focused on the categorical variables but now we turn to our numerical variables to see how they affect the response.  5.1 Name variable First, however, let’s transform the name...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chapter 5 Exploration of numerical variables | Spaceship Titanic - A comprehensive guide">
+<meta name="twitter:description" content="We’ve so far been focused on the categorical variables but now we turn to our numerical variables to see how they affect the response.  5.1 Name variable First, however, let’s transform the name...">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Spaceship Titanic - A comprehensive guide</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> Introduction</a></li>
+<li><a class="" href="early-data-exploration.html"><span class="header-section-number">2</span> Early data exploration</a></li>
+<li><a class="" href="handle-missing-data.html"><span class="header-section-number">3</span> Handle missing data</a></li>
+<li><a class="" href="exploration-of-categorical-variables.html"><span class="header-section-number">4</span> Exploration of categorical variables</a></li>
+<li><a class="active" href="exploration-of-numerical-variables.html"><span class="header-section-number">5</span> Exploration of numerical variables</a></li>
+<li><a class="" href="blocks.html"><span class="header-section-number">6</span> Blocks</a></li>
+<li><a class="" href="sharing-your-book.html"><span class="header-section-number">7</span> Sharing your book</a></li>
+<li><a class="" href="references.html">References</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/MoonCastle85/SpaceshipTitanicBook">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="exploration-of-numerical-variables" class="section level1" number="5">
+<h1>
+<span class="header-section-number">5</span> Exploration of numerical variables<a class="anchor" aria-label="anchor" href="#exploration-of-numerical-variables"><i class="fas fa-link"></i></a>
+</h1>
+<p>We’ve so far been focused on the categorical variables but now we turn to our numerical variables to see how they affect the response.</p>
+<div id="name-variable" class="section level2" number="5.1">
+<h2>
+<span class="header-section-number">5.1</span> Name variable<a class="anchor" aria-label="anchor" href="#name-variable"><i class="fas fa-link"></i></a>
+</h2>
+<p>First, however, let’s transform the name variable into numerical values. We can assume that there is no rank order of the names based on the fact that the variable distribution is uniform (see <a href="early-data-exploration.html#fig:frequencies">2.1</a>). Here I use a very simple encoding to convert the names into numbers.</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">encode_cat_to_numeric</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">x</span>, ordered <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/class.html">unclass</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">train6</span> <span class="op">&lt;-</span> <span class="va">train5</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>LastNameAsNumber <span class="op">=</span> <span class="fu">encode_cat_to_numeric</span><span class="op">(</span><span class="va">LastName</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">add_count</span><span class="op">(</span>x <span class="op">=</span> <span class="va">.</span>, <span class="va">LastNameAsNumber</span>, name <span class="op">=</span> <span class="st">"LastNameCount"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">PassengerGroup</span>, <span class="va">LastNameAsNumber</span><span class="op">)</span>, .fns <span class="op">=</span> <span class="va">as.integer</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div id="age-cabinnumber-and-lastnames" class="section level2" number="5.2">
+<h2>
+<span class="header-section-number">5.2</span> Age, CabinNumber and LastNames<a class="anchor" aria-label="anchor" href="#age-cabinnumber-and-lastnames"><i class="fas fa-link"></i></a>
+</h2>
+<p>Kuhn and Johnson propose a smoothing function using <code>gam</code> from the <code>mgcv</code>-package to fit generalized additive models for numeric variables against the response. I’ve modified their function somewhat.</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_smooth_plot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">d</span>, <span class="va">v</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">TransportedRate</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">Transported</span> <span class="op">==</span> <span class="st">"True"</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">my_df</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">%&gt;%</span> </span>
+<span>    <span class="fu">select</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">v</span><span class="op">)</span>, <span class="va">Transported</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">arrange</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">my_df_small</span> <span class="op">&lt;-</span> <span class="va">my_df</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">distinct</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">gam_model</span> <span class="op">&lt;-</span> <span class="fu">gam</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"Transported"</span>, <span class="st">"~ s("</span>, <span class="va">v</span>, <span class="st">")"</span><span class="op">)</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">my_df</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span> </span>
+<span>  <span class="va">my_df_small</span> <span class="op">&lt;-</span> <span class="va">my_df_small</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span></span>
+<span>      link <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">gam_model</span>, <span class="va">my_df_small</span>, type <span class="op">=</span> <span class="st">"link"</span><span class="op">)</span>,</span>
+<span>      se <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">gam_model</span>, <span class="va">my_df_small</span>, type <span class="op">=</span> <span class="st">"link"</span>, se.fit <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">se.fit</span>,</span>
+<span>      upper <span class="op">=</span> <span class="va">link</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">qnorm</a></span><span class="op">(</span><span class="fl">.975</span><span class="op">)</span> <span class="op">*</span> <span class="va">se</span>,</span>
+<span>      lower <span class="op">=</span> <span class="va">link</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">qnorm</a></span><span class="op">(</span><span class="fl">.975</span><span class="op">)</span> <span class="op">*</span> <span class="va">se</span>,</span>
+<span>      lower <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">linkinv</span><span class="op">(</span><span class="va">lower</span><span class="op">)</span>,</span>
+<span>      upper <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">linkinv</span><span class="op">(</span><span class="va">upper</span><span class="op">)</span>,</span>
+<span>      probability <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="fu">linkinv</span><span class="op">(</span><span class="va">link</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">g</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">my_df_small</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>        <span class="fu">geom_line</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="va">probability</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>        <span class="fu">geom_ribbon</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">lower</span>, ymax <span class="op">=</span> <span class="va">upper</span><span class="op">)</span>, fill <span class="op">=</span> <span class="st">"grey"</span>, alpha <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>        <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="va">TransportedRate</span>, col <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">.35</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>  <span class="op">+</span> </span>
+<span>        <span class="fu">scale_y_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0.1</span><span class="op">)</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>        <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="va">v</span>, title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"Smoothed"</span>, <span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">train6</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Age</span>, <span class="va">PassengerGroup</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">map</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">.</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">varz</span><span class="op">)</span> <span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span>, <span class="va">varz</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:smooth-1"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/smooth-1.png" alt="Smoothed plots that show probability distribution of continuous variables against the average response" width="672"><p class="caption">
+Figure 5.1: Smoothed plots that show probability distribution of continuous variables against the average response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:smooth-2"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/smooth-2.png" alt="Smoothed plots that show probability distribution of continuous variables against the average response" width="672"><p class="caption">
+Figure 5.2: Smoothed plots that show probability distribution of continuous variables against the average response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:smooth-3"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/smooth-3.png" alt="Smoothed plots that show probability distribution of continuous variables against the average response" width="672"><p class="caption">
+Figure 5.3: Smoothed plots that show probability distribution of continuous variables against the average response
+</p>
+</div>
+<div class="figure">
+<span style="display:block;" id="fig:smooth-4"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/smooth-4.png" alt="Smoothed plots that show probability distribution of continuous variables against the average response" width="672"><p class="caption">
+Figure 5.4: Smoothed plots that show probability distribution of continuous variables against the average response
+</p>
+</div>
+</div>
+<div id="amenities" class="section level2" number="5.3">
+<h2>
+<span class="header-section-number">5.3</span> Amenities<a class="anchor" aria-label="anchor" href="#amenities"><i class="fas fa-link"></i></a>
+</h2>
+<p>The amenity variables that are zero might reflect the fact that the passenger is in cryosleep so let’s filter that out.</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train6</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">TotalSpent</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">map</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">.</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">varz</span><span class="op">)</span> <span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span>, <span class="va">varz</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [[1]]</span></span></code></pre></div>
+<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-1.png" width="672"></div>
+<pre><code>#&gt; 
+#&gt; [[2]]</code></pre>
+<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-2.png" width="672"></div>
+<pre><code>#&gt; 
+#&gt; [[3]]</code></pre>
+<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-3.png" width="672"></div>
+<pre><code>#&gt; 
+#&gt; [[4]]</code></pre>
+<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-4.png" width="672"></div>
+<pre><code>#&gt; 
+#&gt; [[5]]</code></pre>
+<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-5.png" width="672"></div>
+<pre><code>#&gt; 
+#&gt; [[6]]</code></pre>
+<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-6.png" width="672"></div>
+</div>
+<div id="correlations" class="section level2" number="5.4">
+<h2>
+<span class="header-section-number">5.4</span> Correlations<a class="anchor" aria-label="anchor" href="#correlations"><i class="fas fa-link"></i></a>
+</h2>
+<p>Finally, we can see if our new numerical variables correlate highly with some others.</p>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train6</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">plot_correlation</span><span class="op">(</span><span class="va">.</span>, type <span class="op">=</span> <span class="st">"continuous"</span>, geom_text_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, </span>
+<span>                   theme_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>text <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>, axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/correlation-numeric-1.png" width="672"></div>
+<p>We can note several interesting things:</p>
+<ol style="list-style-type: decimal">
+<li><p>Passengers younger that 15 years of age seem to have a higher chance to be transported, with the effect being more significant the younger the passenger is. For the rest of the passengers, age doesn’t seem to matter much.</p></li>
+<li><p>Passenger groups seem to have some effect although the variable is correlated with CabinNumber which, in turn, is likely correlated to Deck that might explain the differences</p></li>
+<li><p>CabinNumber shows some effect but if we look at the Deck for the numbers that seem to make the biggest difference, we see that all those cabins are in decks F and G.</p></li>
+<li><p>LastName seemes to have no effect.</p></li>
+<li><p>Passengers who spent credits on RoomService, Spa and VRDeck seem to have been less likely to be transported while the opposite is true for those that spent credits at the FoodCourt or ShoppingMall.</p></li>
+<li><p>Our TotalSpent variable probably smooths out the effects of individual amenities and might reduce model performance. We should be prepared to remove it from our models.</p></li>
+</ol>
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="exploration-of-categorical-variables.html"><span class="header-section-number">4</span> Exploration of categorical variables</a></div>
+<div class="next"><a href="blocks.html"><span class="header-section-number">6</span> Blocks</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#exploration-of-numerical-variables"><span class="header-section-number">5</span> Exploration of numerical variables</a></li>
+<li><a class="nav-link" href="#name-variable"><span class="header-section-number">5.1</span> Name variable</a></li>
+<li><a class="nav-link" href="#age-cabinnumber-and-lastnames"><span class="header-section-number">5.2</span> Age, CabinNumber and LastNames</a></li>
+<li><a class="nav-link" href="#amenities"><span class="header-section-number">5.3</span> Amenities</a></li>
+<li><a class="nav-link" href="#correlations"><span class="header-section-number">5.4</span> Correlations</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/blob/master/04-numerical.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/edit/master/04-numerical.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-16.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>

@@ -37,7 +37,7 @@ The Cabin and Name variables have a near uniform distribution which implies that
 ```{r correlation, results = "hide", warning = FALSE, fig.cap = "Correlation between numerical variables"}
 train %>%
   na.omit(.) %>%
-plot_correlation(., type = "all", theme_config = list(axis.text.x = element_text(angle = 90)))
+plot_correlation(., type = "all", theme_config = list(text = element_text(size = 20), axis.text.x = element_text(angle = 90)))
 ```
 
 We see that there's some relatively high correlation between homeplanets and destinations as well as a moderate correlation between CryoSleep and Transported which already gives us a hint that CryoSleep might be important. Otherwise, the cariables seem relatively uncorrelated which is a good thing since some models cannot handle variables that are too correlated.
