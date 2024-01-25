@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Chapter 6 Interactions | Spaceship Titanic - A comprehensive guide</title>
+<meta name="author" content="Vanja Manborg">
+<meta name="description" content="So far we’ve only created features from single variables but what about the effects of two variables together? Would it help our models if we added an interaction effect between for example...">
+<meta name="generator" content="bookdown 0.37 with bs4_book()">
+<meta property="og:title" content="Chapter 6 Interactions | Spaceship Titanic - A comprehensive guide">
+<meta property="og:type" content="book">
+<meta property="og:url" content="https://spaceshiptitanic.manborgconsulting.com/interactions.html">
+<meta property="og:description" content="So far we’ve only created features from single variables but what about the effects of two variables together? Would it help our models if we added an interaction effect between for example...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chapter 6 Interactions | Spaceship Titanic - A comprehensive guide">
+<meta name="twitter:description" content="So far we’ve only created features from single variables but what about the effects of two variables together? Would it help our models if we added an interaction effect between for example...">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script><script src="libs/jquery-migrate-3.1.0/jquery-migrate-3.1.0.min.js"></script><link href="libs/slick-1.8.1/slick/slick.css" rel="stylesheet">
+<link href="libs/slick-1.8.1/slick/slick-theme.css" rel="stylesheet">
+<script src="libs/slick-1.8.1/slick/slick.min.js"></script><script src="libs/css-resize-1.2.1/ResizeSensor.js"></script><script src="libs/css-resize-1.2.1/ElementQueries.js"></script><link href="libs/slickR-0.0.2/slick.css" rel="stylesheet">
+<link href="libs/slickR-0.0.2/slick-theme.css" rel="stylesheet">
+<script src="libs/slickR-0.0.2/slickR.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Spaceship Titanic - A comprehensive guide</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> Introduction</a></li>
+<li><a class="" href="early-data-exploration.html"><span class="header-section-number">2</span> Early data exploration</a></li>
+<li><a class="" href="handle-missing-data.html"><span class="header-section-number">3</span> Handle missing data</a></li>
+<li><a class="" href="exploration-of-categorical-variables.html"><span class="header-section-number">4</span> Exploration of categorical variables</a></li>
+<li><a class="" href="exploration-of-numerical-variables.html"><span class="header-section-number">5</span> Exploration of numerical variables</a></li>
+<li><a class="active" href="interactions.html"><span class="header-section-number">6</span> Interactions</a></li>
+<li><a class="" href="feature-selection-and-elimination.html"><span class="header-section-number">7</span> Feature selection and elimination</a></li>
+<li><a class="" href="final-model-exploration.html"><span class="header-section-number">8</span> Final model exploration</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/MoonCastle85/SpaceshipTitanicBook">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="interactions" class="section level1" number="6">
+<h1>
+<span class="header-section-number">6</span> Interactions<a class="anchor" aria-label="anchor" href="#interactions"><i class="fas fa-link"></i></a>
+</h1>
+<p>So far we’ve only created features from single variables but what about the effects of two variables together? Would it help our models if we added an interaction effect between for example HomePlanet and Destination to create the new feature HomeDestination? What about other such interactions?</p>
+<p>In the previous competition for the Titanic of 1912, the sex of a passenger mattered (women more likely to survive) and the ticket class mattered (first class more likely to survive) but the interaction “woman in first class” had an almost 100% of survival and this interaction improved the model (if I remember correctly). In this space odyssey, we want to discover if such interactions exist between the variables we have.</p>
+<p>Of course, we won’t know the extent of the improvement until we test the interaction effects with various models. Some models inherently discover interactions (like tree-models) and the addition of interaction effects might not matter. But it might matter for other models or it might at least improve computation time.</p>
+<div id="visual-exploration-of-interactions" class="section level2" number="6.1">
+<h2>
+<span class="header-section-number">6.1</span> Visual exploration of interactions<a class="anchor" aria-label="anchor" href="#visual-exploration-of-interactions"><i class="fas fa-link"></i></a>
+</h2>
+<p>Since we only have a few categorical variables, let’s visualize all possible interactions. Here I use the default <code>glm</code> logistic regression model where the formula <code>Transported ~ (.)^2</code> amounts to <em>Outcome ~ Variable_1 + Variable_2 + Variable_1 x Variable_2</em></p>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">plot_simple_int</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">v1</span>, <span class="va">v2</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">tmp_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Transported"</span>, <span class="va">v1</span>, <span class="va">v2</span><span class="op">)</span></span>
+<span>  <span class="va">tmp_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">Transported</span> <span class="op">~</span> <span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span>, data <span class="op">=</span> <span class="va">df</span><span class="op">[</span>, <span class="va">tmp_vars</span><span class="op">]</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">interactions</span><span class="fu">::</span><span class="fu"><a href="https://interactions.jacob-long.com/reference/cat_plot.html">cat_plot</a></span><span class="op">(</span><span class="va">tmp_model</span>, pred <span class="op">=</span> <span class="op">{</span><span class="op">{</span> <span class="va">v1</span> <span class="op">}</span><span class="op">}</span>, modx <span class="op">=</span> <span class="op">{</span><span class="op">{</span> <span class="va">v2</span> <span class="op">}</span><span class="op">}</span>, geom <span class="op">=</span> <span class="st">"line"</span>, colors <span class="op">=</span> <span class="va">c25</span>,</span>
+<span>                       main.title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">v1</span>, <span class="st">"and"</span>, <span class="va">v2</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">preds_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CryoSleep"</span>, <span class="st">"HomePlanet"</span>, <span class="st">"Destination"</span>, <span class="st">"VIP"</span>, <span class="st">"Deck"</span>, <span class="st">"Side"</span><span class="op">)</span></span>
+<span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/combn.html">combn</a></span><span class="op">(</span><span class="va">preds_cat</span>, <span class="fl">2</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">c25</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"dodgerblue2"</span>, <span class="st">"#E31A1C"</span>, <span class="st">"green4"</span>, <span class="st">"#6A3D9A"</span>, <span class="st">"#FF7F00"</span>, <span class="st">"black"</span>, <span class="st">"gold1"</span>, <span class="st">"skyblue2"</span>, <span class="st">"#FB9A99"</span>, <span class="st">"palegreen2"</span>, <span class="st">"#CAB2D6"</span>,</span>
+<span>  <span class="st">"#FDBF6F"</span>, <span class="st">"gray70"</span>, <span class="st">"khaki2"</span>, <span class="st">"maroon"</span>, <span class="st">"orchid1"</span>, <span class="st">"deeppink1"</span>, <span class="st">"blue1"</span>, <span class="st">"steelblue4"</span>, <span class="st">"darkturquoise"</span>, <span class="st">"green1"</span>, <span class="st">"yellow4"</span>,</span>
+<span>  <span class="st">"yellow3"</span>, <span class="st">"darkorange4"</span>, <span class="st">"brown"</span><span class="op">)</span> <span class="co"># Had to add extra colours because I couldn't get `cat_plot` to work with defaults</span></span>
+<span></span>
+<span><span class="va">save_plot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">p</span>, <span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">ggsave</span><span class="op">(</span>filename <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"PairInt"</span>, <span class="va">i</span>, <span class="st">".png"</span><span class="op">)</span>, plot <span class="op">=</span> <span class="va">p</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">pair_int_plots</span> <span class="op">&lt;-</span> <span class="va">pairs</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">map</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">.</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">vp</span><span class="op">)</span> <span class="fu">plot_simple_int</span><span class="op">(</span><span class="va">train5</span>, <span class="va">vp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">vp</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">plotsToSVG</span> <span class="op">&lt;-</span> <span class="fu">walk2</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">pair_int_plots</span>, .y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_along</a></span><span class="op">(</span><span class="va">pair_int_plots</span><span class="op">)</span>, .f <span class="op">=</span> <span class="va">save_plot</span><span class="op">)</span></span>
+<span><span class="va">plotsToSVG</span> <span class="op">&lt;-</span> <span class="fu">map</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">pair_int_plots</span><span class="op">)</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"PairInt"</span>, <span class="va">i</span>, <span class="st">".png"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">slickR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/slickR/man/slickR.html">slickR</a></span><span class="op">(</span><span class="va">plotsToSVG</span>, height <span class="op">=</span> <span class="st">"480"</span>, width <span class="op">=</span> <span class="st">"672"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">slickR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/slickR/man/settings.html">settings</a></span><span class="op">(</span>slidesToShow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p>Parallel lines indicate no significant interaction effects while lines that cross indicate a potential for a significant interactions. I’ll highlight a few interactions below.</p>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">plot_simple_int</span><span class="op">(</span><span class="va">train6</span>, <span class="st">"CryoSleep"</span>, <span class="st">"HomePlanet"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:int-cryo-home"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/int-cryo-home-1.png" alt="Interaction between CryoSleep and HomePlanet" width="672"><p class="caption">
+Figure 6.1: Interaction between CryoSleep and HomePlanet
+</p>
+</div>
+<p>The interaction between CryoSleep and Deck suggests that passengers in E and G decks seem less likely to be transported when in cryosleep while the reverse could be true for passengers in decks D and F.</p>
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">plot_simple_int</span><span class="op">(</span><span class="va">train6</span>, <span class="st">"Deck"</span>, <span class="st">"Side"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:int-deck-side"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/int-deck-side-1.png" alt="Interaction between Deck and Side" width="672"><p class="caption">
+Figure 6.2: Interaction between Deck and Side
+</p>
+</div>
+<p>The interaction between Deck and Side, however, seems to show only a minor effect, if any.</p>
+</div>
+<div id="interaction-significance-with-only-variable-pairs-and-their-interactions" class="section level2" number="6.2">
+<h2>
+<span class="header-section-number">6.2</span> Interaction significance with only variable pairs and their interactions<a class="anchor" aria-label="anchor" href="#interaction-significance-with-only-variable-pairs-and-their-interactions"><i class="fas fa-link"></i></a>
+</h2>
+<p>One problem with the above visual approach is that we don’t know if these interaction effects are real - in the sense they represent some true relationship with the outcome - or if they’re so called false positives - that is, random effects that happened to be present in this dataset. For example, does the fact that passengers from Earth seem less likely to be transported even when in cryosleep reflect some true aspect of the spacetime anomaly that caused the transportation to another dimension or is this pattern just something that happened this time on pure chance? Another way to think of this is: if the Spaceship Titanic were to pass through this spacetime anomaly a thousand times, would the pattern persist?</p>
+<p>To explore this further, we must validate some of these effects by cross validation. We will still use our simple <code>glm</code> model to model the response against each pair of variables and then compare it to a similar model that includes the interaction term. We will use the accuracy metric for comparison.</p>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">compare_models_1way</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span>, <span class="va">metric</span> <span class="op">=</span> <span class="va">a</span><span class="op">$</span><span class="va">metric</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span> <span class="co"># A customized compare_models function from caret that allows for</span></span>
+<span>  <span class="va">mods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span>                                               <span class="co"># a custom t.test adjustment in the diff-function</span></span>
+<span>  <span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu">resamples</span><span class="op">(</span><span class="va">mods</span><span class="op">)</span></span>
+<span>  <span class="va">diffs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html">diff</a></span><span class="op">(</span><span class="va">rs</span>, metric <span class="op">=</span> <span class="va">metric</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, adjustment <span class="op">=</span> <span class="st">"none"</span>, <span class="va">...</span><span class="op">)</span></span>
+<span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="va">diffs</span><span class="op">$</span><span class="va">statistics</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">pair_model</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">v1</span>, <span class="va">v2</span><span class="op">)</span> <span class="op">{</span> <span class="co"># Model without interactions with only two variables</span></span>
+<span>  <span class="va">tmp_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Transported"</span>, <span class="va">v1</span>, <span class="va">v2</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span>  <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">train</span><span class="op">(</span><span class="va">Transported</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">df</span><span class="op">[</span>, <span class="va">tmp_vars</span><span class="op">]</span>, preProc <span class="op">=</span> <span class="cn">NULL</span>, method <span class="op">=</span> <span class="st">"glm"</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, trControl <span class="op">=</span> <span class="va">ctrl</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">pair_int_model</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">v1</span>, <span class="va">v2</span><span class="op">)</span> <span class="op">{</span> <span class="co"># Model without interactions with only two variables</span></span>
+<span>  <span class="va">tmp_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Transported"</span>, <span class="va">v1</span>, <span class="va">v2</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span>  <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">train</span><span class="op">(</span><span class="va">Transported</span> <span class="op">~</span> <span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span>, data <span class="op">=</span> <span class="va">df</span><span class="op">[</span>, <span class="va">tmp_vars</span><span class="op">]</span>, preProc <span class="op">=</span> <span class="cn">NULL</span>, method <span class="op">=</span> <span class="st">"glm"</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, trControl <span class="op">=</span> <span class="va">ctrl</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">preds_cat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CryoSleep"</span>, <span class="st">"HomePlanet"</span>, <span class="st">"Destination"</span>, <span class="st">"VIP"</span>, <span class="st">"Deck"</span>, <span class="st">"Side"</span><span class="op">)</span></span>
+<span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/combn.html">combn</a></span><span class="op">(</span><span class="va">preds_cat</span>, <span class="fl">2</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">pairs_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/combn.html">combn</a></span><span class="op">(</span><span class="va">preds_cat</span>, <span class="fl">2</span>, simplify <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ctrl</span> <span class="op">&lt;-</span> <span class="fu">trainControl</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"repeatedcv"</span>, repeats <span class="op">=</span> <span class="fl">5</span>, classProbs <span class="op">=</span> <span class="cn">TRUE</span>, summaryFunction <span class="op">=</span> <span class="va">prSummary</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_cluster</span> <span class="op">&lt;-</span> <span class="fu">makeCluster</span><span class="op">(</span><span class="fu">detectCores</span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span>, type <span class="op">=</span> <span class="st">'SOCK'</span><span class="op">)</span></span>
+<span><span class="fu">registerDoSNOW</span><span class="op">(</span><span class="va">my_cluster</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">no_int_mods</span> <span class="op">&lt;-</span> <span class="va">pairs</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">map</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">.</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">vp</span><span class="op">)</span> <span class="fu">pair_model</span><span class="op">(</span><span class="va">train5</span>, <span class="va">vp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">vp</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">int_mods</span> <span class="op">&lt;-</span> <span class="va">pairs</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">map</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">.</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">vp</span><span class="op">)</span> <span class="fu">pair_int_model</span><span class="op">(</span><span class="va">train5</span>, <span class="va">vp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">vp</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">stopCluster</span><span class="op">(</span><span class="va">my_cluster</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">no_int_acc</span> <span class="op">&lt;-</span> <span class="va">no_int_mods</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">list_flatten</span><span class="op">(</span><span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">map</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">.</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="fu">getTrainPerf</span><span class="op">(</span><span class="va">m</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>, <span class="st">"TrainPrecision"</span><span class="op">]</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">list_c</span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">diff_res</span> <span class="op">&lt;-</span> <span class="fu">map2</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">no_int_mods</span>, .y <span class="op">=</span> <span class="va">int_mods</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">m1</span>, <span class="va">m2</span><span class="op">)</span> <span class="fu">compare_models_1way</span><span class="op">(</span><span class="va">m1</span>, <span class="va">m2</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">diff_res2</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Improvement <span class="op">=</span> <span class="fu">map_dbl</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">diff_res</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">est</span><span class="op">)</span> <span class="va">est</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span>,</span>
+<span>             Pvalue <span class="op">=</span> <span class="fu">map_dbl</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">diff_res</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="va">p</span><span class="op">$</span><span class="va">p.value</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="va">.</span>, Accuracy <span class="op">=</span> <span class="va">no_int_acc</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="va">pairs_cols</span>, <span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">diff_res2</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Pvalue</span> <span class="op">&lt;=</span> <span class="fl">0.05</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">Improvement</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;            V1          V2  Improvement       Pvalue</span></span>
+<span><span class="co">#&gt; 1   CryoSleep Destination 0.2691091011 2.497225e-13</span></span>
+<span><span class="co">#&gt; 2  HomePlanet        Deck 0.1043066266 1.551826e-04</span></span>
+<span><span class="co">#&gt; 3         VIP        Deck 0.0017354191 2.474699e-02</span></span>
+<span><span class="co">#&gt; 4 Destination        Side 0.0008895738 1.775294e-03</span></span>
+<span><span class="co">#&gt;    Accuracy</span></span>
+<span><span class="co">#&gt; 1 0.6718461</span></span>
+<span><span class="co">#&gt; 2 0.6836372</span></span>
+<span><span class="co">#&gt; 3 0.5790599</span></span>
+<span><span class="co">#&gt; 4 0.5773259</span></span></code></pre></div>
+<p>The p-value test here tells us whether the effects of the interaction terms were large enough to be considered non-random. We’ve used a cutoff of 5% but without any adjustment. This can be problematic since the more tests we run with a 5% cutoff, the higher the chance of finding interactions that have an effect purely by chance (in fact, for our 15 pairs with a 5% cutoff, the chances of getting a false false positive increase from 5% to 54%). We will look at some adjustment methods for pvalues to take this into account later.</p>
+<p>For now, we can conclude that there are 3 variable pairs that seem to improve model performance compared to a model without interaction effects. One is CryoSleep and Destination but from our visual inspection earlier, the effect doesn’t seem large, especially compared to the other ones we’ve seen.</p>
+</div>
+<div id="interaction-significance-with-entire-model-and-pairwise-interactions" class="section level2" number="6.3">
+<h2>
+<span class="header-section-number">6.3</span> Interaction significance with entire model and pairwise interactions<a class="anchor" aria-label="anchor" href="#interaction-significance-with-entire-model-and-pairwise-interactions"><i class="fas fa-link"></i></a>
+</h2>
+<p>We’ve looked at variable pairs and their interactions in absence of the other variables in the previous section but how do the interactions contribute to a model with all the other variables? Do the improvements still persist or do some of them become correlated with some other variable so that their effects lessen or even introduce noise to the data?</p>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">train5</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">int_train</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">my_split</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">PassengerGroup</span><span class="op">)</span>, .fns <span class="op">=</span> <span class="va">as.integer</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">Cabin</span>, <span class="va">Name</span>, <span class="va">LastName</span>, <span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">norm_ctrl</span> <span class="op">&lt;-</span> <span class="fu">trainControl</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"repeatedcv"</span>, repeats <span class="op">=</span> <span class="fl">5</span>, classProbs <span class="op">=</span> <span class="cn">TRUE</span>, summaryFunction <span class="op">=</span> <span class="va">prSummary</span><span class="op">)</span></span>
+<span><span class="va">norm_rec</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span><span class="va">Transported</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">int_train</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># my_cluster &lt;- makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
+<span><span class="co"># registerDoSNOW(my_cluster)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># set.seed(8584)</span></span>
+<span><span class="co"># norm_m &lt;- train(norm_rec, data = int_train, method = "glm", metric = "accuracy", trControl = norm_ctrl)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># norm_m_acc &lt;- getTrainPerf(norm_m)[1, "TrainPrecision"]</span></span>
+<span><span class="co"># save(norm_m_acc, file = "GLM model accuracy performance without interactions.RData")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># preds_cat &lt;- c("CryoSleep", "HomePlanet", "Destination", "VIP", "Deck", "Side")</span></span>
+<span><span class="co"># pairs_cols &lt;- combn(preds_cat, 2, simplify = TRUE) %&gt;%</span></span>
+<span><span class="co">#   t() %&gt;%</span></span>
+<span><span class="co">#   as.data.frame()</span></span>
+<span><span class="co"># pairs &lt;- combn(preds_cat, 2, simplify = FALSE)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># int_ctrl &lt;- trainControl(method = "repeatedcv", repeats = 5, classProbs = TRUE, summaryFunction = prSummary)</span></span>
+<span><span class="co"># int_form &lt;- map(.x = pairs, .f = \(vp) formula(paste0("~", vp[1], ":", vp[2]))) # Map over pairs of vars to create int formulas</span></span>
+<span><span class="co"># int_function &lt;- function(rec, f) {</span></span>
+<span><span class="co">#   ir &lt;- rec %&gt;%</span></span>
+<span><span class="co">#     step_interact(!!f)</span></span>
+<span><span class="co">#   return(ir)</span></span>
+<span><span class="co"># }</span></span>
+<span><span class="co"># int_rec &lt;- map(.x = int_form, .f = \(form) int_function(norm_rec, f = form))</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># set.seed(8584)</span></span>
+<span><span class="co"># int_m &lt;- map(.x = int_rec, .f = \(r) train(r, data = int_train, method = "glm", metric = "accuracy", trControl = int_ctrl))</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># int_m_acc &lt;- map_dbl(.x = int_m, .f = \(m) getTrainPerf(m)[1, "TrainPrecision"])</span></span>
+<span><span class="co"># save(int_m_acc, file = "GLM model accuracy performance with interactions.RData")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># anova_res &lt;- map2(.x = list(norm_m), .y = int_m, .f = \(m1, m2) anova(m1$finalModel, m2$finalModel, test = "Chisq")[2, 'Pr(&gt;Chi)'])</span></span>
+<span><span class="co"># save(anova_res, file = "Anova without interactions.RData")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># diff_all_res &lt;- map2(.x = int_m, .y = list(norm_m), .f = \(m1, m2) compare_models_1way(m1, m2, alternative = "greater"))</span></span>
+<span><span class="co"># save(diff_all_res, file = "Comparisson between GLM model with and without interactions.RData")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># stopCluster(my_cluster)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"GLM model accuracy performance without interactions.RData"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"GLM model accuracy performance with interactions.RData"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Comparisson between GLM model with and without interactions.RData"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Anova without interactions.RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">diff_all_res2</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Improvement <span class="op">=</span> <span class="fu">map_dbl</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">diff_all_res</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">est</span><span class="op">)</span> <span class="va">est</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span>,</span>
+<span>             Resampled_Pvalue <span class="op">=</span> <span class="fu">map_dbl</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">diff_all_res</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="va">p</span><span class="op">$</span><span class="va">p.value</span><span class="op">)</span>,</span>
+<span>             Traditional_Pvalue <span class="op">=</span> <span class="fu">map_dbl</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">anova_res</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="va">p</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="va">.</span>, No_Int_Accuracy <span class="op">=</span> <span class="va">norm_m_acc</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="va">.</span>, With_Int_Accuracy <span class="op">=</span> <span class="va">int_m_acc</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bind_cols</span><span class="op">(</span><span class="va">pairs_cols</span>, <span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">diff_all_res2_adj</span> <span class="op">&lt;-</span> <span class="va">diff_all_res2</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Resampled_pvalue_FDR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html">p.adjust</a></span><span class="op">(</span><span class="va">Resampled_Pvalue</span>, method <span class="op">=</span> <span class="st">"fdr"</span><span class="op">)</span>,</span>
+<span>         Traditional_pvalue_FDR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html">p.adjust</a></span><span class="op">(</span><span class="va">Traditional_Pvalue</span>, method <span class="op">=</span> <span class="st">"fdr"</span><span class="op">)</span>,</span>
+<span>         Resampled_pvalue_Bon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html">p.adjust</a></span><span class="op">(</span><span class="va">Resampled_Pvalue</span>, method <span class="op">=</span> <span class="st">"bonferroni"</span><span class="op">)</span>,</span>
+<span>         Traditional_pvalue_Bon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html">p.adjust</a></span><span class="op">(</span><span class="va">Traditional_Pvalue</span>, method <span class="op">=</span> <span class="st">"bonferroni"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">diff_all_res2_adj</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Resampled_Pvalue</span> <span class="op">&lt;=</span> <span class="fl">0.05</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">Improvement</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          V1         V2 Improvement Resampled_Pvalue</span></span>
+<span><span class="co">#&gt; 1 CryoSleep       Deck 0.005205615     4.011748e-02</span></span>
+<span><span class="co">#&gt; 2 CryoSleep HomePlanet 0.003771645     3.656686e-15</span></span>
+<span><span class="co">#&gt;   Traditional_Pvalue No_Int_Accuracy With_Int_Accuracy</span></span>
+<span><span class="co">#&gt; 1       1.241712e-40       0.8070313         0.8049513</span></span>
+<span><span class="co">#&gt; 2       3.508244e-24       0.8070313         0.8062025</span></span>
+<span><span class="co">#&gt;   Resampled_pvalue_FDR Traditional_pvalue_FDR</span></span>
+<span><span class="co">#&gt; 1         2.499718e-01           1.862567e-39</span></span>
+<span><span class="co">#&gt; 2         5.485029e-14           2.631183e-23</span></span>
+<span><span class="co">#&gt;   Resampled_pvalue_Bon Traditional_pvalue_Bon</span></span>
+<span><span class="co">#&gt; 1         6.017622e-01           1.862567e-39</span></span>
+<span><span class="co">#&gt; 2         5.485029e-14           5.262366e-23</span></span></code></pre></div>
+<p>Now that we’ve added all variables to our models, we see that 5 interaction effects are statistically significant without any p-value adjustment if we look at the resampled p-values. Kuhn and Johnson write:
+&gt; When the interactions that were discovered were included in a broader model that contains other (perhaps correlated) predictors, their importance to the model may be diminished. (…) This might reduce the number of predictors considered important (since the residual degrees of freedom are smaller) but the discovered interactions are likely to be more reliably important to a larger model.</p>
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">diff_all_res2_adj</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Resampled_pvalue_FDR</span> <span class="op">&lt;=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">Improvement</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          V1         V2 Improvement Resampled_Pvalue</span></span>
+<span><span class="co">#&gt; 1 CryoSleep HomePlanet 0.003771645     3.656686e-15</span></span>
+<span><span class="co">#&gt;   Traditional_Pvalue No_Int_Accuracy With_Int_Accuracy</span></span>
+<span><span class="co">#&gt; 1       3.508244e-24       0.8070313         0.8062025</span></span>
+<span><span class="co">#&gt;   Resampled_pvalue_FDR Traditional_pvalue_FDR</span></span>
+<span><span class="co">#&gt; 1         5.485029e-14           2.631183e-23</span></span>
+<span><span class="co">#&gt;   Resampled_pvalue_Bon Traditional_pvalue_Bon</span></span>
+<span><span class="co">#&gt; 1         5.485029e-14           5.262366e-23</span></span>
+<span><span class="va">diff_all_res2_adj</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Resampled_pvalue_Bon</span> <span class="op">&lt;=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">Improvement</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          V1         V2 Improvement Resampled_Pvalue</span></span>
+<span><span class="co">#&gt; 1 CryoSleep HomePlanet 0.003771645     3.656686e-15</span></span>
+<span><span class="co">#&gt;   Traditional_Pvalue No_Int_Accuracy With_Int_Accuracy</span></span>
+<span><span class="co">#&gt; 1       3.508244e-24       0.8070313         0.8062025</span></span>
+<span><span class="co">#&gt;   Resampled_pvalue_FDR Traditional_pvalue_FDR</span></span>
+<span><span class="co">#&gt; 1         5.485029e-14           2.631183e-23</span></span>
+<span><span class="co">#&gt;   Resampled_pvalue_Bon Traditional_pvalue_Bon</span></span>
+<span><span class="co">#&gt; 1         5.485029e-14           5.262366e-23</span></span></code></pre></div>
+<p>If we were to adjust our values, only a single interaction effect remains that is CryoSleep and HomePlanet. The stricter adjustment is the Boneferroni which multiplies all the p-values with the number of tests (15 in our case) while a less strict adjustment is the FDR that sorts the p-values in ascending order and multiplies each one with the total number of tests divided by the p-value’s position (so that the lowest value gets multiplied by 15/1 in our case, the second lowest by 14/2 and so on). In the case of our interaction, it holds even with the stricter Bonferroni adjustment which implies that the effect is relatively strong.</p>
+<p>Does this mean that we shouldn’t include the other interaction effects in our model? No. We can still try to add the ones we’ve discovered so far to a later stage where we will evaluate which features to select.</p>
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">int_vars_very_imp</span> <span class="op">&lt;-</span> <span class="va">diff_all_res2_adj</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Resampled_pvalue_Bon</span> <span class="op">&lt;=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">V1</span>, <span class="va">V2</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>ForFormula <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">V1</span>, <span class="st">"'):starts_with('"</span>, <span class="va">V2</span>, <span class="st">"')"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>RevFormula <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">V2</span>, <span class="st">"'):starts_with('"</span>, <span class="va">V1</span>, <span class="st">"')"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">int_vars_maybe_imp</span> <span class="op">&lt;-</span> <span class="va">diff_all_res2_adj</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Resampled_Pvalue</span> <span class="op">&lt;=</span> <span class="fl">0.05</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">V1</span>, <span class="va">V2</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>ForFormula <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">V1</span>, <span class="st">"'):starts_with('"</span>, <span class="va">V2</span>, <span class="st">"')"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>RevFormula <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">V2</span>, <span class="st">"'):starts_with('"</span>, <span class="va">V1</span>, <span class="st">"')"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div id="all-interaction-effects" class="section level2" number="6.4">
+<h2>
+<span class="header-section-number">6.4</span> All interaction effects<a class="anchor" aria-label="anchor" href="#all-interaction-effects"><i class="fas fa-link"></i></a>
+</h2>
+<p>Let’s turn to a more comprehensive interaction analysis where we’ll use penalized regression to see whether any interactions prove beneficial to the model. Here we use the <code>glmnet</code>-function to first fit a model without interactions and then a model with interactions that we tune with different parameters.</p>
+<p>The <span class="math inline">\(\lambda\)</span> parameter controls the penalty that is applied to different variables to maximize accuracy while the <span class="math inline">\(\alpha\)</span> controls the weight applied to each penalty function so that <span class="math inline">\(\alpha = 1\)</span> signifies a Lasso penalty where the penalty is applied to the absolute of the regression coefficient while <span class="math inline">\(\alpha = 0\)</span> signifies a Ridge penalty where the penalty is applied to the squared coefficient. In our case, the glmnet model allows us to tune for the mix of these factors that gives the best accuracy.</p>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df_pen</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">PassengerGroupSize</span>, <span class="va">Solo</span>, <span class="va">LargeGroup</span>, <span class="va">TravelTogether</span>, <span class="fu">tidyselect</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">ends_with</a></span><span class="op">(</span><span class="st">"PerGroup"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                .fns <span class="op">=</span> <span class="va">as.integer</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">my_pen_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">df_pen</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">pen_train</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">my_pen_split</span><span class="op">)</span></span>
+<span><span class="va">my_pen_folds</span> <span class="op">&lt;-</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">pen_train</span>, v <span class="op">=</span> <span class="fl">10</span>, repeats <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">pen_train</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Roles <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Variables</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PassengerId"</span>, <span class="st">"Cabin"</span>, <span class="st">"Name"</span>, <span class="st">"LastName"</span>, <span class="st">"PassengerCount"</span>, <span class="st">"HomePlanetsPerGroup"</span><span class="op">)</span>,</span>
+<span>                         <span class="st">"id"</span>, <span class="st">"predictor"</span><span class="op">)</span>,</span>
+<span>         Roles <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="st">"Transported"</span>, <span class="st">"outcome"</span>, <span class="va">Roles</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">pen_rec</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span>x <span class="op">=</span> <span class="va">pen_train</span>, vars <span class="op">=</span> <span class="va">my_vars</span><span class="op">$</span><span class="va">Variables</span>, roles <span class="op">=</span> <span class="va">my_vars</span><span class="op">$</span><span class="va">Roles</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_zv</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">TotalSpent</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span>,</span>
+<span>                 <span class="va">TotalSpentPerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_dummy</span><span class="op">(</span><span class="fu">all_nominal_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
+<span><span class="va">pen_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span>, save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">pen_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>mixture <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">.2</span>, <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">.2</span><span class="op">)</span>, penalty <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">4</span>, <span class="op">-</span><span class="fl">1</span>, by <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">glmnet_mod</span> <span class="op">&lt;-</span> <span class="fu">logistic_reg</span><span class="op">(</span>penalty <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, mixture <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"glmnet"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># my_cluster &lt;- makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
+<span><span class="co"># registerDoSNOW(my_cluster)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># system.time({</span></span>
+<span><span class="co">#   set.seed(8584)</span></span>
+<span><span class="co">#   pen_tune &lt;- glmnet_mod %&gt;%</span></span>
+<span><span class="co">#     tune_grid(pen_rec, resamples = my_pen_folds, metrics = my_acc, control = pen_ctrl, grid = pen_grid)</span></span>
+<span><span class="co"># })</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># save(pen_tune, file = "Penalized regression without interactions.RData")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># stopCluster(my_cluster)</span></span>
+<span><span class="co"># unregister()</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Penalized regression without interactions.RData"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pen_best</span> <span class="op">&lt;-</span> <span class="fu">fit_best</span><span class="op">(</span><span class="va">pen_tune</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">pen_coef</span> <span class="op">&lt;-</span> <span class="va">pen_best</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">tidy</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">estimate</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">term</span> <span class="op">!=</span> <span class="st">"(Intercept)"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">term</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">show_best</span><span class="op">(</span><span class="va">pen_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>mixture <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">mixture</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">penalty</span>, y <span class="op">=</span> <span class="va">mean</span>, label <span class="op">=</span> <span class="va">mixture</span>, colour <span class="op">=</span> <span class="va">mixture</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_log10</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Tune results without interactions"</span>, x <span class="op">=</span> <span class="st">"Lambda penalty"</span>, y <span class="op">=</span> <span class="st">"Resample accuracy"</span>, colour <span class="op">=</span> <span class="st">"Alpha"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:pen-reg-without-int2"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/pen-reg-without-int2-1.png" alt="Tuning results for a Lasso/Ridge regression without interaction effects." width="672"><p class="caption">
+Figure 6.3: Tuning results for a Lasso/Ridge regression without interaction effects.
+</p>
+</div>
+<p>Without any interaction effects, the regression model favoured the pure Lasso regression (<span class="math inline">\(\alpha = 1\)</span>) with the penalty <span class="math inline">\(\lambda = 0.00016\)</span>. The most important variables (with the highest coefficients) were in this case Deck, VRDeck, Spa, HomePlanet and Cryosleep. The final model used 33 out of 35 variables (the two it dropped were TotalSpent and our feature TravellingSolo) and the resampled accuracy without any interactions was around 0.79.</p>
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">int_vars</span> <span class="op">&lt;-</span> <span class="va">pen_coef</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/combn.html">combn</a></span><span class="op">(</span><span class="va">.</span>, <span class="fl">2</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Map over pairs of vars to create int formula</span></span>
+<span><span class="va">int_formula</span> <span class="op">&lt;-</span> <span class="fu">map_chr</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">int_vars</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">vp</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">vp</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"'):starts_with('"</span>, <span class="va">vp</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="st">"')"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">str_flatten</span><span class="op">(</span><span class="va">.</span>, collapse <span class="op">=</span> <span class="st">"+"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"~"</span>, <span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/formula.html">as.formula</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">pen_int_rec</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span>x <span class="op">=</span> <span class="va">pen_train</span>, vars <span class="op">=</span> <span class="va">my_vars</span><span class="op">$</span><span class="va">Variables</span>, roles <span class="op">=</span> <span class="va">my_vars</span><span class="op">$</span><span class="va">Roles</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_dummy</span><span class="op">(</span><span class="fu">all_nominal_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_interact</span><span class="op">(</span><span class="va">int_formula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_zv</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_nzv</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">TotalSpent</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span>,</span>
+<span>                 <span class="va">TotalSpentPerGroup</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># my_cluster &lt;- makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
+<span><span class="co"># registerDoSNOW(my_cluster)</span></span>
+<span><span class="co"># clusterExport(cl = my_cluster, "int_formula")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># set.seed(8584)</span></span>
+<span><span class="co"># pen_int_tune &lt;- glmnet_mod %&gt;%</span></span>
+<span><span class="co">#   tune_grid(pen_int_rec, resamples = my_pen_folds, metrics = my_acc, control = pen_ctrl, grid = pen_grid)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># save(pen_int_tune, file = "Penalized regression with interactions.RData")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># stopCluster(my_cluster)</span></span>
+<span><span class="co"># unregister()</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Penalized regression with interactions.RData"</span><span class="op">)</span></span></code></pre></div>
+<p>If we look at the best coefficients from the penalized regression model, we several.</p>
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pen_int_best</span> <span class="op">&lt;-</span> <span class="fu">fit_best</span><span class="op">(</span><span class="va">pen_int_tune</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">pen_int_coef</span> <span class="op">&lt;-</span> <span class="va">pen_int_best</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">tidy</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">show_best</span><span class="op">(</span><span class="va">pen_int_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>mixture <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">mixture</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">penalty</span>, y <span class="op">=</span> <span class="va">mean</span>, label <span class="op">=</span> <span class="va">mixture</span>, colour <span class="op">=</span> <span class="va">mixture</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_log10</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Tune results with interactions"</span>, x <span class="op">=</span> <span class="st">"Lambda penalty"</span>, y <span class="op">=</span> <span class="st">"Resample accuracy"</span>, colour <span class="op">=</span> <span class="st">"Alpha"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:pen-reg-with-int3"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/pen-reg-with-int3-1.png" alt="Tuning results for a Lasso/Ridge regression with interaction effects" width="672"><p class="caption">
+Figure 6.4: Tuning results for a Lasso/Ridge regression with interaction effects
+</p>
+</div>
+<p>The regression model still favours the pure Lasso (<span class="math inline">\(\alpha = 1\)</span>) regression but with a higher penalty <span class="math inline">\(\lambda = 0.0025\)</span>. Out of 348 total variables with interaction effects, it selected 107 for the best accuracy which was slightly above 0.80.</p>
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pen_int_top</span> <span class="op">&lt;-</span> <span class="va">pen_int_coef</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">penalty</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">estimate</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">estimate</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">slice</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">pen_int_top</span></span>
+<span><span class="co">#&gt; # A tibble: 10 × 2</span></span>
+<span><span class="co">#&gt;    term                               estimate</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;                                 &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 CryoSleep_True_x_Deck_F               2.31 </span></span>
+<span><span class="co">#&gt;  2 HomePlanet_Europa_x_CryoSleep_True    1.95 </span></span>
+<span><span class="co">#&gt;  3 HomePlanet_Mars_x_Deck_F              1.17 </span></span>
+<span><span class="co">#&gt;  4 LastNamesPerGroup_x_Deck_C            0.977</span></span>
+<span><span class="co">#&gt;  5 Destination_TRAPPIST.1e_x_Deck_E     -0.841</span></span>
+<span><span class="co">#&gt;  6 CryoSleep_True_x_Deck_B               0.825</span></span>
+<span><span class="co">#&gt;  7 CryoSleep_True                        0.558</span></span>
+<span><span class="co">#&gt;  8 Deck_B_x_Side_S                       0.554</span></span>
+<span><span class="co">#&gt;  9 HomePlanet_Mars_x_CryoSleep_True      0.518</span></span>
+<span><span class="co">#&gt; 10 HomePlanet_Europa_x_Side_S            0.444</span></span></code></pre></div>
+<p>The most important variables were almost all interaction effects such as CryoSleep &amp; Deck, HomePlanet &amp; CryoSleep and so on. If we go back to our visualizations, we see that Deck = F does seem to have an effect when CryoSleep changes from False to True and this is true for the change between homeplanets, as well.</p>
+<p>The original variables that made the top ten list were VRDeck, Spa and Cryosleep. From our smoothed graphs, we saw that any credits spent on VRDeck significantly reduced the chances of being transported so this also makes sense.</p>
+<p>Let’s add these discoveries to our important variable list.</p>
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">int_vars_very_imp2</span> <span class="op">&lt;-</span> <span class="va">pen_int_top</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">term</span>, <span class="st">"_x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>V1 <span class="op">=</span> <span class="fu">str_split_i</span><span class="op">(</span><span class="va">term</span>, <span class="st">"_"</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>         V2 <span class="op">=</span> <span class="fu">str_split_i</span><span class="op">(</span><span class="va">term</span>, <span class="st">"_"</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>         ForFormula <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">V1</span>, <span class="st">"'):starts_with('"</span>, <span class="va">V2</span>, <span class="st">"')"</span><span class="op">)</span>,</span>
+<span>         RevFormula <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">V2</span>, <span class="st">"'):starts_with('"</span>, <span class="va">V1</span>, <span class="st">"')"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">V1</span>, <span class="va">V2</span>, <span class="va">ForFormula</span>, <span class="va">RevFormula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bind_rows</span><span class="op">(</span><span class="va">int_vars_very_imp</span>, <span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">int_vars_very_imp2</span></span>
+<span><span class="co">#&gt;                   V1         V2</span></span>
+<span><span class="co">#&gt; 1          CryoSleep HomePlanet</span></span>
+<span><span class="co">#&gt; 2          CryoSleep       Deck</span></span>
+<span><span class="co">#&gt; 3         HomePlanet  CryoSleep</span></span>
+<span><span class="co">#&gt; 4         HomePlanet       Deck</span></span>
+<span><span class="co">#&gt; 5  LastNamesPerGroup       Deck</span></span>
+<span><span class="co">#&gt; 6        Destination       Deck</span></span>
+<span><span class="co">#&gt; 7          CryoSleep       Deck</span></span>
+<span><span class="co">#&gt; 8               Deck       Side</span></span>
+<span><span class="co">#&gt; 9         HomePlanet  CryoSleep</span></span>
+<span><span class="co">#&gt; 10        HomePlanet       Side</span></span>
+<span><span class="co">#&gt;                                              ForFormula</span></span>
+<span><span class="co">#&gt; 1    starts_with('CryoSleep'):starts_with('HomePlanet')</span></span>
+<span><span class="co">#&gt; 2          starts_with('CryoSleep'):starts_with('Deck')</span></span>
+<span><span class="co">#&gt; 3    starts_with('HomePlanet'):starts_with('CryoSleep')</span></span>
+<span><span class="co">#&gt; 4         starts_with('HomePlanet'):starts_with('Deck')</span></span>
+<span><span class="co">#&gt; 5  starts_with('LastNamesPerGroup'):starts_with('Deck')</span></span>
+<span><span class="co">#&gt; 6        starts_with('Destination'):starts_with('Deck')</span></span>
+<span><span class="co">#&gt; 7          starts_with('CryoSleep'):starts_with('Deck')</span></span>
+<span><span class="co">#&gt; 8               starts_with('Deck'):starts_with('Side')</span></span>
+<span><span class="co">#&gt; 9    starts_with('HomePlanet'):starts_with('CryoSleep')</span></span>
+<span><span class="co">#&gt; 10        starts_with('HomePlanet'):starts_with('Side')</span></span>
+<span><span class="co">#&gt;                                              RevFormula</span></span>
+<span><span class="co">#&gt; 1    starts_with('HomePlanet'):starts_with('CryoSleep')</span></span>
+<span><span class="co">#&gt; 2          starts_with('Deck'):starts_with('CryoSleep')</span></span>
+<span><span class="co">#&gt; 3    starts_with('CryoSleep'):starts_with('HomePlanet')</span></span>
+<span><span class="co">#&gt; 4         starts_with('Deck'):starts_with('HomePlanet')</span></span>
+<span><span class="co">#&gt; 5  starts_with('Deck'):starts_with('LastNamesPerGroup')</span></span>
+<span><span class="co">#&gt; 6        starts_with('Deck'):starts_with('Destination')</span></span>
+<span><span class="co">#&gt; 7          starts_with('Deck'):starts_with('CryoSleep')</span></span>
+<span><span class="co">#&gt; 8               starts_with('Side'):starts_with('Deck')</span></span>
+<span><span class="co">#&gt; 9    starts_with('CryoSleep'):starts_with('HomePlanet')</span></span>
+<span><span class="co">#&gt; 10        starts_with('Side'):starts_with('HomePlanet')</span></span></code></pre></div>
+</div>
+<div id="tree-model-interactions" class="section level2" number="6.5">
+<h2>
+<span class="header-section-number">6.5</span> Tree model interactions<a class="anchor" aria-label="anchor" href="#tree-model-interactions"><i class="fas fa-link"></i></a>
+</h2>
+<p>Max and Kuhn also offer another method for discovering interaction effects by the use of a tree-based model like random forest. The algorithm doesn’t evaluate the effects of interactions but it does rank the original variables based on their importance which can be used to model interaction effects in a second stage.</p>
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df_tree</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">PassengerGroupSize</span>, <span class="va">Solo</span>, <span class="va">LargeGroup</span>, <span class="va">TravelTogether</span>, <span class="fu">tidyselect</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">ends_with</a></span><span class="op">(</span><span class="st">"PerGroup"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                .fns <span class="op">=</span> <span class="va">as.integer</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">my_tree_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">df_tree</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">tree_train</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">my_tree_split</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">tree_train</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Roles <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Variables</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PassengerId"</span>, <span class="st">"Cabin"</span>, <span class="st">"Name"</span>, <span class="st">"LastName"</span>, <span class="st">"PassengerCount"</span>, <span class="st">"HomePlanetsPerGroup"</span><span class="op">)</span>,</span>
+<span>                         <span class="st">"id"</span>, <span class="st">"predictor"</span><span class="op">)</span>,</span>
+<span>         Roles <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="st">"Transported"</span>, <span class="st">"outcome"</span>, <span class="va">Roles</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tree_rec</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span>x <span class="op">=</span> <span class="va">tree_train</span>, vars <span class="op">=</span> <span class="va">my_vars</span><span class="op">$</span><span class="va">Variables</span>, roles <span class="op">=</span> <span class="va">my_vars</span><span class="op">$</span><span class="va">Roles</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_zv</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">TotalSpent</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span>,</span>
+<span>                 <span class="va">TotalSpentPerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_dummy</span><span class="op">(</span><span class="fu">all_nominal_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tree_baked</span> <span class="op">&lt;-</span> <span class="va">tree_rec</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">prep</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bake</span><span class="op">(</span>new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Cabin</span>, <span class="va">Name</span>, <span class="va">LastName</span>, <span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># rf_mod &lt;- ranger::ranger(Transported ~ . -PassengerId, data = tree_baked, num.trees = 1000, importance = "impurity", </span></span>
+<span><span class="co">#                  num.threads = detectCores() - 1, seed = 8584)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># save(rf_mod, file = "Ranger tree model variable importance.RData")</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Ranger tree model variable importance.RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rf_imp</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>Predictor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">rf_mod</span><span class="op">$</span><span class="va">variable.importance</span><span class="op">)</span>,</span>
+<span>                 Importance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html">unname</a></span><span class="op">(</span><span class="va">rf_mod</span><span class="op">$</span><span class="va">variable.importance</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span><span class="va">rf_imp</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">Predictor</span>, <span class="va">Importance</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">Importance</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_bar</span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">coord_flip</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">xlab</span><span class="op">(</span><span class="st">""</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:tree-based-var-imp2"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/tree-based-var-imp2-1.png" alt="Variable importance based on a the ranger tree-model" width="672"><p class="caption">
+Figure 6.5: Variable importance based on a the ranger tree-model
+</p>
+</div>
+<p>The tree model heavily favours the amenity variables as well as some other variables that our penalized model didn’t consider important enough. We saw, however, from our numerical analysis, that many of the amenities had large effects on the response and so perhaps their interactions do, as well? Based on the ranking from the tree model, as well as our exploration from earlier, let’s add additional interactions that might be interesting to explore.</p>
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tree_int_vars</span> <span class="op">&lt;-</span> <span class="va">rf_imp</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Importance</span> <span class="op">&gt;</span> <span class="fl">150</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">Predictor</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/combn.html">combn</a></span><span class="op">(</span><span class="va">.</span>, <span class="fl">2</span>, simplify <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>V1 <span class="op">=</span> <span class="fu">str_split_i</span><span class="op">(</span><span class="va">V1</span>, <span class="st">"_"</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>         V2 <span class="op">=</span> <span class="fu">str_split_i</span><span class="op">(</span><span class="va">V2</span>, <span class="st">"_"</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>         ForFormula <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">V1</span>, <span class="st">"'):starts_with('"</span>, <span class="va">V2</span>, <span class="st">"')"</span><span class="op">)</span>,</span>
+<span>         RevFormula <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">V2</span>, <span class="st">"'):starts_with('"</span>, <span class="va">V1</span>, <span class="st">"')"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="exploration-of-numerical-variables.html"><span class="header-section-number">5</span> Exploration of numerical variables</a></div>
+<div class="next"><a href="feature-selection-and-elimination.html"><span class="header-section-number">7</span> Feature selection and elimination</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#interactions"><span class="header-section-number">6</span> Interactions</a></li>
+<li><a class="nav-link" href="#visual-exploration-of-interactions"><span class="header-section-number">6.1</span> Visual exploration of interactions</a></li>
+<li><a class="nav-link" href="#interaction-significance-with-only-variable-pairs-and-their-interactions"><span class="header-section-number">6.2</span> Interaction significance with only variable pairs and their interactions</a></li>
+<li><a class="nav-link" href="#interaction-significance-with-entire-model-and-pairwise-interactions"><span class="header-section-number">6.3</span> Interaction significance with entire model and pairwise interactions</a></li>
+<li><a class="nav-link" href="#all-interaction-effects"><span class="header-section-number">6.4</span> All interaction effects</a></li>
+<li><a class="nav-link" href="#tree-model-interactions"><span class="header-section-number">6.5</span> Tree model interactions</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/blob/master/05-interactions.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/edit/master/05-interactions.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-25.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>

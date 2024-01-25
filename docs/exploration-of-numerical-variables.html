@@ -18,7 +18,11 @@
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
 <script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
-<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script><script src="libs/jquery-migrate-3.1.0/jquery-migrate-3.1.0.min.js"></script><link href="libs/slick-1.8.1/slick/slick.css" rel="stylesheet">
+<link href="libs/slick-1.8.1/slick/slick-theme.css" rel="stylesheet">
+<script src="libs/slick-1.8.1/slick/slick.min.js"></script><script src="libs/css-resize-1.2.1/ResizeSensor.js"></script><script src="libs/css-resize-1.2.1/ElementQueries.js"></script><link href="libs/slickR-0.0.2/slick.css" rel="stylesheet">
+<link href="libs/slickR-0.0.2/slick-theme.css" rel="stylesheet">
+<script src="libs/slickR-0.0.2/slickR.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
     
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   </style>
@@ -49,9 +53,9 @@
 <li><a class="" href="handle-missing-data.html"><span class="header-section-number">3</span> Handle missing data</a></li>
 <li><a class="" href="exploration-of-categorical-variables.html"><span class="header-section-number">4</span> Exploration of categorical variables</a></li>
 <li><a class="active" href="exploration-of-numerical-variables.html"><span class="header-section-number">5</span> Exploration of numerical variables</a></li>
-<li><a class="" href="blocks.html"><span class="header-section-number">6</span> Blocks</a></li>
-<li><a class="" href="sharing-your-book.html"><span class="header-section-number">7</span> Sharing your book</a></li>
-<li><a class="" href="references.html">References</a></li>
+<li><a class="" href="interactions.html"><span class="header-section-number">6</span> Interactions</a></li>
+<li><a class="" href="feature-selection-and-elimination.html"><span class="header-section-number">7</span> Feature selection and elimination</a></li>
+<li><a class="" href="final-model-exploration.html"><span class="header-section-number">8</span> Final model exploration</a></li>
 </ul>
 
         <div class="book-extra">
@@ -69,24 +73,58 @@
 <span class="header-section-number">5.1</span> Name variable<a class="anchor" aria-label="anchor" href="#name-variable"><i class="fas fa-link"></i></a>
 </h2>
 <p>First, however, let’s transform the name variable into numerical values. We can assume that there is no rank order of the names based on the fact that the variable distribution is uniform (see <a href="early-data-exploration.html#fig:frequencies">2.1</a>). Here I use a very simple encoding to convert the names into numbers.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">encode_cat_to_numeric</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">x</span>, ordered <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/class.html">unclass</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="va">train6</span> <span class="op">&lt;-</span> <span class="va">train5</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">add_name_features</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>LastNameAsNumber <span class="op">=</span> <span class="fu">encode_cat_to_numeric</span><span class="op">(</span><span class="va">LastName</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">add_count</span><span class="op">(</span>x <span class="op">=</span> <span class="va">.</span>, <span class="va">LastNameAsNumber</span>, name <span class="op">=</span> <span class="st">"LastNameCount"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">PassengerGroup</span>, <span class="va">LastNameAsNumber</span><span class="op">)</span>, .fns <span class="op">=</span> <span class="va">as.integer</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">PassengerGroup</span>, <span class="va">LastNameAsNumber</span><span class="op">)</span>, .fns <span class="op">=</span> <span class="va">as.integer</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">train6</span> <span class="op">&lt;-</span> <span class="fu">add_name_features</span><span class="op">(</span><span class="va">train5</span><span class="op">)</span></span></code></pre></div>
+<p>Let’s also explore our count values for names visually to see how they look against the response.</p>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df1</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Transported</span>, <span class="va">LastNamesPerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">LastNamesPerGroup</span>, <span class="va">Transported</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>count <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>perc <span class="op">=</span> <span class="va">count</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">g1</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">df1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_bar</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">LastNamesPerGroup</span>, y <span class="op">=</span> <span class="va">perc</span><span class="op">*</span><span class="fl">100</span>, fill <span class="op">=</span> <span class="va">Transported</span><span class="op">)</span>, stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Percent transported"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">df2</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Transported</span>, <span class="va">LastNameCount</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">LastNameCount</span>, <span class="va">Transported</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>count <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>perc <span class="op">=</span> <span class="va">count</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">g2</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">df2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_bar</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">LastNameCount</span>, y <span class="op">=</span> <span class="va">perc</span><span class="op">*</span><span class="fl">100</span>, fill <span class="op">=</span> <span class="va">Transported</span><span class="op">)</span>, stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Percent transported"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">g1</span> <span class="op">+</span> <span class="va">g2</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>guides <span class="op">=</span> <span class="st">"collect"</span>, axis_titles <span class="op">=</span> <span class="st">"collect_y"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:explore-name-counts"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/explore-name-counts-1.png" alt="Exploration of the counts of the LastName variable where LastNameCount is the number of passengers in total that share the same last name while LastNamesPerGroup is the number of passengers that share last name within a group." width="672"><p class="caption">
+Figure 5.1: Exploration of the counts of the LastName variable where LastNameCount is the number of passengers in total that share the same last name while LastNamesPerGroup is the number of passengers that share last name within a group.
+</p>
+</div>
+<p>There does seem to be some difference which is good news since it allows us to get some use of the name variable that in its original form didn’t seem to have much variance. Hopefully these features will also prove to be beneficial.</p>
 </div>
 <div id="age-cabinnumber-and-lastnames" class="section level2" number="5.2">
 <h2>
 <span class="header-section-number">5.2</span> Age, CabinNumber and LastNames<a class="anchor" aria-label="anchor" href="#age-cabinnumber-and-lastnames"><i class="fas fa-link"></i></a>
 </h2>
 <p>Kuhn and Johnson propose a smoothing function using <code>gam</code> from the <code>mgcv</code>-package to fit generalized additive models for numeric variables against the response. I’ve modified their function somewhat.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_smooth_plot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">d</span>, <span class="va">v</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">TransportedRate</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">Transported</span> <span class="op">==</span> <span class="st">"True"</span><span class="op">)</span></span>
 <span>  </span>
@@ -97,7 +135,7 @@
 <span>  <span class="va">my_df_small</span> <span class="op">&lt;-</span> <span class="va">my_df</span> <span class="op">%&gt;%</span></span>
 <span>    <span class="fu">distinct</span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="va">gam_model</span> <span class="op">&lt;-</span> <span class="fu">gam</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"Transported"</span>, <span class="st">"~ s("</span>, <span class="va">v</span>, <span class="st">")"</span><span class="op">)</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">my_df</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">gam_model</span> <span class="op">&lt;-</span> <span class="fu">mgcv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html">gam</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/formula.html">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"Transported"</span>, <span class="st">"~ s("</span>, <span class="va">v</span>, <span class="st">")"</span><span class="op">)</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">my_df</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span> </span>
 <span>  <span class="va">my_df_small</span> <span class="op">&lt;-</span> <span class="va">my_df_small</span> <span class="op">%&gt;%</span></span>
 <span>    <span class="fu">mutate</span><span class="op">(</span></span>
@@ -113,96 +151,124 @@
 <span>  <span class="va">g</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">my_df_small</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>        <span class="fu">geom_line</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="va">probability</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>        <span class="fu">geom_ribbon</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">lower</span>, ymax <span class="op">=</span> <span class="va">upper</span><span class="op">)</span>, fill <span class="op">=</span> <span class="st">"grey"</span>, alpha <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>        <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="va">TransportedRate</span>, col <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">.35</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>  <span class="op">+</span> </span>
+<span>        <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="va">TransportedRate</span>, col <span class="op">=</span> <span class="st">"red"</span>, alpha <span class="op">=</span> <span class="fl">.8</span>, lty <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>  <span class="op">+</span> </span>
 <span>        <span class="fu">scale_y_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0.1</span><span class="op">)</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>        <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="va">v</span>, title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"Smoothed"</span>, <span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="va">train6</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Age</span>, <span class="va">PassengerGroup</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">map</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">.</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">varz</span><span class="op">)</span> <span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span>, <span class="va">varz</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span>, <span class="st">"Age"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<span style="display:block;" id="fig:smooth-1"></span>
-<img src="SpaceshipTitanicBook_files/figure-html/smooth-1.png" alt="Smoothed plots that show probability distribution of continuous variables against the average response" width="672"><p class="caption">
-Figure 5.1: Smoothed plots that show probability distribution of continuous variables against the average response
+<span style="display:block;" id="fig:smooth-age"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/smooth-age-1.png" alt="General additive model (GAM) plots for Age with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set." width="672"><p class="caption">
+Figure 5.2: General additive model (GAM) plots for Age with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
 </p>
 </div>
+<p>Passengers younger that 15 years of age seem to have a higher chance to be transported, with the effect being more significant the younger the passenger is. For the rest of the passengers, age doesn’t seem to matter much.</p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span>, <span class="st">"PassengerGroup"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<span style="display:block;" id="fig:smooth-2"></span>
-<img src="SpaceshipTitanicBook_files/figure-html/smooth-2.png" alt="Smoothed plots that show probability distribution of continuous variables against the average response" width="672"><p class="caption">
-Figure 5.2: Smoothed plots that show probability distribution of continuous variables against the average response
+<span style="display:block;" id="fig:smooth-passengergroup"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/smooth-passengergroup-1.png" alt="General additive model (GAM) plots for PassengerGroup with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set." width="672"><p class="caption">
+Figure 5.3: General additive model (GAM) plots for PassengerGroup with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
 </p>
 </div>
+<p>Passenger groups seem to have some effect although the variable is correlated with CabinNumber which, in turn, is likely correlated to Deck that might explain the differences</p>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span>, <span class="st">"CabinNumber"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<span style="display:block;" id="fig:smooth-3"></span>
-<img src="SpaceshipTitanicBook_files/figure-html/smooth-3.png" alt="Smoothed plots that show probability distribution of continuous variables against the average response" width="672"><p class="caption">
-Figure 5.3: Smoothed plots that show probability distribution of continuous variables against the average response
+<span style="display:block;" id="fig:smooth-cabinnumber"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/smooth-cabinnumber-1.png" alt="General additive model (GAM) plots for CabinNumber with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set." width="672"><p class="caption">
+Figure 5.4: General additive model (GAM) plots for CabinNumber with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
 </p>
 </div>
+<p>CabinNumber shows some effect but if we look at the Deck for the numbers that seem to make the biggest difference, we see that all those cabins are in decks F and G.</p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span>, <span class="st">"LastNameAsNumber"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<span style="display:block;" id="fig:smooth-4"></span>
-<img src="SpaceshipTitanicBook_files/figure-html/smooth-4.png" alt="Smoothed plots that show probability distribution of continuous variables against the average response" width="672"><p class="caption">
-Figure 5.4: Smoothed plots that show probability distribution of continuous variables against the average response
+<span style="display:block;" id="fig:smooth-lastname"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/smooth-lastname-1.png" alt="General additive model (GAM) plots for LastNameAsNumber with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set." width="672"><p class="caption">
+Figure 5.5: General additive model (GAM) plots for LastNameAsNumber with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
 </p>
 </div>
+<p>LastName seemes to have no effect.</p>
 </div>
 <div id="amenities" class="section level2" number="5.3">
 <h2>
 <span class="header-section-number">5.3</span> Amenities<a class="anchor" aria-label="anchor" href="#amenities"><i class="fas fa-link"></i></a>
 </h2>
 <p>The amenity variables that are zero might reflect the fact that the passenger is in cryosleep so let’s filter that out.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">train6</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">TotalSpent</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">map</span><span class="op">(</span>.x <span class="op">=</span> <span class="va">.</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">varz</span><span class="op">)</span> <span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span>, <span class="va">varz</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [[1]]</span></span></code></pre></div>
-<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-1.png" width="672"></div>
-<pre><code>#&gt; 
-#&gt; [[2]]</code></pre>
-<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-2.png" width="672"></div>
-<pre><code>#&gt; 
-#&gt; [[3]]</code></pre>
-<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-3.png" width="672"></div>
-<pre><code>#&gt; 
-#&gt; [[4]]</code></pre>
-<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-4.png" width="672"></div>
-<pre><code>#&gt; 
-#&gt; [[5]]</code></pre>
-<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-5.png" width="672"></div>
-<pre><code>#&gt; 
-#&gt; [[6]]</code></pre>
-<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/amenities-6.png" width="672"></div>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"RoomService"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:roomservice"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/roomservice-1.png" alt="General additive model (GAM) plots for RoomService with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set." width="672"><p class="caption">
+Figure 5.6: General additive model (GAM) plots for RoomService with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
+</p>
+</div>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"VRDeck"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:vrdeck"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/vrdeck-1.png" alt="General additive model (GAM) plots for VRDeck with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set." width="672"><p class="caption">
+Figure 5.7: General additive model (GAM) plots for VRDeck with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
+</p>
+</div>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"Spa"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:spa"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/spa-1.png" alt="General additive model (GAM) plots for Spa with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set." width="672"><p class="caption">
+Figure 5.8: General additive model (GAM) plots for Spa with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
+</p>
+</div>
+<p>Passengers who spent credits on RoomService, Spa and VRDeck seem to have been less likely to be transported.</p>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"ShoppingMall"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:shoppingmall"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/shoppingmall-1.png" alt="General additive model (GAM) plots for ShoppingMall with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set." width="672"><p class="caption">
+Figure 5.9: General additive model (GAM) plots for ShoppingMall with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
+</p>
+</div>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"FoodCourt"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:foodcourt"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/foodcourt-1.png" alt="General additive model (GAM) plots for FoodCourt with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set." width="672"><p class="caption">
+Figure 5.10: General additive model (GAM) plots for FoodCourt with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
+</p>
+</div>
+<p>Passengers who spent credits at the FoodCourt or ShoppingMall seem instead to have been more likely to be transported</p>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"TotalSpent"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:totalspent"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/totalspent-1.png" alt="General additive model (GAM) plots for TotalSpent with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set." width="672"><p class="caption">
+Figure 5.11: General additive model (GAM) plots for TotalSpent with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
+</p>
+</div>
+<p>Our TotalSpent variable probably smooths out the effects of individual amenities and might reduce model performance. We should be prepared to remove it from our models.</p>
 </div>
 <div id="correlations" class="section level2" number="5.4">
 <h2>
 <span class="header-section-number">5.4</span> Correlations<a class="anchor" aria-label="anchor" href="#correlations"><i class="fas fa-link"></i></a>
 </h2>
-<p>Finally, we can see if our new numerical variables correlate highly with some others.</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<p>We can see if our new numerical variables correlate highly with some others.</p>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train6</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">plot_correlation</span><span class="op">(</span><span class="va">.</span>, type <span class="op">=</span> <span class="st">"continuous"</span>, geom_text_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, </span>
-<span>                   theme_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>text <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>, axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu">DataExplorer</span><span class="fu">::</span><span class="fu"><a href="http://boxuancui.github.io/DataExplorer/reference/plot_correlation.html">plot_correlation</a></span><span class="op">(</span><span class="va">.</span>, type <span class="op">=</span> <span class="st">"continuous"</span>, geom_text_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, </span>
+<span>                   theme_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>text <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">15</span><span class="op">)</span>, axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/correlation-numeric-1.png" width="672"></div>
-<p>We can note several interesting things:</p>
-<ol style="list-style-type: decimal">
-<li><p>Passengers younger that 15 years of age seem to have a higher chance to be transported, with the effect being more significant the younger the passenger is. For the rest of the passengers, age doesn’t seem to matter much.</p></li>
-<li><p>Passenger groups seem to have some effect although the variable is correlated with CabinNumber which, in turn, is likely correlated to Deck that might explain the differences</p></li>
-<li><p>CabinNumber shows some effect but if we look at the Deck for the numbers that seem to make the biggest difference, we see that all those cabins are in decks F and G.</p></li>
-<li><p>LastName seemes to have no effect.</p></li>
-<li><p>Passengers who spent credits on RoomService, Spa and VRDeck seem to have been less likely to be transported while the opposite is true for those that spent credits at the FoodCourt or ShoppingMall.</p></li>
-<li><p>Our TotalSpent variable probably smooths out the effects of individual amenities and might reduce model performance. We should be prepared to remove it from our models.</p></li>
-</ol>
+<p>PassengerGroup and CabinNumber are relatively correlated which could cause problems with some models that are sensitive to correlated variables. We should consider using one of of each variable and see which one gives better results.</p>
+
 </div>
 </div>
   <div class="chapter-nav">
 <div class="prev"><a href="exploration-of-categorical-variables.html"><span class="header-section-number">4</span> Exploration of categorical variables</a></div>
-<div class="next"><a href="blocks.html"><span class="header-section-number">6</span> Blocks</a></div>
+<div class="next"><a href="interactions.html"><span class="header-section-number">6</span> Interactions</a></div>
 </div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
     <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
       <ul class="nav navbar-nav">
@@ -228,7 +294,7 @@ Figure 5.4: Smoothed plots that show probability distribution of continuous vari
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-16.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-25.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
