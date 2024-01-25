@@ -3,7 +3,7 @@
 The traditional statistical test between two categorical values is the chi\^2 test, which compares the actual frequencies of each combination of categorical variables to a perfectly independent frequency (a frequency that would occur if each combination had the same ratio as the overall ratio for one variable). The null hypothesis for the chi\^2 test is that there is no relationship between the variables.
 
 I use a set of helper functions to iterate over the different categorical variables and then summarize the results in tables.
-```{r chi-tests, warning = FALSE}
+```{r chi-unsignificant, warning = FALSE}
 my_chisq_test <- function(var1, var2) { # Test and extract Chi^2 statistics
   res <- rstatix::chisq_test(x = var1, y = var2)
   ex_res <- c(chi = res$statistic, pval = res$p)
@@ -26,7 +26,11 @@ chi_sqr_res2 %>%
   filter(p_value > 0.05 & Var1 != Var2) %>%
   distinct(chi_sqr, .keep_all = TRUE) %>%
   arrange(as.character(Var1), desc(p_value))
+```
 
+If we use the typical 95% confidence interval as a cut-off point for comparison, we can see that only two pairs of variables have p-values higher than 5%, which means that these variables are independent of each other. All other variables are related in some way, as can be seen below.
+
+```{r chi-significant}
 signif_chi <- chi_sqr_res2 %>%
   select(Var1, Var2, chi_sqr, p_value) %>%
   filter(p_value <= 0.05 & Var1 != Var2) %>%
@@ -36,24 +40,34 @@ signif_chi <- chi_sqr_res2 %>%
 signif_chi
 ```
 
-If we use the typical 95% confidence interval as a cut-off point for comparison, we can see that only two pairs of variables have p-values higher than 5%, which means that these variables are independent of each other. All other variables are related in some way. One way we can explore this further is to visualize the levels of the categorical variables in mosaic plots.
+One way we can explore this further is to visualize the levels of the categorical variables in mosaic plots.
 
 ## Mosaic plots
 Here I use a custom function from Kuhn's and Johnsson's code to improve the default mosaic plot and plot the categorical variables against each other with the help of contigency tables for each pair. I've left out LastName since it has too many levels.
-```{r mosaic, fig.cap = "Mosaic plots to visualize the relationships between categorical variables"}
-my_mosaic <- function(dtab) { 
-  mosaic(dtab, pop = FALSE, highlighting = TRUE, highlighting_fill = rainbow_hcl, margins = unit(c(6, 1, 1, 8), "lines"),
-         labeling = labeling_border(rot_labels = c(90, 0, 0, 0), just_labels = c("left", "right", "center",  "right"),
-                                    offset_varnames = unit(c(3, 1, 1, 4), "lines")), 
-         keep_aspect_ratio = FALSE)
+```{r mosaic, message = FALSE, cache=TRUE, fig.cap = "Mosaic plots to visualize the relationships between categorical variables"}
+my_mosaic <- function(dtab, i) {
+  png(filename = paste0("Mosaic", i, ".png"))
+  vcd::mosaic(dtab, pop = FALSE, highlighting = TRUE, highlighting_fill = colorspace::rainbow_hcl,
+            margins = unit(c(6, 1, 1, 8), "lines"),
+            labeling = vcd::labeling_border(rot_labels = c(90, 0, 0, 0), just_labels = c("left", "right", "center", "right"),
+                                       offset_varnames = unit(c(3, 1, 1, 4), "lines")), keep_aspect_ratio = FALSE)
+  dev.off()
 }
 
-# Produces too many plots at once but it's useful to see all interactions at once
-# train4 %>% 
-#   select(HomePlanet, Destination, Deck, Side, VIP, CryoSleep, Transported) %>%
-#   mutate(walk(.x = across(everything()), .f = \(x) walk(.x = across(everything()), .f = \(y) my_mosaic(base::table(x, y)))))
+my_tables <- list(
+  base::table(HomePlanet = train4$HomePlanet, Transported = train4$Transported),
+  base::table(Destination = train4$Destination, Transported = train4$Transported),
+  base::table(Deck = train4$Deck, Transported = train4$Transported),
+  base::table(Side = train4$Side, Transported = train4$Transported),
+  base::table(VIP = train4$VIP, Transported = train4$Transported),
+  base::table(CryoSleep = train4$CryoSleep, Transported = train4$Transported)
+)
 
-my_mosaic(base::table(Destination = train4$Destination, Deck = train4$Deck))
+mosaic_plots <- map2(.x = my_tables, .y = 1:length(my_tables), .f = \(t, it) my_mosaic(dtab = t, i = it))
+
+plotsToSVG <- map(1:length(mosaic_plots), .f = \(i) paste0("Mosaic", i, ".png"))
+slickR::slickR(plotsToSVG, height = "480px", width = "672px") +
+  slickR::settings(slidesToShow = 1)
 ```
 
 If we take a look at some of the variable pairs, we can see that the height of the coloured bars changes when we move across horisontally. For example, the share of passengers that are in cryosleep changes with the deck and since the p-value from the Chi\^2 test is very low, the change is significant. This is harder to see visually for CryoSleep and Side and this is also reflected in the p-value that is almost at our threshold of 5%. 
@@ -64,24 +78,33 @@ We also see that destinations are clearly connected to homeplanets which we migh
 Correspondence analysis uses the residuals from the contingency table of two variables compared to the frequency table the variables would've had if they were unrelated to 
 Kuhn and Johnson also recommend the `CA` function from the `FactoMineR`-package that performs a correspondence analysis which maps the levels of the categorical variables into a two-dimensional space. It is similar to a principal component analysis.
 
-```{r correspondense-analysis, results = "hide", fig.cap = "Correspondance analysis of categorical variables that have more than two categories"}
-plot(CA(base::table(Deck = train4$Deck, Destination = train4$Destination), graph = FALSE), title = "Destination and Deck")
-plot(CA(base::table(Deck = train4$Deck, HomePlanet = train4$HomePlanet), graph = FALSE), title = "HomePlanet and Deck")
+```{r correspondence-dest-deck, results = "hide", fig.cap = "Correspondance analysis of categorical variables that have more than two categories"}
+plot(FactoMineR::CA(base::table(Deck = train4$Deck, Destination = train4$Destination), graph = FALSE), 
+     title = "Destination and Deck")
 ```
 
 The way to read these plots is as follows:
-- The horizontal and vertical components show the amount of the Chi\^2 statistic that each respective component accounts for. Another way to think of this is what amount of information from the original variables is explained by either the horizontal or vertical direction. The eigenvalues inside the parenthesis gives us a sense of which component is more important. For example, the horizontal axis is much more important in both our cases.
+
+- The horizontal and vertical components show the amount of the Chi\^2 statistic that each respective component accounts for. Another way to think of this is what amount of information from the original variables is explained by either the horizontal or vertical direction. The eigenvalues inside the parenthesis gives us a sense of which component is more important. For example, the horizontal axis is much more important in both our cases. 
+
 - The distance from the origin in either direction tells us how rare the particular category is. For example, Deck T has only five passengers so it's very rare.
+
 - Categories from the same variable that are close together (particularly along the horizontal axis in our case) suggest similarities between the categories. For example, decks A-C seem to have a similar variation.
+
 - Categories from different variables that are close together suggest a dependence and especially if the distance from the origin is large. A trick to see the strength of the relationship is to imagine a straight line from one category to the orgin and then to the other category. The greater the distance and the smaller the angle, the stronger the relationship. For example, if we draw a line from deck A to the origin and then to Cancri, we get a relatively long line and a small angle. 
 
 We can check if these insights make sense in our mosaic plot above. For example, decks A-C do seem to an unusually high proportion of passengers that travel to Cancri, compared to (what we can visually imagine) is the average for the entire dataset. Decks D-G do seem to be more common for travellers to Trappist but the relationship is relatively moderate (again, compared to the average). 
 
-What is the main takeaway? It might make sense to either pool some groups, like decks A-C into a single category to reduce the noise our models need to deal with. 
+```{r correspondence-home-deck, results = "hide", fig.cap = "Correspondance analysis of categorical variables that have more than two categories"}
+plot(FactoMineR::CA(base::table(Deck = train4$Deck, HomePlanet = train4$HomePlanet), graph = FALSE), 
+     title = "HomePlanet and Deck")
+```
+
+For HomePlanet and Deck, we see a strong relationship between Europa and decks A-C as well as Earth and deck G. What is the main takeaway? It might make sense to either pool some groups, like decks A-C into a single category to reduce the noise our models need to deal with. 
 
 ## Relationships between categorical variables and the outcome
 So far, we've only look at relationships between the categoric predictors but not how they are related to the response. We can explore this with a binominal proportion test (again, the code is heavily borrowed from Kuhn and Johnson). This is in a sense similar to the chi\^2 test in that it compares the actual proportions within a group to some given or expected proportion, in this case the proportion of those that were transported from the total number of passengers.
-```{r binominal, warning = FALSE, results = "hide", fig.cap = "Binominal distribution plots for categorical variables and the average response"}
+```{r binominal, warning = FALSE, results = "hide", message = FALSE}
 response_rate = mean(train4$Transported == "True")
 
 my_binom <- function(df, t) { # Test whether the differences in proportions (of transported) are significant
@@ -94,7 +117,7 @@ my_binom <- function(df, t) { # Test whether the differences in proportions (of 
 }
 
 my_binom_plot <- function(df, v, t) { # Applies the proportion test to different categories of a variable and plots the results
-  df %>%
+  p <- df %>%
     group_split(!!sym(v)) %>%
     map(.x = ., .f = \(df) my_binom(df, t)) %>%
     bind_rows() %>%
@@ -102,54 +125,98 @@ my_binom_plot <- function(df, v, t) { # Applies the proportion test to different
     ggplot(., aes(x = my_var, y = Proportion)) +
     geom_errorbar(aes(ymin = 1 - Lower, ymax = 1 - Upper), width = .1) +
     geom_point() +
-    geom_hline(yintercept = response_rate, col = "red", alpha = .35, lty = 2) + 
+    geom_hline(yintercept = response_rate, col = "red", alpha = .8, lty = 4) + 
     scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0, 1)) +
-    theme(axis.text = element_text(size = 8)) +
     labs(x = "", title = v)
+  
+  return(p)
+}
+```
+
+```{r all-binom-plots, message=FALSE, warning=FALSE, cache=TRUE, fig.cap="All categorical variables plotted as a binominal plots with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+save_plot <- function(p, i) {
+  ggsave(filename = paste0("Binominal", i, ".png"), plot = p)
 }
 
-train4 %>%
-  select(PassengerGroupSize, DestinationsPerGroup, CabinsPerGroup, VIPsPerGroup, LastNamesPerGroup, Transported) %>%
-  summarise(across(.cols = -Transported, .fns = list)) %>%
-  iwalk(~print(my_binom_plot(train4, .y, "Transported")))
+binom_plots <- train4 %>%
+  select(where(is.character), where(is.factor)) %>%
+  summarise(across(.cols = -c(Cabin, Name, LastName, PassengerId, Transported, PassengerGroup), .fns = list)) %>%
+  imap(.f = ~my_binom_plot(train4, .y, "Transported"))
+
+plotsToSVG <- walk2(.x = binom_plots, .y = seq_along(binom_plots), .f = save_plot)
+plotsToSVG <- map(1:length(binom_plots), .f = \(i) paste0("Binominal", i, ".png"))
+slickR::slickR(plotsToSVG, height = "480px", width = "672px") +
+  slickR::settings(slidesToShow = 1)
 ```
 
-We're already explored the core variables so here I want to focus on some of the simple features we've derived by counting categories per group.
-1. PassengerGroupSize suggests that there might be a difference between passengers who travel alone and those who don't. We might also want to create a variable for large groups > 7 although this might overfit the data since only around 1% of passengers would be in this category in the train data.
-2. DestinationsPerGroup suggests that there might be some slight difference between groups of passengers that all travelled to the same destination and those that didn't.
-3. CabinsPerGroup doesn't seem to add much value
-4. VIPsPerGroup suggests that the chances of being transported are higher for passengers who are in a group where another passenger has a VIP ticket. We'll explore this a bit more below since it seems to go against what we can see from the VIP variable where having a VIP ticket seems to reduce the chance of transportation.
-5. CabinsPerGroup doesn't seem to add much value
+Let's focus on some of these categorical variables:
+```{r binom-passgrp, warning = FALSE, results = "hide", message = FALSE, fig.cap = "PassengerGroupSize plotted as a binominal plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_binom_plot(train4, "PassengerGroupSize", "Transported")
+```
+
+
+We're already explored the core variables so here I want to focus on some of the simple features we've derived by counting categories per group. PassengerGroupSize suggests that there might be a difference between passengers who travel alone and those who don't. We might also want to create a variable for large groups > 7 although this might overfit the data since only around 1% of passengers would be in this category in the train data.
+
+```{r binom-destgrp, warning = FALSE, results = "hide", message = FALSE, fig.cap = "PassengerGroupSize plotted as a binominal plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_binom_plot(train4, "DestinationsPerGroup", "Transported")
+```
+
+DestinationsPerGroup suggests that there might be some slight difference between groups of passengers that all travelled to the same destination and those that didn't.
+
+```{r binom-cabingrp, warning = FALSE, results = "hide", message = FALSE, fig.cap = "PassengerGroupSize plotted as a binominal plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_binom_plot(train4, "CabinsPerGroup", "Transported")
+```
+
+CabinsPerGroup doesn't seem to add much value.
+
+```{r binom-vipgrp, warning = FALSE, results = "hide", message = FALSE, fig.cap = "PassengerGroupSize plotted as a binominal plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_binom_plot(train4, "VIPsPerGroup", "Transported")
+```
+
+VIPsPerGroup suggests that the chances of being transported are higher for passengers who are in a group where another passenger has a VIP ticket. We'll explore this a bit more below since it seems to go against what we can see from the VIP variable where having a VIP ticket seems to reduce the chance of transportation.
+
+```{r binom-lastnamegrp, warning = FALSE, results = "hide", message = FALSE, fig.cap = "PassengerGroupSize plotted as a binominal plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_binom_plot(train4, "LastNamesPerGroup", "Transported")
+```
+
+There seems to be a slight difference for groups where two people have the same name.
+
 ```{r new-features}
-train5 <- train4 %>%
-  mutate(Solo = if_else(PassengerGroup == 1, 1, 0),
-         LargeGroup = if_else(as.integer(PassengerGroup) > 7, 1, 0),
+add_grp_features <- function(df) {
+  res <- df %>%
+  mutate(Solo = if_else(PassengerGroupSize == 1, 1, 0),
+         LargeGroup = if_else(as.integer(PassengerGroupSize) > 7, 1, 0),
          TravelTogether = if_else(DestinationsPerGroup == 1, 1, 0))
-```
-\
-Let's explore the VIP variables a bit more.
-```{r VIP-variable, warning = FALSE, results = "hide"}
-train5 %>%
-  select(VIP, VIPsPerGroup, Transported) %>%
-  summarise(across(.cols = -Transported, .fns = list)) %>%
-  iwalk(~print(my_binom_plot(train4, .y, "Transported")))
+}
 
+train5 <- add_grp_features(train4)
+```
+
+Let's explore the VIP variables a bit more.
+```{r VIP-binom, warning = FALSE, results = "hide", message = FALSE, fig.cap="A closer look at the VIP variable and its relation to CryoSleep"}
+my_binom_plot(train5, "VIP", "Transported")
+my_binom_plot(train5, "VIPsPerGroup", "Transported")
+```
+
+
+
+```{r VIP-variable, warning = FALSE, results = "hide", message = FALSE, fig.cap="A closer look at the VIP variable and its relation to CryoSleep"}
 g1 <- train5 %>%
   select(CryoSleep, Transported, VIPsPerGroup) %>%
   ggplot(., mapping = aes(x = CryoSleep, fill = Transported)) +
   geom_bar() +
   geom_text(aes(by = CryoSleep), stat = "prop", position = position_stack(vjust = 0.5)) +
   facet_wrap(~VIPsPerGroup, labeller = "label_both") +
-  labs(title = "CryoSleep share with different VIPsPerGroup", x = "CryoSleep", y = "Number of passengers") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  labs(title = "CryoSleep share VIPsPerGroup", x = "CryoSleep", y = "Number of passengers") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), text = element_text(size = 10), plot.title = element_text(size = 10))
 
 g2 <- train5 %>%
   select(CryoSleep, Transported) %>%
   ggplot(., mapping = aes(x = CryoSleep, fill = Transported)) +
   geom_bar() +
   geom_text(aes(by = CryoSleep), stat = "prop", position = position_stack(vjust = 0.5)) +
-  labs(title = "CryoSleep share of total data", x = "CryoSleep", y = "Number of passengers") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  labs(title = "CryoSleep share total", x = "CryoSleep", y = "Number of passengers") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), text = element_text(size = 10), plot.title = element_text(size = 10))
 
 g3 <- train5 %>%
   filter(VIP == "True") %>%
@@ -157,10 +224,15 @@ g3 <- train5 %>%
   ggplot(., mapping = aes(x = CryoSleep, fill = Transported)) +
   geom_bar() +
   geom_text(aes(by = CryoSleep), stat = "prop", position = position_stack(vjust = 0.5)) +
-  labs(title = "CryoSleep share for those with VIP", x = "CryoSleep", y = "Number of passengers") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  labs(title = "CryoSleep share VIP", x = "CryoSleep", y = "Number of passengers") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), text = element_text(size = 10), plot.title = element_text(size = 10))
 
-g1 + g2 + g3 + plot_layout(guides = "collect")
+(g1 + g2 + g3) + 
+  plot_layout(guides = "collect", axis_titles = "collect")
 ```
 
 The proportion of people transported seems to be higher for groups with more than a single VIP-ticket even when we control for CryoSleep. On the other hand, passengers with VIP-tickets seem slightly less likely to be transported which suggests that we should keep both variables for modelling.
+
+```{r remove-03, include=FALSE}
+rm(chi_sqr_res, my_tables, mosaic_plots, plotsToSVG, binom_plots, g1, g2, g3)
+```

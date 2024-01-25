@@ -22,9 +22,20 @@ Only the VIP variable has near-zero variation (2.3% of all rows). We'll deal wit
 
 ## Frequency distribution of all variables
 Let's see how the values of the different variables are distributed.
-```{r frequencies, results = "hide", animation.hook = "gifski", interval = 1.5, fig.cap = "Distribution of the variables against the response"}
-plot_frq(train, Transported)
-plot_frq(train, -Transported, type = "histogram")
+```{r frequencies, results = "hide", fig.cap = "Distribution of the response"}
+sjPlot::plot_frq(train, Transported, type = "histogram")
+```
+
+The response in the training set is balanced which is good and we don't need to do under- or oversampling to balance it. A balanced response is necessary for tuning many models.
+```{r frequencies2, message = FALSE, cache=TRUE, fig.cap = "Distribution of the variables against the response"}
+my_frq <- sjPlot::plot_frq(train, type = "histogram")
+save_plot <- function(p, i) {
+  ggsave(filename = paste0("Variable", i, ".png"), plot = p)
+}
+plotsToSVG <- walk2(.x = my_frq, .y = seq_along(my_frq), .f = save_plot)
+plotsToSVG <- map(1:length(my_frq), .f = \(i) paste0("Variable", i, ".png"))
+slickR::slickR(plotsToSVG, height = "480px", width = "672px") +
+  slickR::settings(slidesToShow = 1)
 ```
 
 The target variable is balanced which is preferable. An unbalanced distribution of the target variable (meaning that the share of one outcome vastly outweighs the other) can skew the predictive results of some algorithms. Fortunately, we do not have to apply any resampling or downsampling methods to balance it.
@@ -34,13 +45,13 @@ The numeric variables are right-skewed, meaning they have outliers to the right 
 The Cabin and Name variables have a near uniform distribution which implies that they either won't have much predictive power by themselves or could even reduce the accuracy by introducing unnecessary noise to the model. We will either have to derive features from these variables or not include them in the models.
 
 ## Correlation between the variables
-```{r correlation, results = "hide", warning = FALSE, fig.cap = "Correlation between numerical variables"}
+```{r correlation, results = "hide", warning = FALSE, message = FALSE, fig.cap = "Correlation between numerical variables"}
 train %>%
   na.omit(.) %>%
-plot_correlation(., type = "all", theme_config = list(text = element_text(size = 20), axis.text.x = element_text(angle = 90)))
+DataExplorer::plot_correlation(., type = "all", theme_config = list(text = element_text(size = 20), axis.text.x = element_text(angle = 90)))
 ```
 
-We see that there's some relatively high correlation between homeplanets and destinations as well as a moderate correlation between CryoSleep and Transported which already gives us a hint that CryoSleep might be important. Otherwise, the cariables seem relatively uncorrelated which is a good thing since some models cannot handle variables that are too correlated.
+We see that there's some relatively high correlation between home planets and destinations as well as a moderate correlation between CryoSleep and Transported which already gives us a hint that CryoSleep might be important. Otherwise, the variables seem relatively uncorrelated which is a good thing since some models cannot handle variables that are too correlated.
 
 ## Overview of missing values
 ```{r missing, fig.cap = "Missing values overview"}
@@ -48,3 +59,7 @@ plot_na_hclust(train)
 ```
 
 All predictor variables are missing to the amount of 2% which is relatively low. When we cluster the missing values, we can also see that most don't overlap which suggests that they're missing at random and not due to some specific pattern. This tells us that we can probably find a suitable algorithm to help us impute the missing values based on the non-missing values. Had there been a pattern or clusters of missing data, we'd have to explore further to uncover the reasons for such non-random missingness.
+
+```{r remove-01, include=FALSE}
+rm(plotsToSVG)
+```

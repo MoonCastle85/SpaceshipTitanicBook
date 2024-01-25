@@ -44,7 +44,7 @@ train2 %>%
   group_by(PassengerGroup) %>%
   filter(any(is.na(HomePlanet))) %>%
   ungroup() %>%
-  slice_sample(n = 100) %>%
+  slice_sample(n = 50) %>%
   ggplot(., mapping = aes(x = PassengerGroup, y = PassengerCount, fill = HomePlanet)) +
     geom_col()  +
     labs(title = "Example missing HomePlanet", x = "Passenger group", y = "Number of passengers") +
@@ -56,7 +56,7 @@ We can also see that groups with two or more travelers are never housed in the s
 ```{r missing-cabin, warning = FALSE, fig.cap = "Missing values for Cabin"}
 train2 %>%
   filter(PassengerGroupSize != 1 & Side == "S" & Deck == "G") %>%
-  slice_sample(n = 100) %>%
+  slice_sample(n = 50) %>%
   ggplot(., mapping = aes(x = as.factor(CabinNumber), y = PassengerCount, fill = PassengerGroup)) +
   geom_col() +
   labs(title = "Example missing CabinNumber", x = "Cabin number", y = "Number of passengers") +
@@ -179,43 +179,38 @@ The missRanger algorithm can impute all of the variables at the same time and th
 
 ### KNN - K-Nearest Neighbors
 ```{r knn-imputation, warning = FALSE}
-# knn_norm <- recipe(Transported ~ ., data = train3) %>%
-#   step_normalize(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck) %>%
-#   prep()
-# 
-# train3_knn <- knn_norm %>%
-#   bake(new_data = NULL)
-# 
-# train3_knn_noNA <- train3_knn %>%
-#   na.omit()
-# 
-# vars_to_impute <- c("HomePlanet", "CryoSleep", "Destination", "Age", "VIP", "RoomService", "FoodCourt", "ShoppingMall",
-#                     "Spa", "VRDeck", "Deck", "Side", "CabinNumber", "LastName")
-# vars_for_imputing <- c("HomePlanet", "CryoSleep", "Destination", "Age", "VIP", "RoomService", "FoodCourt",
-#                               "ShoppingMall", "Spa", "VRDeck", "PassengerGroup", "Deck", "Side", "CabinNumber",
-#                               "PassengerGroupSize", "HomePlanetsPerGroup", "DestinationsPerGroup", "CabinsPerGroup",
-#                               "CryoSleepsPerGroup", "VIPsPerGroup", "LastNamesPerGroup")
-# 
-# imp_knn_rec <- recipe(Transported ~ ., data = train3_knn_noNA) %>%
-#   step_impute_knn(recipe = ., all_of(vars_to_impute), impute_with = imp_vars(all_of(vars_for_imputing)),
-#                   neighbors = 5) %>%
-#   prep()
-# 
-# knn <- bake(imp_knn_rec, new_data = train3_knn)
-# 
-# knn_unnorm <- knn %>%
-#   mutate(across(.cols = c(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
-#                 .fns = ~ rev_normalization(.x, knn_norm)))
-# 
-# save(knn_unnorm, file = "KNN.RData")
-load("KNN.RData")
+train3_for_knn <- train3 %>%
+  mutate(across(.cols = where(is.factor), .fns = as.character))
+
+vars_to_impute <- c("HomePlanet", "CryoSleep", "Destination", "Age", "VIP", "RoomService", "FoodCourt", "ShoppingMall",
+                    "Spa", "VRDeck", "Deck", "Side", "CabinNumber", "LastName")
+vars_for_imputing <- c("HomePlanet", "CryoSleep", "Destination", "Age", "VIP", "RoomService", "FoodCourt",
+                              "ShoppingMall", "Spa", "VRDeck", "PassengerGroup", "Deck", "Side", "CabinNumber",
+                              "PassengerGroupSize", "DestinationsPerGroup", "CabinsPerGroup",
+                              "CryoSleepsPerGroup", "VIPsPerGroup", "LastNamesPerGroup")
+
+train3_noNA <- train3_for_knn[complete.cases(train3_for_knn),]
+  
+knn_impute_rec <- recipe(Transported ~ ., data = train3_noNA) %>%
+  step_normalize(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck) %>%
+  step_impute_knn(recipe = ., all_of(vars_to_impute), impute_with = imp_vars(all_of(vars_for_imputing)), neighbors = 5) 
+
+set.seed(8584)
+knn_impute_prep <- knn_impute_rec %>% prep(strings_as_factors = FALSE)
+
+set.seed(8584)
+knn_impute_bake <- bake(knn_impute_prep, new_data = train3_for_knn)
+
+knn_impute_res <- knn_impute_bake %>%
+  mutate(across(.cols = c(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
+                .fns = ~ rev_normalization(.x, knn_impute_prep)))
 ```
 
 The KNN-algorithm is very fast and can impute multiple variables at the same time. It can also be relatively easily tuned by changing the number of neighbors the imputation is based on.
 
 ### Comparison of imputation algorithms - numerical variables
 ```{r imputation-evaluation-num, fig.cap = "Comparisson of standard deviation for numerical values before and after imputation"}
-my_skim <- skim_with(numeric = sfl(min = ~min(., na.rm = TRUE), median = ~median(., na.rm = TRUE), 
+my_skim <- skimr::skim_with(numeric = skimr::sfl(min = ~min(., na.rm = TRUE), median = ~median(., na.rm = TRUE), 
                                    mean = ~mean(., na.rm = TRUE), max = ~max(., na.rm = TRUE), 
                                    sd = ~sd(., na.rm = TRUE)), append = FALSE)
 
@@ -227,7 +222,7 @@ ranger_skim <- ranger2 %>%
   select(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, CabinNumber) %>%
   my_skim(.)
 
-knn_skim <- knn_unnorm %>%
+knn_skim <- knn_impute_res %>%
   select(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, CabinNumber) %>%
   my_skim(.)
 
@@ -249,6 +244,8 @@ sd_skim %>%
   scale_colour_discrete(name = "Non-imputed", labels = "sd", type = "orange")
 ```
 
+We see that the standard deviation is barely affected by the imputation.
+
 ```{r imputation-evaluation-num2, fig.cap = "Comparisson of mean for numerical values before and after imputation"}
 mean_skim %>%
   filter(Metric != "No imp") %>%
@@ -264,34 +261,35 @@ There is barely any difference between the algorithms so I will use the KNN-algo
 
 ### Comparison of imputation algorithms - categorical variables
 To make it easier to compare the results from the algorithms with the non-imputed values, I've created some helpful functions to iterate over the different variables and plot the results.
-```{r imputation-evaluation-cat, echo = FALSE, fig.cap = "Imputed distribution for categorical variables with all three methods against no imputation"}
+```{r imputation-evaluation-home, fig.cap = "Imputed distribution for HomePlanet compared to no imputation"}
 my_prop_plot <- function(df, v, t) {
   g <- ggplot(data = df, mapping = aes(x = !!sym(t), fill = !!sym(v))) +
     geom_bar() +
-    geom_text(aes(by = !!sym(t)), stat = "prop", position = position_stack(vjust = 0.5)) +
+    geom_text(aes(by = as.factor(!!sym(t))), stat = "prop", position = position_stack(vjust = 0.5)) +
     labs(title = deparse(substitute(df)), x = t, y = "Number of passengers") +
     scale_y_continuous(breaks = seq(0, 9000, 500)) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.key.size = unit(0.4, 'cm'))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
   return(g)
 }
 
-my_prop_grid_plot <- function(df_na, df_ranger, df_knn, v, target) {
-  g1 <- my_prop_plot(df_na, v, target)
-  g2 <- my_prop_plot(df_ranger, v, target)
-  g3 <- my_prop_plot(df_knn, v, target)
-  
-  g <- wrap_plots(g1, g2, g3, guides = "collect")
-  print(g)
-}
+h1 <- my_prop_plot(train3, "HomePlanet", "Transported")
+h2 <- my_prop_plot(ranger2, "HomePlanet", "Transported")
+h3 <- my_prop_plot(knn_impute_res, "HomePlanet", "Transported")
 
-train3 %>%
-  select(HomePlanet, CryoSleep) %>%
-  names() %>%
-  walk(.x = ., .f = \(my_vars) my_prop_grid_plot(df_na = train3, df_ranger = ranger2, df_knn = knn_unnorm,
-                                                         v = my_vars, target = "Transported"))
+(h1 | h2 | h3) + plot_layout(guides = "collect", axis_titles = "collect")
 ```
 
-Perhaps expected since the amount of missing data was so low but it's good to confirm visually that the imputations haven't done anything crazy.
+The proportions of home planets look good even after imputation.
+
+```{r imputation-evaluation-cryo, fig.cap = "Imputed distribution for HomePlanet compared to no imputation"}
+c1 <- my_prop_plot(train3, "CryoSleep", "Transported")
+c2 <- my_prop_plot(ranger2, "CryoSleep", "Transported")
+c3 <- my_prop_plot(knn_impute_res, "CryoSleep", "Transported")
+
+(c1 | c2 | c3) + plot_layout(guides = "collect", axis_titles = "collect")
+```
+
+And proportions of CryoSleep also look good. We shouldn't have expected any big change since there was so little missing data but it's good practice to do a visual check.
 
 ### Do the imputated values break any "rules"?
 One last thing we must do before we accept the imputed values is to check whether the imputation has managed to adhere to the 'rules' we discovered with our manual exploration. Here I use a modified version of the `useful_features`-function to update the simple features.
@@ -318,63 +316,63 @@ useful_features2 <- function(x) {
   return(x2)
 }
 
-check_knn <- useful_features2(knn_unnorm)
+check_knn <- useful_features2(knn_impute_res)
 
 check_knn %>%
   filter(HomePlanetsPerGroup != 1) %>%
   select(PassengerId, HomePlanet, HomePlanetsPerGroup)
+```
 
-check_knn %>%
-  filter(Deck %in% c("A", "B", "C") & HomePlanet != "Europa" | Deck == "G" & HomePlanet != "Earth") %>%
-  select(PassengerId, HomePlanet, Deck)
+Passengers in group 7336 both had missing values for HomePlanet but the imputation has given them different home planets, something that breaks the 'rule' we discovered earlier that all passenger groups travel from the same home planet
 
-check_knn %>%
-  filter(CryoSleep == TRUE & TotalSpent > 0) %>%
-  select(PassengerId, CryoSleep, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent)
-
+```{r imputation-evaluation4}
 check_knn %>%
   filter(Age <= 12 & TotalSpent > 0) %>%
   select(PassengerId, CryoSleep, Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent)
-
-check_knn %>%
-  filter(VIP == TRUE & HomePlanet == "Earth") %>%
-  select(PassengerId, HomePlanet, VIP)
 ```
 
-We can note several issues: 
-1. Passengers in group 7336 both had missing values for HomePlanet but the imputation has given them different home planets, something that breaks the 'rule' we discovered earlier that all passenger groups travel from the same home planet
-2. Passenger 0770-02 had a missing value for Age but the algorithm has set it to 4 even though the passenger has spent credits and thus should be older than 12.
+Passenger 0770-02 had a missing value for Age but the algorithm has set it to 4 even though the passenger has spent credits and thus should be older than 12.
 
 We can deal with the first issue if we make a rule that sets the homeplanet of the entire group based on one of the member's homeplanets if the group has more than one homeplanet. The second issue is trickier but we can replace it with the mean age of passengers on the same deck and with the same cryosleep status.
 
 ```{r manual-imp-correction, fig.cap = "Missing values overview after imputation"}
-amenities_summary <- check_knn %>%
-  filter(Age > 12 & TotalSpent > 0) %>%
-  summarise(mean_age = round(mean(Age), 0), .by = c(CryoSleep, Deck))
+fix_knn <- function(df) {
+  amenities_summary <- df %>%
+    filter(Age > 12 & TotalSpent > 0) %>%
+    summarise(mean_age = round(mean(Age), 0), .by = c(CryoSleep, Deck))
+  
+  wrong_age <- df %>%
+    filter(Age <= 12 & TotalSpent > 0) %>%
+    left_join(., amenities_summary, by = c("CryoSleep", "Deck")) %>%
+    select(PassengerId, mean_age)
+  
+  wrong_planet <- df %>%
+    filter(HomePlanetsPerGroup != 1) %>%
+    select(PassengerId, PassengerGroup, HomePlanet) %>%
+    group_by(PassengerGroup) %>%
+    mutate(HomePlanet_correct = first(HomePlanet)) %>%
+    ungroup() %>%
+    select(PassengerId, HomePlanet_correct)
+  
+    res <- df %>%
+    left_join(., wrong_age, by = "PassengerId") %>%
+    left_join(., wrong_planet, by = "PassengerId") %>%
+    mutate(Age = if_else(Age <= 12 & TotalSpent > 0, mean_age, Age),
+           HomePlanet = if_else(HomePlanetsPerGroup != 1, HomePlanet_correct, HomePlanet)) %>%
+    select(-mean_age, -HomePlanet_correct)
+    
+    return(res)
+}
 
-wrong_age <- check_knn %>%
-  filter(Age <= 12 & TotalSpent > 0) %>%
-  left_join(., amenities_summary, by = c("CryoSleep", "Deck")) %>%
-  select(PassengerId, mean_age)
-
-wrong_planet <- check_knn %>%
-  filter(HomePlanetsPerGroup != 1) %>%
-  select(PassengerId, PassengerGroup, HomePlanet) %>%
-  group_by(PassengerGroup) %>%
-  mutate(HomePlanet_correct = first(HomePlanet)) %>%
-  ungroup() %>%
-  select(PassengerId, HomePlanet_correct)
-
-fix_knn <- check_knn %>%
-  left_join(., wrong_age, by = "PassengerId") %>%
-  left_join(., wrong_planet, by = "PassengerId") %>%
-  mutate(Age = if_else(Age <= 12 & TotalSpent > 0, mean_age, Age),
-         HomePlanet = if_else(HomePlanetsPerGroup != 1, HomePlanet_correct, HomePlanet)) %>%
-  select(-mean_age, -HomePlanet_correct)
-
-train4 <- useful_features2(fix_knn)
+fixed_knn <- fix_knn(check_knn)
+train4 <- useful_features2(fixed_knn)
 
 plot_na_hclust(train4)
 ```
 
 The only missing values are now in the variables that we won't use for modelling (we'll use features derived from them instead).
+
+```{r remove-02, include=FALSE}
+rm(train3_for_knn, vars_to_impute, vars_for_imputing, train3_noNA, knn_impute_rec, knn_impute_prep, knn_impute_bake, my_skim,
+   no_imp_skim, ranger_skim, knn_skim, h1, h2, h3, c1, c2, c3, check_knn, fixed_knn)
+```

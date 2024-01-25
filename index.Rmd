@@ -15,56 +15,29 @@ csl: chicago-fullnote-bibliography.csl
 ---
 
 # Introduction
-My name is Vanja Manborg and ever since I got to dabble in data science through my (not so much data-science focused) engineering job, I've spent my free time in RStudio instead of things like family, friends and going to the movies. That's still normal, right? 
+My name is Vanja Manborg and ever since I got to dabble in data science through my engineering job, I've spent my free time in RStudio instead of things like family, friends and going to the movies. I believe in learning-by-doing methodology so this is my attempt to get relatively high scores for the [Spaceship Titanic competition](https://www.kaggle.com/competitions/spaceship-titanic/data) on Kaggle and learn new concepts and tricks of data-science while I'm at it. The competition is a futuristic version of the Titanic challenge where the goal is to predict with as high accuracy as possible which of the space-faring passengers got transported to another dimension during the spaceships maiden voyage from our solar system to another.
 
-I believe in learning-by-doing methodology so this is my attempt to get relatively high scores for the [Spaceship Titanic competition](https://www.kaggle.com/competitions/spaceship-titanic/data) on Kaggle and learn new concepts and tricks of data-science while I'm at it. The competition is a futuristic version of the Titanic challenge where the goal is to predict with as high accuracy as possible which of the space-faring passengers got transported to another dimension during the spaceships maiden voyage from our solar system to another.
+Some formalities:
 
-Note that I won't go into details about the packages or their functions but expect you to check them out for yourself. Also, I imagine that you the reader is following along so when I write "*We* then do x", I mean you and myself and not the voices in my head (although they are there, too). 
+- I won't go into details about the packages or their functions
+
+- I've relied on the excellent Max Kuhn's and Kjell Johnson's book ['Feature Engineering and Selection: A Practical Approach for Predictive Models'](http://www.feat.engineering/) and used some of their code for the more advanced feature exploration.
 
 Without further ado, let's dive into it!
 
 ```{r setup, include = FALSE}
 library(tidyverse)
 library(tidymodels)
-library(caret)
-library(sjPlot)
-library(DataExplorer)
-library(visdat)
-library(skimr)
-library(naniar)
-library(ggstats)
-library(ggthemes)
-library(gridExtra)
-library(mgcv)
-library(vcd)
-library(FactoMineR)
-library(factoextra)
-library(colorspace)
-library(missRanger)
-library(rpart)
-library(dlookr)
-library(embed)
-library(pre)
 library(parallel)
 library(doSNOW)
-library(janitor)
-library(rFSA)
-library(bslib)
-library(showtext)
-library(forcats)
-library(interactions)
-library(foreach)
-library(cowplot)
+library(glmulti)
 library(patchwork)
-library(R.utils)
-library(glue)
-library(Matrix)
-library(ranger)
-library(glmnet)
-library(pls)
-library(gifski)
+library(caret)
+library(dlookr)
+library(missRanger)
+library(ggstats)
 
-theme_set(theme_clean(base_size = 24))
+theme_set(ggthemes::theme_clean(base_size = 24))
 
 unregister <- function() { # Helper function to unregister parallel processes that didn't shut down for some reason
   env <- foreach:::.foreachGlobals

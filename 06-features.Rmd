@@ -1,0 +1,617 @@
+# Feature selection and elimination
+Now that we have created several new features and discovered many interaction effects, we must explore which of these have the potential to improve our models and which don't. Kuhn and Johnsson recommend several methods for feature selection and elimination and we're going to explore them all.
+
+## Recursive feature elimination
+On method is to create a model with that includes all features and through a resampling process remove sets of variables to test how it improves performance. We will start with our smaller set of interactions since this process is computationally demanding.
+
+```{r recurs-feat-no-corr, warning = FALSE, results='hide', message=FALSE, cache=TRUE}
+train7 <- train6 %>%
+  select(-c(PassengerCount, HomePlanetsPerGroup))
+
+set.seed(8584)
+rfe_split <- initial_split(train7, prop = 0.8)
+rfe_train <- training(rfe_split)
+
+many_stats <- function(data, lev = levels(data$obs), model = NULL) {
+    c(twoClassSummary(data = data, lev = levels(data$obs), model),
+      prSummary(data = data, lev = levels(data$obs), model),
+      mnLogLoss(data = data, lev = levels(data$obs), model),
+      defaultSummary(data = data, lev = levels(data$obs), model))
+}
+
+rfe_funcs <- caret::rfFuncs
+rfe_funcs$summary <- many_stats
+
+rfe_vars <- data.frame(Variables = names(train7)) %>%
+  mutate(Roles = if_else(Variables %in% c("PassengerId", "Cabin", "Name", "LastName"), "id", "predictor"),
+         Roles = if_else(Variables == "Transported", "outcome", Roles))
+
+int_formula <- int_vars_very_imp2 %>%
+  select(ForFormula, RevFormula) %>%
+  unlist() %>%
+  unname() %>%
+  str_flatten(., collapse = "+") %>%
+  str_c("~", .) %>%
+  as.formula(.)
+
+rfe_rec <- recipe(x = rfe_train, vars = rfe_vars$Variables, roles = rfe_vars$Roles) %>%
+  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent, CabinNumber, LastNameAsNumber, PassengerGroup,
+                 TotalSpentPerGroup) %>%
+  step_dummy(all_nominal_predictors()) %>%
+  step_interact(int_formula) %>%
+  step_zv(all_predictors())
+
+rfe_bake <- rfe_rec %>% prep() %>% bake(new_data = NULL)
+
+rfe_sizes <- seq(5, 55, 5)
+rfe_ctrl <- rfeControl(method = "repeatedcv", repeats = 5, functions = rfe_funcs, returnResamp = "all", verbose = FALSE)
+
+## This part takes a while to run, even in parallel, so save the results
+# my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
+# registerDoSNOW(my_cluster)
+# 
+# snow::clusterEvalQ(my_cluster, library(recipes))
+# snow::clusterExport(my_cluster, "int_formula")
+# 
+# set.seed(8584)
+# rfe_acc <- rfe(rfe_rec, data = rfe_train, sizes = rfe_sizes, rfeControl = rfe_ctrl, metric = "Accuracy", ntree = 1000)
+# 
+# save(rfe_acc, file = "Recursive feature elimination with interactions.RData")
+# 
+# stopCluster(my_cluster)
+# unregister()
+
+load("Recursive feature elimination with interactions.RData")
+```
+
+```{r recurs-feat-no-corr2, warning = FALSE, results='hide', message=FALSE, fig.cap="Estimated performance with recursive feature elimination based on the number of variables that are included"}
+rfe_acc$results %>%
+  ggplot(data = ., aes(x = Variables, y = Accuracy)) +
+  geom_point() +
+  geom_line()
+```
+
+
+```{r recurs-feat-no-corr3, fig.cap="Correlation between the first set of optimal variables from the RFE model"}
+rfe_bake %>% 
+  select(rfe_acc[["optVariables"]]) %>%
+  DataExplorer::plot_correlation(., type = "continuous", geom_text_args = list(size = 10), 
+                   theme_config = list(text = element_text(size = 8), axis.text.x = element_text(angle = 90)))
+```
+
+We see that there are several variables with relatively high correlation that could be introducing noise to our model. Let's add a step to remove correlated variables and see how it affects performance.
+
+```{r recurs-feat-corr, warning = FALSE, results='hide', message=FALSE, cache=TRUE}
+rfe_rec_corr <- recipe(x = rfe_train, vars = rfe_vars$Variables, roles = rfe_vars$Roles) %>%
+  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent, CabinNumber, LastNameAsNumber, PassengerGroup,
+                 TotalSpentPerGroup) %>%
+  step_dummy(all_nominal_predictors()) %>%
+  step_interact(int_formula) %>%
+  step_zv(all_predictors()) %>%
+  step_corr(all_numeric_predictors(), threshold = 0.5)
+  
+rfe_bake_corr <- rfe_rec_corr %>% prep() %>% bake(new_data = NULL)
+
+## This part takes a while to run, even in parallel so save the results
+# my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
+# registerDoSNOW(my_cluster)
+# 
+# snow::clusterEvalQ(my_cluster, library(recipes))
+# snow::clusterExport(my_cluster, "int_formula")
+# 
+# set.seed(8584)
+# rfe_acc_corr <- rfe(rfe_rec_corr, data = rfe_train, sizes = rfe_sizes, rfeControl = rfe_ctrl, metric = "Accuracy", ntree = 1000)
+# 
+# save(rfe_acc_corr, file = "Recursive feature elimination with interactions removed correlated.RData")
+# 
+# stopCluster(my_cluster)
+# unregister()
+
+load("Recursive feature elimination with interactions removed correlated.RData")
+```
+
+
+```{r recurs-feat-corr2, warning = FALSE, results='hide', message=FALSE, fig.cap="Estimated performance with recursive feature elimination based on the number of variables. Correlated variables have been removed."}
+rfe_acc_corr$results %>%
+  ggplot(data = ., aes(x = Variables, y = Accuracy)) +
+  geom_point() +
+  geom_line()
+```
+
+I'm not sure why the results contain variables above 55 that was our tuning max but the model has similar performance as the one without removal of correlations and still considers 45 variables to be optimal.
+
+```{r ecurs-feat-corr3}
+rfe_opt_vars1 <- rfe_acc_corr[["optVariables"]]
+rfe_opt_vars1
+
+rfe_opt_vars2 <- data.frame(term = rfe_opt_vars1) %>%
+  filter(str_detect(term, "_x_")) %>%
+  mutate(V1 = str_split_i(term, "_", 1),
+         V2 = str_split_i(term, "_", -2),
+         ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')"),
+         RevFormula = str_c("starts_with('", V2, "'):starts_with('", V1, "')")) %>%
+  select(V1, V2, ForFormula, RevFormula)
+```
+
+For a final run, we can also add the interactions that we considered based on the results from the tree model to this optimal set of variables and see if they improve the model.
+
+```{r recurs-feat-all, warning = FALSE, results='hide', message=FALSE, cache=TRUE}
+set.seed(8584)
+rfe_split_all <- initial_split(train7, prop = 0.8)
+rfe_train_all <- training(rfe_split_all)
+
+many_stats <- function(data, lev = levels(data$obs), model = NULL) {
+    c(twoClassSummary(data = data, lev = levels(data$obs), model),
+      prSummary(data = data, lev = levels(data$obs), model),
+      mnLogLoss(data = data, lev = levels(data$obs), model),
+      defaultSummary(data = data, lev = levels(data$obs), model))
+}
+
+rfe_funcs <- caret::rfFuncs
+rfe_funcs$summary <- many_stats
+
+rfe_vars <- data.frame(Variables = names(train7)) %>%
+  mutate(Roles = if_else(Variables %in% c("PassengerId", "Cabin", "Name", "LastName"), "id", "predictor"),
+         Roles = if_else(Variables == "Transported", "outcome", Roles))
+
+int_formula <- bind_rows(rfe_opt_vars2, tree_int_vars) %>%
+  select(ForFormula, RevFormula) %>%
+  unlist() %>%
+  unname() %>%
+  unique(.) %>%
+  str_flatten(., collapse = "+") %>%
+  str_c("~", .) %>%
+  as.formula(.)
+
+rfe_rec_all <- recipe(x = rfe_train_all, vars = rfe_vars$Variables, roles = rfe_vars$Roles) %>%
+  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent, CabinNumber, LastNameAsNumber, PassengerGroup,
+                 TotalSpentPerGroup) %>%
+  step_dummy(all_nominal_predictors()) %>%
+  step_interact(int_formula) %>%
+  step_zv(all_predictors()) %>%
+  step_corr(all_numeric_predictors(), threshold = 0.5)
+
+rfe_bake_all <- rfe_rec_all %>% prep() %>% bake(new_data = NULL)
+
+rfe_sizes_all <- seq(5, 100, 5)
+rfe_ctrl <- rfeControl(method = "repeatedcv", repeats = 5, functions = rfe_funcs, returnResamp = "all", verbose = FALSE)
+
+## This part takes a while to run, even in parallel so save the results
+
+# my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
+# registerDoSNOW(my_cluster)
+# 
+# snow::clusterEvalQ(my_cluster, library(recipes))
+# snow::clusterExport(my_cluster, "int_formula")
+# 
+# system.time({
+#   set.seed(8584)
+#   rfe_acc_all <- rfe(rfe_rec_all, data = rfe_train_all, sizes = rfe_sizes_all, rfeControl = rfe_ctrl, metric = "Accuracy", 
+#                      ntree = 1000)
+# })
+# save(rfe_acc_all, file = "Recursive feature elimination final.RData")
+# 
+# stopCluster(my_cluster)
+# unregister()
+
+load("Recursive feature elimination final.RData")
+```
+
+```{r recurs-feat-all2, warning = FALSE, results='hide', message=FALSE, fig.cap="Estimated performance with recursive feature elimination with all interactions. Correlated variables removed."}
+rfe_acc_all$results %>%
+  ggplot(data = ., aes(x = Variables, y = Accuracy)) +
+  geom_point() +
+  geom_line()
+```
+
+I'm not sure why the results contain variables above 55 that was our tuning max but the model has similar performance as the one without removal of correlations and still considers 45 variables to be optimal.
+
+```{r rfe-best}
+rfe_acc_avg <- rfe_acc_all$results$Accuracy
+
+rfe_vars_best <- rfe_acc_all[["optVariables"]]
+rfe_vars_best2 <- data.frame(term = rfe_vars_best) %>%
+  filter(str_detect(term, "_x_")) %>%
+  mutate(V1 = str_split_i(term, "_", 1),
+         V2_tmp = str_split_i(term, "_x_", 2),
+         V2 = str_split_i(V2_tmp, "_", 1),
+         ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')"),
+         RevFormula = str_c("starts_with('", V2, "'):starts_with('", V1, "')")) %>%
+  select(V1, V2, ForFormula, RevFormula)
+```
+
+Since I'm not sure why we got results for 170 variables and more, let's test that set of variables with randomForest to see if the results are consistent.
+
+```{r rfe-test-weird, warning = FALSE, results='hide', message=FALSE, cache=TRUE}
+rfe_vars_best_weird <- rfe_acc_all$variables %>%
+  filter(Variables == 170) %>%
+  select(var) %>%
+  rename(term = var) %>%
+  filter(str_detect(term, "_x_")) %>%
+  mutate(V1 = str_split_i(term, "_", 1),
+         V2_temp = str_split_i(term, "_x_", 2),
+         V2 = str_split_i(V2_temp, "_", 1),
+         ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')"),
+         RevFormula = str_c("starts_with('", V2, "'):starts_with('", V1, "')")) %>%
+  select(V1, V2, ForFormula, RevFormula)
+
+int_form_weird <- rfe_vars_best_weird %>%
+  select(ForFormula, RevFormula) %>%
+  unlist() %>%
+  unname() %>%
+  unique(.) %>%
+  str_flatten(., collapse = "+") %>%
+  str_c("~", .) %>%
+  as.formula(.)
+
+rfe_rec_all_weird <- recipe(x = rfe_train_all, vars = rfe_vars$Variables, roles = rfe_vars$Roles) %>%
+  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent, CabinNumber, LastNameAsNumber, PassengerGroup,
+                 TotalSpentPerGroup) %>%
+  step_dummy(all_nominal_predictors()) %>%
+  step_interact(int_form_weird) %>%
+  step_zv(all_predictors()) %>%
+  step_corr(all_numeric_predictors(), threshold = 0.5)
+
+rf_mod <- rand_forest(trees = 1000, min_n = 5) %>%
+  set_mode("classification") %>%
+  set_engine("randomForest")
+
+rfe_all_weird_wf <- workflow() %>%
+  add_recipe(rfe_rec_all_weird) %>%
+  add_model(rf_mod)
+
+# my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
+# registerDoSNOW(my_cluster)
+# 
+# snow::clusterEvalQ(my_cluster, library(recipes))
+# snow::clusterExport(my_cluster, "int_formula")
+# 
+# system.time({
+#   set.seed(8584)
+#   rfe_acc_all_weird <- fit(rfe_all_weird_wf, rfe_train_all)
+# })
+# 
+# save(rfe_acc_all_weird, file = "Weird RFE results.RData")
+# 
+# stopCluster(my_cluster)
+# unregister()
+
+load("Weird RFE results.RData")
+rfe_acc_all_weird
+```
+
+The accuracy is closer to 80% so within the values of the other sets of variables.
+
+## Simulated annealing
+
+```{r simulated-annealing, warning = FALSE, results='hide', message=FALSE, cache=TRUE}
+set.seed(8584)
+sa_split <- initial_split(train7, prop = 0.8)
+sa_train <- training(sa_split)
+
+many_stats <- function(data, lev = levels(data$obs), model = NULL) {
+    c(twoClassSummary(data = data, lev = levels(data$obs), model),
+      prSummary(data = data, lev = levels(data$obs), model),
+      mnLogLoss(data = data, lev = levels(data$obs), model),
+      defaultSummary(data = data, lev = levels(data$obs), model))
+}
+
+my_vars <- data.frame(Variables = names(train7)) %>%
+  mutate(Roles = if_else(Variables %in% c("PassengerId", "Cabin", "Name", "LastName"), "id", "predictor"),
+         Roles = if_else(Variables == "Transported", "outcome", Roles))
+
+int_formula <- bind_rows(rfe_opt_vars2, tree_int_vars) %>%
+  select(ForFormula, RevFormula) %>%
+  unlist() %>%
+  unname() %>%
+  unique(.) %>%
+  str_flatten(., collapse = "+") %>%
+  str_c("~", .) %>%
+  as.formula(.)
+
+sa_rec <- recipe(x = sa_train, vars = my_vars$Variables, roles = my_vars$Roles) %>%
+  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent, CabinNumber, LastNameAsNumber, PassengerGroup,
+                 TotalSpentPerGroup) %>%
+  step_dummy(all_nominal_predictors()) %>%
+  step_interact(int_formula) %>%
+  step_zv(all_predictors()) %>%
+  step_corr(all_numeric_predictors(), threshold = 0.5)
+
+sa_bake <- sa_rec %>%
+  prep() %>%
+  bake(new_data = NULL)
+
+sa_funcs <- caretSA
+sa_funcs$fitness_extern <- many_stats
+sa_funcs$initial <- function(vars, prob = 0.50, ...) {
+  sort(sample.int(vars, size = floor(vars * prob) + 1))
+}
+
+# Arguments for klaR::NaiveBayes that is used to fit the SA model. Adjust is used for the kernel density estimation
+sa_grid <- data.frame(mtry = 5)
+
+# Inner control
+sa_ctrl_inner <- trainControl(method = "boot", p = 0.90, number = 1, summaryFunction = many_stats, classProbs = TRUE, 
+                        allowParallel = FALSE)
+
+# Outer control for SA
+sa_ctrl_outer <- safsControl(method = "cv", metric = c(internal = "Accuracy", external = "Accuracy"), 
+                       maximize = c(internal = TRUE, external = TRUE), functions = sa_funcs, improve = 20, returnResamp = "all",
+                       verbose = FALSE, allowParallel = TRUE)
+
+# my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
+# registerDoSNOW(my_cluster)
+# clusterExport(cl = my_cluster, "int_formula")
+# 
+# # Run simulated annealing with RandomForest
+# system.time({
+#   set.seed(8485)
+#   sim_anneal_50_pct <- safs(sa_rec, data = sa_train, iters = 500, safsControl = sa_ctrl_outer, method = "rf", tuneGrid = sa_grid,
+#                             trControl = sa_ctrl_inner, metric = "Accuracy")
+# })
+# 
+# save(sim_anneal_50_pct, file = "Simulated annealing with 50% inital.RData")
+# 
+# stopCluster(my_cluster)
+# unregister()
+
+load("Simulated annealing with 50% inital.RData")
+```
+
+```{r simulated-annealing-internal, warning = FALSE, results='hide', message=FALSE, fig.cap="Estimated performance of internal resamples from simulated annealing."}
+sim_ann_50_int <- sim_anneal_50_pct$internal
+sim_ann_50_int2 <- sim_ann_50_int %>%
+  group_by(Iter) %>%
+  summarise(Accuracy = sum(Accuracy) / length(unique(sim_ann_50_int$Resample))) %>%
+  ungroup() %>%
+  mutate(Resample = "Averaged") %>%
+  bind_rows(sim_ann_50_int, .) %>%
+  mutate(colour_grp = if_else(Resample == "Averaged", "yes", "no"))
+sim_ann_50_int_avg <- sim_ann_50_int2 %>% filter(Resample == "Averaged") %>% select(Iter, Accuracy)
+  
+ggplot(sim_ann_50_int2, aes(x = Iter, y = Accuracy, colour = colour_grp)) +
+  geom_point() +
+  facet_wrap(~Resample) +
+  lims(y = c(0, NA)) +
+  theme(legend.position = "none")
+```
+
+
+```{r simulated-annealing-external, warning = FALSE, results='hide', message=FALSE, fig.cap="Estimated performance of external resamples from simulated annealing."}
+sim_ann_50_ext <- sim_anneal_50_pct$external
+sim_ann_50_ext2 <- sim_ann_50_ext %>%
+  group_by(Iter) %>%
+  summarise(Accuracy = sum(Accuracy) / length(unique(sim_ann_50_int$Resample))) %>%
+  ungroup() %>%
+  mutate(Resample = "Averaged") %>%
+  bind_rows(sim_ann_50_int, .) %>%
+  mutate(colour_grp = if_else(Resample == "Averaged", "yes", "no"))
+
+sim_ann_50_ext_avg <- sim_ann_50_ext2 %>% filter(Resample == "Averaged") %>% select(Iter, Accuracy)
+ext_int_corr <- round(cor(sim_ann_50_int_avg$Accuracy, sim_ann_50_ext_avg$Accuracy), 2)
+
+ggplot(mapping = aes(x = Iter, y = Accuracy)) +
+  geom_point(data = sim_ann_50_int_avg, aes(colour = "red")) +
+  geom_point(data = sim_ann_50_ext_avg, aes(colour = "black")) +
+  geom_label(data = sim_ann_50_ext_avg, x = 5, y = 0.7, label = str_c("Corr: ", ext_int_corr)) +
+  labs(colour = "Estimate") +
+  scale_colour_hue(labels = c("Internal", "External"))
+```
+
+```{r simulated-annealing-best, warning = FALSE, results='hide', message=FALSE, fig.cap="Estimated performance of best resample from simulated annealing."}
+sim_ann_50_final <- sim_anneal_50_pct$sa
+sim_ann_50_final2 <- data.frame(Iter = sim_ann_50_final[["internal"]]$Iter, Accuracy = sim_ann_50_final[["internal"]]$Accuracy,
+                                Subset_Size = unlist(lapply(sim_ann_50_final[["subsets"]], length))) %>%
+  pivot_longer(-Iter)
+
+ggplot(sim_ann_50_final2, aes(x = Iter, y = value)) +
+  geom_point() +
+  facet_wrap(~name, nrow = 2, ncol = 1, scales = "free_y")
+```
+
+The results from simulated annealing indicate much lower accuracy overall which could be due to the fact that the Naive Bayes model doesn't perform as well as randomForest did for our recursive feature elimination procedure. The optimal set of variables was 73 which is very similar to the RFE process. Let's save them for our final model comparison.
+
+```{r simulated-annealing-best-vars}
+sa_vars_best <- sim_anneal_50_pct[["optVariables"]]
+sa_vars_best2 <- data.frame(term = sa_vars_best) %>%
+  filter(str_detect(term, "_x_")) %>%
+  mutate(V1 = str_split_i(term, "_", 1),
+         V2 = str_split_i(term, "_", -2),
+         ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')"),
+         RevFormula = str_c("starts_with('", V2, "'):starts_with('", V1, "')")) %>%
+  select(V1, V2, ForFormula, RevFormula)
+```
+
+If we compare the best variables from the RFE process with the SA process, we can see which one overlap and which don't.
+
+```{r common-vars-rfe-sa}
+best_vars_rfe_sa <- intersect(rfe_vars_best, sa_vars_best)
+best_vars_rfe_sa
+```
+
+## Genetic algorithm
+```{r genetic-algorithm, warning = FALSE, results='hide', message=FALSE, cache=TRUE}
+# set.seed(8584)
+# ga_split <- initial_split(train7, prop = 0.8)
+# ga_train <- training(ga_split)
+# 
+# many_stats <- function(data, lev = levels(data$obs), model = NULL) {
+#     c(twoClassSummary(data = data, lev = levels(data$obs), model),
+#       prSummary(data = data, lev = levels(data$obs), model),
+#       mnLogLoss(data = data, lev = levels(data$obs), model),
+#       defaultSummary(data = data, lev = levels(data$obs), model))
+# }
+# 
+# my_vars <- data.frame(Variables = names(train7)) %>%
+#   mutate(Roles = if_else(Variables %in% c("PassengerId", "Cabin", "Name", "LastName"), "id", "predictor"),
+#          Roles = if_else(Variables == "Transported", "outcome", Roles))
+# 
+# int_formula <- bind_rows(rfe_opt_vars2, tree_int_vars) %>%
+#   select(ForFormula, RevFormula) %>%
+#   unlist() %>%
+#   unname() %>%
+#   unique(.) %>%
+#   str_flatten(., collapse = "+") %>%
+#   str_c("~", .) %>%
+#   as.formula(.)
+# 
+# ga_rec <- recipe(x = ga_train, vars = my_vars$Variables, roles = my_vars$Roles) %>%
+#   step_dummy(all_nominal_predictors()) %>%
+#   step_interact(int_formula) %>%
+#   step_zv(all_predictors())
+# 
+# ga_bake <- ga_rec %>%
+#   prep() %>%
+#   bake(new_data = NULL)
+# 
+# ga_funcs <- caretGA
+# ga_funcs$fitness_extern <- many_stats
+# ga_funcs$initial <- function(vars, popSize, ...)  {
+#   x <- matrix(NA, nrow = popSize, ncol = vars)
+#   probs <- seq(0.1, 0.90, length = popSize)
+#   for (i in 1:popSize) {
+#     x[i, ] <- 
+#       sample(0:1, replace = TRUE, size = vars, prob = c(probs[i], 1 - probs[i]))
+#   }
+#   var_count <- apply(x, 1, sum)
+#   if (any(var_count == 0)) {
+#     for (i in which(var_count == 0)) {
+#       p <- sample(1:length(vars), size = 2)
+#       x[i, p] <- 1
+#     }
+#   }
+#   return(x)
+# }
+# 
+# # Inner control
+# ga_ctrl_inner <- trainControl(method = "boot", p = 0.90, number = 1, summaryFunction = many_stats, classProbs = TRUE, 
+#                         allowParallel = FALSE)
+# 
+# # Outer control for SA
+# ga_ctrl_outer <- gafsControl(method = "cv", metric = c(internal = "Accuracy", external = "Accuracy"), 
+#                        maximize = c(internal = TRUE, external = TRUE), functions = ga_funcs, returnResamp = "all",
+#                        verbose = FALSE, allowParallel = TRUE)
+# 
+# # Arguments for klaR::NaiveBayes that is used to fit the SA model. Adjust is used for the kernel density estimation
+# ga_grid <- data.frame(mtry = 5)
+
+# my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
+# registerDoSNOW(my_cluster)
+# clusterExport(cl = my_cluster, "int_formula")
+# 
+# system.time({
+#   set.seed(8584)
+#   ga_acc <- gafs(ga_rec, data = ga_train, iters = 2, gafsControl = ga_ctrl_outer, method = "rf", tuneGrid = ga_grid,
+#                    trControl = ga_ctrl_inner, metric = "Accuracy", ntree = 1000)
+# })
+# 
+# save(ga_acc, file = "Genetic algorithm feature selection.RData")
+# 
+# stopCluster(my_cluster)
+# unregister()
+
+load("Genetic algorithm feature selection.RData")
+```
+
+```{r genetic-internal, warning = FALSE, results='hide', message=FALSE, fig.cap="Estimated performance of internal resamples from genetic algorithm."}
+ga_internal <- ga_acc$internal
+ga_internal2 <- ga_internal %>%
+  group_by(Iter) %>%
+  summarise(Accuracy = sum(Accuracy) / length(unique(ga_internal$Resample))) %>%
+  ungroup() %>%
+  mutate(Resample = "Averaged") %>%
+  bind_rows(ga_internal, .) %>%
+  mutate(colour_grp = if_else(Resample == "Averaged", "yes", "no"))
+
+ga_internal_avg <- ga_internal2 %>% filter(Resample == "Averaged") %>% select(Iter, Accuracy)
+  
+ggplot(ga_internal2, aes(x = Iter, y = Accuracy, colour = colour_grp)) +
+  geom_point() +
+  facet_wrap(~Resample) +
+  lims(y = c(0, NA)) +
+  theme(legend.position = "none")
+```
+
+```{r genetic-external, warning = FALSE, results='hide', message=FALSE, fig.cap="Estimated performance of external resamples from genetic algorithm."}
+ga_external <- ga_acc$external
+ga_external2 <- ga_external %>%
+  group_by(Iter) %>%
+  summarise(Accuracy = sum(Accuracy) / length(unique(ga_external$Resample))) %>%
+  ungroup() %>%
+  mutate(Resample = "Averaged") %>%
+  bind_rows(ga_external, .) %>%
+  mutate(colour_grp = if_else(Resample == "Averaged", "yes", "no"))
+
+ga_external_avg <- ga_external2 %>% filter(Resample == "Averaged") %>% select(Iter, Accuracy)
+
+ggplot(mapping = aes(x = Iter, y = Accuracy)) +
+  geom_point(data = ga_internal_avg, aes(colour = "red")) +
+  geom_point(data = ga_external_avg, aes(colour = "black")) +
+  geom_label(data = ga_external_avg, x = 5, y = 0.7, label = str_c("Corr: ", ext_int_corr)) +
+  labs(colour = "Estimate") +
+  scale_colour_hue(labels = c("Internal", "External"))
+```
+
+## Check performance with random subsets
+
+```{r rf-random, warning = FALSE, results='hide', message=FALSE, cache=TRUE}
+# my_subset_size <- length(sim_anneal_50_pct$optVariables)
+# my_vars <- sa_bake %>%
+#   select(-c("PassengerId", "Cabin", "Name", "LastName", "Transported")) %>%
+#   names(.)
+# map_seq <- 1:(length(my_vars)/2)
+# 
+# rand_subset <- map(map_seq, .f = \(x) sample(my_vars, my_subset_size))
+# rand_data <- map(rand_subset, .f = \(x) sa_bake %>% dplyr::select(Transported, x))
+# rand_rec <- map(rand_data, .f = \(x) recipe(Transported ~ ., data = x))
+# 
+# subset_ctrl <- trainControl(method = "cv", classProbs = TRUE, summaryFunction = many_stats)
+# subset_grid <- data.frame(mtry = 5)
+
+# my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
+# registerDoSNOW(my_cluster)
+# 
+# system.time({
+#   subset_model <- map2(.x = rand_rec, .y = rand_data, 
+#                        .f = \(rec, df) train(rec, data = df, method = "rf", tuneGrid = subset_grid, trControl = subset_ctrl,
+#                                              metric = "Accuracy"))
+# })
+# 
+# subset_perf <- map(subset_model, .f = \(m) getTrainPerf(m))
+#   
+# save(subset_perf, file = "Rf random subsets performance.RData")
+# rm(rand_subset, rand_data, rand_rec, subset_model)
+# 
+# stopCluster(my_cluster)
+# unregister()
+
+load("Rf random subsets performance.RData")
+```
+
+```{r rf-random-comparison, fig.cap="Comparison of different feature selection results with a random subset result."}
+rfe_acc_avg2 <- rfe_acc_avg %>%
+  enframe()
+rf_random_avg <- map_dbl(subset_perf, .f = \(x) x$TrainAccuracy)
+rf_random_avg2 <- rf_random_avg %>% enframe()
+
+ggplot() +
+  geom_point(data = rfe_acc_avg2, aes(x = name, y = value, colour = "RFE")) +
+  geom_point(data = rf_random_avg2, aes(x = name, y = value, colour = "Random")) +
+  geom_point(data = sim_ann_50_ext_avg, aes(x = Iter, y = Accuracy, colour = "SA")) +
+  geom_point(data = ga_internal_avg, aes(x = Iter, y = Accuracy, colour = "GA")) +
+  scale_colour_manual(values = c("RFE" = "green", "Random" = "darkgrey", "GA" = "red", "SA" = "orange")) +
+  labs(x = "Iterations", y = "Accuracy", colour = "Method") +
+  lims(x = c(0, 100))
+```
+We can see that the recursive feature elimination process outperforms the random variable subset. If we test for significance between our RFE results and the best results from the random subset, the p-values confirm that the difference is significant. 
+```{r rf-random-comparison-sign}
+wilcox.test(rfe_acc_avg, sort(rf_random_avg, decreasing = TRUE)[1:25], paired = TRUE)
+t.test(rfe_acc_avg, sort(rf_random_avg, decreasing = TRUE)[1:25], paired = TRUE)
+```
+```{r remove-06, include=FALSE}
+rm(rfe_split, rfe_train, rfe_funcs, rfe_vars, int_formula, rfe_rec, rfe_bake, rfe_sizes, rfe_ctrl, rfe_rec_corr, rfe_bake_corr,
+   rfe_split_all, rfe_train_all, rfe_rec_all, rfe_bake_all, rfe_sizes_all, rfe_vars_best_weird, int_form_weird,
+   rfe_rec_all_weird, rf_mod, rfe_all_weird_wf, sa_split, sa_train, my_vars, sa_rec, sa_bake, sa_funcs, sa_grid, sa_ctrl_inner,
+   sa_ctrl_outer, my_frq, pen_int_best, rfe_acc, rfe_acc_all, rfe_acc_all_weird, rfe_acc_corr, sim_ann_50_ext, sim_ann_50_ext2,
+   sim_ann_50_int, sim_ann_50_int2)
+```

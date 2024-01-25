@@ -10,15 +10,46 @@ encode_cat_to_numeric <- function(x) {
   return(x)
 }
 
-train6 <- train5 %>%
+add_name_features <- function(df) {
+  res <- df %>%
   mutate(LastNameAsNumber = encode_cat_to_numeric(LastName)) %>%
   add_count(x = ., LastNameAsNumber, name = "LastNameCount") %>%
   mutate(across(.cols = c(PassengerGroup, LastNameAsNumber), .fns = as.integer))
+}
+
+train6 <- add_name_features(train5)
 ```
+
+Let's also explore our count values for names visually to see how they look against the response.
+
+```{r explore-name-counts, results = "hide", warning = FALSE, message = FALSE, fig.cap = "Exploration of the counts of the LastName variable where LastNameCount is the number of passengers in total that share the same last name while LastNamesPerGroup is the number of passengers that share last name within a group."}
+df1 <- train6 %>%
+  select(Transported, LastNamesPerGroup) %>%
+  group_by(LastNamesPerGroup, Transported) %>%
+  summarise(count = n()) %>%
+  mutate(perc = count / sum(count))
+
+g1 <- ggplot(data = df1) +
+  geom_bar(aes(x = LastNamesPerGroup, y = perc*100, fill = Transported), stat = "identity") +
+  labs(y = "Percent transported")
+
+df2 <- train6 %>%
+  select(Transported, LastNameCount) %>%
+  group_by(LastNameCount, Transported) %>%
+  summarise(count = n()) %>%
+  mutate(perc = count / sum(count))
+
+g2 <- ggplot(data = df2) +
+  geom_bar(aes(x = LastNameCount, y = perc*100, fill = Transported), stat = "identity") +
+  labs(y = "Percent transported")
+
+g1 + g2 + plot_layout(guides = "collect", axis_titles = "collect_y")
+```
+There does seem to be some difference which is good news since it allows us to get some use of the name variable that in its original form didn't seem to have much variance. Hopefully these features will also prove to be beneficial.
 
 ## Age, CabinNumber and LastNames
 Kuhn and Johnson propose a smoothing function using `gam` from the `mgcv`-package to fit generalized additive models for numeric variables against the response. I've modified their function somewhat.
-```{r smooth, results = "hide", fig.cap = "Smoothed plots that show probability distribution of continuous variables against the average response"}
+```{r smooth-age, results = "hide", fig.cap="General additive model (GAM) plots for Age with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_smooth_plot <- function(d, v) {
   TransportedRate <- mean(d$Transported == "True")
   
@@ -29,7 +60,7 @@ my_smooth_plot <- function(d, v) {
   my_df_small <- my_df %>%
     distinct(!!sym(v))
 
-  gam_model <- gam(as.formula(paste("Transported", "~ s(", v, ")")), data = my_df, family = binomial())
+  gam_model <- mgcv::gam(as.formula(paste("Transported", "~ s(", v, ")")), data = my_df, family = binomial())
  
   my_df_small <- my_df_small %>%
     mutate(
@@ -45,48 +76,79 @@ my_smooth_plot <- function(d, v) {
   g <- ggplot(my_df_small, aes(x = !!sym(v))) + 
         geom_line(aes(y = probability)) + 
         geom_ribbon(aes(ymin = lower, ymax = upper), fill = "grey", alpha = .5) + 
-        geom_hline(yintercept = TransportedRate, col = "red", alpha = .35, lty = 2)  + 
+        geom_hline(yintercept = TransportedRate, col = "red", alpha = .8, lty = 4)  + 
         scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0, 1)) +
         labs(x = v, title = paste("Smoothed", v))
 
   return(g)
 }
 
-train6 %>%
-  select(Age, PassengerGroup, CabinNumber, LastNameAsNumber) %>%
-  names(.) %>%
-  map(.x = ., .f = \(varz) my_smooth_plot(train6, varz))
+my_smooth_plot(train6, "Age")
 ```
+
+Passengers younger that 15 years of age seem to have a higher chance to be transported, with the effect being more significant the younger the passenger is. For the rest of the passengers, age doesn't seem to matter much.
+
+```{r smooth-passengergroup, results = "hide", fig.cap="General additive model (GAM) plots for PassengerGroup with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_smooth_plot(train6, "PassengerGroup")
+```
+
+Passenger groups seem to have some effect although the variable is correlated with CabinNumber which, in turn, is likely correlated to Deck that might explain the differences
+
+```{r smooth-cabinnumber, results = "hide", fig.cap = "General additive model (GAM) plots for CabinNumber with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_smooth_plot(train6, "CabinNumber")
+```
+
+CabinNumber shows some effect but if we look at the Deck for the numbers that seem to make the biggest difference, we see that all those cabins are in decks F and G.
+
+```{r smooth-lastname, results = "hide", fig.cap = "General additive model (GAM) plots for LastNameAsNumber with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_smooth_plot(train6, "LastNameAsNumber")
+```
+
+LastName seemes to have no effect.
 
 ## Amenities
 The amenity variables that are zero might reflect the fact that the passenger is in cryosleep so let's filter that out.
-```{r amenities}
-train6 %>%
-  filter(CryoSleep == FALSE) %>%
-  select(RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent) %>%
-  names(.) %>%
-  map(.x = ., .f = \(varz) my_smooth_plot(train6, varz))
+```{r roomservice, results = "hide", fig.cap = "General additive model (GAM) plots for RoomService with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "RoomService")
 ```
 
+```{r vrdeck, results = "hide", fig.cap = "General additive model (GAM) plots for VRDeck with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "VRDeck")
+```
+
+```{r spa, results = "hide", fig.cap = "General additive model (GAM) plots for Spa with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "Spa")
+```
+
+Passengers who spent credits on RoomService, Spa and VRDeck seem to have been less likely to be transported.
+
+```{r shoppingmall, results = "hide", fig.cap = "General additive model (GAM) plots for ShoppingMall with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "ShoppingMall")
+```
+
+```{r foodcourt, results = "hide", fig.cap = "General additive model (GAM) plots for FoodCourt with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "FoodCourt")
+```
+
+Passengers who spent credits at the FoodCourt or ShoppingMall seem instead to have been more likely to be transported
+
+```{r totalspent, results = "hide", fig.cap = "General additive model (GAM) plots for TotalSpent with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "TotalSpent")
+```
+
+Our TotalSpent variable probably smooths out the effects of individual amenities and might reduce model performance. We should be prepared to remove it from our models.
+
 ## Correlations
-Finally, we can see if our new numerical variables correlate highly with some others.
+We can see if our new numerical variables correlate highly with some others.
 ```{r correlation-numeric}
 train6 %>%
   select(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, CabinNumber, LastNameAsNumber, PassengerGroup) %>%
-  plot_correlation(., type = "continuous", geom_text_args = list(size = 10), 
+  DataExplorer::plot_correlation(., type = "continuous", geom_text_args = list(size = 10), 
                    theme_config = list(text = element_text(size = 15), axis.text.x = element_text(angle = 90)))
 ```
 
-We can note several interesting things: 
+PassengerGroup and CabinNumber are relatively correlated which could cause problems with some models that are sensitive to correlated variables. We should consider using one of of each variable and see which one gives better results.
 
-1. Passengers younger that 15 years of age seem to have a higher chance to be transported, with the effect being more significant the younger the passenger is. For the rest of the passengers, age doesn't seem to matter much.
-
-2. Passenger groups seem to have some effect although the variable is correlated with CabinNumber which, in turn, is likely correlated to Deck that might explain the differences
-
-3. CabinNumber shows some effect but if we look at the Deck for the numbers that seem to make the biggest difference, we see that all those cabins are in decks F and G.
-
-4. LastName seemes to have no effect.
-
-5. Passengers who spent credits on RoomService, Spa and VRDeck seem to have been less likely to be transported while the opposite is true for those that spent credits at the FoodCourt or ShoppingMall. 
-
-6. Our TotalSpent variable probably smooths out the effects of individual amenities and might reduce model performance. We should be prepared to remove it from our models.
+```{r remove-04, include=FALSE}
+rm(df1, df2, g1, g2)
+```
