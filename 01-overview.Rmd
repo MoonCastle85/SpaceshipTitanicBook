@@ -1,6 +1,6 @@
 # Early data exploration
 ## Overview of the data
-The data has already been divided into train and test sets so let's load them and get a sense of how the *train* data looks like. We'll also try to be very strict with the machine learning principles and not touch or even look at the *test* data until the end. 
+The data has already been divided into train and test sets so let's load them and get a sense of how the *train* data looks like. We'll leave the *test* data (won't even look at it) until the end. 
 
 Let's first get a sense of the train data.
 ```{r overview}
@@ -8,17 +8,17 @@ train <- read.csv("train.csv", na.strings = "")
 str(train)
 ```
 
-There are 8693 observations and 14 variables where "Transported" is the target variable. The specifics on the different variables are explained in detail on the competition website so I won't repeat them here. It's enough to note that there is a mix of categorical and continuous variables and that our target variable is expressed as True/False in a character vector.
+There are 8693 observations and 14 variables where "Transported" is the response. The specifics on the different variables are explained in detail on the competition website so I won't repeat them here. It's enough to note that there is a mix of categorical and numerical variables and that our response is a binary classification (True or False).
 
 ## Do some variables have zero or near-zero variance?
-One of the first things that might be useful to check is whether any of the variables have zero or near-zero variance. A zero variance variable is one where all rows have the same value (imagine a variable where all rows are just the number 1). Such variables are not useful for prediction since they don't change regardless of how the target variable changes.
+One of the first things that might be useful to check is whether any of the variables have zero or near-zero variance. A zero variance variable is one where all rows have the same value (imagine a variable where all rows are just the number 1). Such variables are not useful for prediction since they don't change in any way with the response.
 
-Their close cousin are the near-zero variances where a high percentage of the rows have the same value but some don't. This can be particularly problematic when we want to do repeated cross validation where we divide the data into subdata to test our models. Some of these subdata might then have zero variance while other subdata might get a high variance for the same variable. 
+Their close cousin are the near-zero variances where a high percentage of the rows have the same value but a few don't. This can be particularly problematic when we want to do repeated cross validation where we divide the data into subdata to test our models. Some of these subdata might then have zero variance while others might get a high variance for the same variable. 
 ```{r variance}
 nearZeroVar(train, saveMetrics = TRUE) %>% rownames_to_column() %>% filter(nzv)
 ```
 
-Only the VIP variable has near-zero variation (2.3% of all rows). We'll deal with this later.
+Only the VIP variable has near-zero variation (2.3% of all rows). We'll see if this becomes an issue later in our process.
 
 ## Frequency distribution of all variables
 Let's see how the values of the different variables are distributed.
@@ -26,8 +26,9 @@ Let's see how the values of the different variables are distributed.
 sjPlot::plot_frq(train, Transported, type = "histogram")
 ```
 
-The response in the training set is balanced which is good and we don't need to do under- or oversampling to balance it. A balanced response is necessary for tuning many models.
-```{r frequencies2, message = FALSE, cache=TRUE, fig.cap = "Distribution of the variables against the response"}
+The response in the training set is balanced which is good and means we don't need to do any under- or oversampling to balance it. A balanced response is necessary for tuning many models since it makes the metrics we tune against make more sense. If there was a great unbalance in the true responses vs the false ones, then metrics like accuracy might be distorted since even random guesses might give us high accuracy just from the fact that the distirbution is unbalanced.
+
+```{r frequencies2, message = FALSE, cache=TRUE, fig.cap = "Distribution of the predictor variables"}
 my_frq <- sjPlot::plot_frq(train, type = "histogram")
 save_plot <- function(p, i) {
   ggsave(filename = paste0("Variable", i, ".png"), plot = p)
@@ -38,14 +39,12 @@ slickR::slickR(plotsToSVG, height = "480px", width = "672px") +
   slickR::settings(slidesToShow = 1)
 ```
 
-The target variable is balanced which is preferable. An unbalanced distribution of the target variable (meaning that the share of one outcome vastly outweighs the other) can skew the predictive results of some algorithms. Fortunately, we do not have to apply any resampling or downsampling methods to balance it.
-
-The numeric variables are right-skewed, meaning they have outliers to the right of the horizontal axis and the amenities (RoomService, FoodCourt etc) have a high proportion of zero values. The difference in scales is also large. We will need to apply some kind of preproces to scale them to help out models like K-nearest-neighbors (KNN). We might also need to add binary features (yes/no or 1/0) for the amenities that are zero.
+All of the numeric variables are right-skewed, which means they have outliers to the right of the horizontal axis and the amenities (RoomService, FoodCourt etc) have a high proportion of zero values. The difference in scales is also large. We will need to apply some kind of preproces to scale them down to help out models like K-nearest-neighbors (KNN). We might also need to add binary features (yes/no or 1/0) for the amenities that are zero to perhaps help the models differentiate them from the rest.
 
 The Cabin and Name variables have a near uniform distribution which implies that they either won't have much predictive power by themselves or could even reduce the accuracy by introducing unnecessary noise to the model. We will either have to derive features from these variables or not include them in the models.
 
 ## Correlation between the variables
-```{r correlation, results = "hide", warning = FALSE, message = FALSE, fig.cap = "Correlation between numerical variables"}
+```{r correlation, results = "hide", warning = FALSE, message = FALSE, fig.cap = "Correlation between numerical predictor variables"}
 train %>%
   na.omit(.) %>%
 DataExplorer::plot_correlation(., type = "all", theme_config = list(text = element_text(size = 20), axis.text.x = element_text(angle = 90)))
@@ -58,7 +57,9 @@ We see that there's some relatively high correlation between home planets and de
 plot_na_hclust(train)
 ```
 
-All predictor variables are missing to the amount of 2% which is relatively low. When we cluster the missing values, we can also see that most don't overlap which suggests that they're missing at random and not due to some specific pattern. This tells us that we can probably find a suitable algorithm to help us impute the missing values based on the non-missing values. Had there been a pattern or clusters of missing data, we'd have to explore further to uncover the reasons for such non-random missingness.
+All of the predictor variables have around 2% missing data which is relatively low. When we cluster the missing values, we can also see that most don't overlap which suggests that they're missing at random and not due to some specific pattern. This tells us that we can probably find a suitable algorithm to help us impute the missing values based on the non-missing values. Had there been a pattern or clusters of missing data, we'd have to explore further to uncover the reasons for such non-random missingness.
+
+However, we will see in our exploration of the data that there might be some pattern missingness, or at least values that are missing that can be inferred from the others.
 
 ```{r remove-01, include=FALSE}
 rm(plotsToSVG)
