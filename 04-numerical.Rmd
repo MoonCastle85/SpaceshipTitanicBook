@@ -22,7 +22,7 @@ train6 <- add_name_features(train5)
 
 Let's also explore our count values for names visually to see how they look against the response.
 
-```{r explore-name-counts, results = "hide", warning = FALSE, message = FALSE, fig.cap = "Exploration of the counts of the LastName variable where LastNameCount is the number of passengers in total that share the same last name while LastNamesPerGroup is the number of passengers that share last name within a group."}
+```{r explore-name-counts, warning = FALSE, message = FALSE, fig.cap = "Exploration of the counts of the LastName variable where LastNameCount is the number of passengers in total that share the same last name while LastNamesPerGroup is the number of passengers that share last name within a group."}
 df1 <- train6 %>%
   select(Transported, LastNamesPerGroup) %>%
   group_by(LastNamesPerGroup, Transported) %>%
@@ -49,7 +49,7 @@ There does seem to be some difference which is good news since it allows us to g
 
 ## Age, CabinNumber and LastNames
 Kuhn and Johnson propose a smoothing function using `gam` from the `mgcv`-package to fit generalized additive models for numeric variables against the response. I've modified their function somewhat.
-```{r smooth-age, results = "hide", fig.cap="General additive model (GAM) plots for Age with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r smooth-age, fig.cap="General additive model (GAM) plots for Age with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_smooth_plot <- function(d, v) {
   TransportedRate <- mean(d$Transported == "True")
   
@@ -88,19 +88,19 @@ my_smooth_plot(train6, "Age")
 
 Passengers younger that 15 years of age seem to have a higher chance to be transported, with the effect being more significant the younger the passenger is. For the rest of the passengers, age doesn't seem to matter much.
 
-```{r smooth-passengergroup, results = "hide", fig.cap="General additive model (GAM) plots for PassengerGroup with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r smooth-passengergroup, fig.cap="General additive model (GAM) plots for PassengerGroup with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_smooth_plot(train6, "PassengerGroup")
 ```
 
 Passenger groups seem to have some effect although the variable is correlated with CabinNumber which, in turn, is likely correlated to Deck that might explain the differences
 
-```{r smooth-cabinnumber, results = "hide", fig.cap = "General additive model (GAM) plots for CabinNumber with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r smooth-cabinnumber, fig.cap = "General additive model (GAM) plots for CabinNumber with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_smooth_plot(train6, "CabinNumber")
 ```
 
 CabinNumber shows some effect but if we look at the Deck for the numbers that seem to make the biggest difference, we see that all those cabins are in decks F and G.
 
-```{r smooth-lastname, results = "hide", fig.cap = "General additive model (GAM) plots for LastNameAsNumber with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r smooth-lastname, fig.cap = "General additive model (GAM) plots for LastNameAsNumber with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_smooth_plot(train6, "LastNameAsNumber")
 ```
 
@@ -108,31 +108,31 @@ LastName seemes to have no effect.
 
 ## Amenities
 The amenity variables that are zero might reflect the fact that the passenger is in cryosleep so let's filter that out.
-```{r roomservice, results = "hide", fig.cap = "General additive model (GAM) plots for RoomService with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r roomservice, fig.cap = "General additive model (GAM) plots for RoomService with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "RoomService")
 ```
 
-```{r vrdeck, results = "hide", fig.cap = "General additive model (GAM) plots for VRDeck with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r vrdeck, fig.cap = "General additive model (GAM) plots for VRDeck with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "VRDeck")
 ```
 
-```{r spa, results = "hide", fig.cap = "General additive model (GAM) plots for Spa with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r spa, fig.cap = "General additive model (GAM) plots for Spa with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "Spa")
 ```
 
 Passengers who spent credits on RoomService, Spa and VRDeck seem to have been less likely to be transported.
 
-```{r shoppingmall, results = "hide", fig.cap = "General additive model (GAM) plots for ShoppingMall with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r shoppingmall, fig.cap = "General additive model (GAM) plots for ShoppingMall with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "ShoppingMall")
 ```
 
-```{r foodcourt, results = "hide", fig.cap = "General additive model (GAM) plots for FoodCourt with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r foodcourt, fig.cap = "General additive model (GAM) plots for FoodCourt with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "FoodCourt")
 ```
 
 Passengers who spent credits at the FoodCourt or ShoppingMall seem instead to have been more likely to be transported
 
-```{r totalspent, results = "hide", fig.cap = "General additive model (GAM) plots for TotalSpent with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r totalspent, fig.cap = "General additive model (GAM) plots for TotalSpent with smoothed confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "TotalSpent")
 ```
 

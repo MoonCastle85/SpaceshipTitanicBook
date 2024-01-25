@@ -90,7 +90,7 @@ We can return to this visual understanding of the relationship between the categ
 ## Correspondence Analysis
 Correspondence analysis uses the residuals from the contingency table of two variables compared to the frequency table the variables would've had if they were unrelated to each other. \@ref(fig:correspondence-dest-deck) shows the correspondence analysis between Destination and Deck.
 
-```{r correspondence-dest-deck, results = "hide", fig.cap = "Correspondance analysis of Destination and Deck variables."}
+```{r correspondence-dest-deck, fig.cap = "Correspondance analysis of Destination and Deck variables."}
 plot(FactoMineR::CA(base::table(Deck = train4$Deck, Destination = train4$Destination), graph = FALSE), 
      title = "Destination and Deck")
 ```
@@ -107,7 +107,7 @@ The way to read this plot is as follows:
 
 We can check if these insights make sense in our mosaic plot above. For example, decks A-C do seem to an unusually high proportion of passengers that travel to Cancri while decks D-G do seem to be more common for travellers to Trappist although the relationship is more moderate. 
 
-```{r correspondence-home-deck, results = "hide", fig.cap = "Correspondance analysis of HomePlanet and Deck variables."}
+```{r correspondence-home-deck, fig.cap = "Correspondance analysis of HomePlanet and Deck variables."}
 plot(FactoMineR::CA(base::table(Deck = train4$Deck, HomePlanet = train4$HomePlanet), graph = FALSE), 
      title = "HomePlanet and Deck")
 ```
@@ -163,13 +163,13 @@ slickR::slickR(plotsToSVG, height = "480px", width = "672px") +
 
 We see a lot of interesting details so let us focus on a few of our features that relate to the passenger group.
 
-```{r binom-passgrp, warning = FALSE, results = "hide", message = FALSE, fig.cap = "PassengerGroupSize plotted as a binomial plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r binom-passgrp, warning = FALSE, message = FALSE, fig.cap = "PassengerGroupSize plotted as a binomial plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_binom_plot(train4, "PassengerGroupSize", "Transported")
 ```
 
 \@ref(fig:binom-passgrp) suggests that there might be a difference between passengers who travel alone and those who don't. Perhaps a binary feature that tracks whether a passenger travels solo or is within a group could be of benefit. Also, perhaps very large groups are less likely to be transported, although we don't have much data here.
 
-```{r binom-destgrp, warning = FALSE, results = "hide", message = FALSE, fig.cap = "DestinationsPerGroup plotted as a binomial plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
+```{r binom-destgrp, warning = FALSE, message = FALSE, fig.cap = "DestinationsPerGroup plotted as a binomial plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_binom_plot(train4, "DestinationsPerGroup", "Transported")
 ```
 
@@ -190,7 +190,7 @@ train5 <- add_grp_features(train4)
 
 Let's explore the VIP variables a bit more. \@ref(fig:VIP-binom) suggests that the chances of being transported are higher for passengers who are in a group where another passenger has a VIP ticket at the same time as having a VIP ticket by itself seems to reduce the chance of being transported.
 
-```{r VIP-binom, warning = FALSE, results = "hide", message = FALSE, fig.cap="A closer look at the VIP variable and its relation to the response."}
+```{r VIP-binom, warning = FALSE, message = FALSE, fig.cap="A closer look at the VIP variable and its relation to the response."}
 my_binom_plot(train5, "VIP", "Transported")
 my_binom_plot(train5, "VIPsPerGroup", "Transported")
 ```
@@ -199,7 +199,7 @@ Based on what we can see in \@ref(fig:VIP-variable), the passengers that are in 
 
 We will explore the effects of the numerical variables in the next chapter.
 
-```{r VIP-variable, warning = FALSE, results = "hide", message = FALSE, fig.cap="A closer look at VIP and VIPsPerGroup against the response."}
+```{r VIP-variable, warning = FALSE, message = FALSE, fig.cap="A closer look at VIP and VIPsPerGroup against the response."}
 g1 <- train5 %>%
   select(VIP, Transported, VIPsPerGroup) %>%
   filter(VIPsPerGroup == 2) %>%

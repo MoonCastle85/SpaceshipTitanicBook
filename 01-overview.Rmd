@@ -22,7 +22,7 @@ Only the VIP variable has near-zero variation (2.3% of all rows). We'll see if t
 
 ## Frequency distribution of all variables
 Let's see how the values of the different variables are distributed.
-```{r frequencies, results = "hide", fig.cap = "Distribution of the response"}
+```{r frequencies, fig.cap = "Distribution of the response"}
 sjPlot::plot_frq(train, Transported, type = "histogram")
 ```
 
