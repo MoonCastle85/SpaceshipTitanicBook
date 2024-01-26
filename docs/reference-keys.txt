@@ -27,11 +27,9 @@ fig:smooth-passengergroup
 fig:smooth-cabinnumber
 fig:smooth-lastname
 fig:roomservice
-fig:vrdeck
-fig:spa
 fig:shoppingmall
-fig:foodcourt
 fig:totalspent
+fig:interactions-all
 fig:int-cryo-home
 fig:int-deck-side
 fig:pen-reg-without-int2

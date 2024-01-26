@@ -88,7 +88,7 @@ The mosaic plot can be read from horisontally where we can see how the height of
 We can return to this visual understanding of the relationship between the categorical variables whenever we want to check if some relationship metric makes sense. For example, we can see that the differences between Side and some of the variables that didn't fall outside the 5% p-value, like HomePlanet, seem relatively small.
 
 ## Correspondence Analysis
-Correspondence analysis uses the residuals from the contingency table of two variables compared to the frequency table the variables would've had if they were unrelated to each other. \@ref(fig:correspondence-dest-deck) shows the correspondence analysis between Destination and Deck.
+Correspondence analysis uses the residuals from the contingency table of two variables compared to the frequency table the variables would've had if they were unrelated to each other. Figure \@ref(fig:correspondence-dest-deck) shows the correspondence analysis between Destination and Deck.
 
 ```{r correspondence-dest-deck, fig.cap = "Correspondance analysis of Destination and Deck variables."}
 plot(FactoMineR::CA(base::table(Deck = train4$Deck, Destination = train4$Destination), graph = FALSE), 
@@ -167,13 +167,13 @@ We see a lot of interesting details so let us focus on a few of our features tha
 my_binom_plot(train4, "PassengerGroupSize", "Transported")
 ```
 
-\@ref(fig:binom-passgrp) suggests that there might be a difference between passengers who travel alone and those who don't. Perhaps a binary feature that tracks whether a passenger travels solo or is within a group could be of benefit. Also, perhaps very large groups are less likely to be transported, although we don't have much data here.
+Figure \@ref(fig:binom-passgrp) suggests that there might be a difference between passengers who travel alone and those who don't. Perhaps a binary feature that tracks whether a passenger travels solo or is within a group could be of benefit. Also, perhaps very large groups are less likely to be transported, although we don't have much data here.
 
 ```{r binom-destgrp, warning = FALSE, message = FALSE, fig.cap = "DestinationsPerGroup plotted as a binomial plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 my_binom_plot(train4, "DestinationsPerGroup", "Transported")
 ```
 
-\@ref(fig:binom-destgrp) suggests that there might be some slight difference between groups of passengers that all travelled to the same destination and those that didn't. While the differences are small, the presence of this feature might improve some models.
+Figure \@ref(fig:binom-destgrp) suggests that there might be some slight difference between groups of passengers that all travelled to the same destination and those that didn't. While the differences are small, the presence of this feature might improve some models.
 
 Let's create a function that will add the new features we've discovered to our data.
 
@@ -188,14 +188,14 @@ add_grp_features <- function(df) {
 train5 <- add_grp_features(train4)
 ```
 
-Let's explore the VIP variables a bit more. \@ref(fig:VIP-binom) suggests that the chances of being transported are higher for passengers who are in a group where another passenger has a VIP ticket at the same time as having a VIP ticket by itself seems to reduce the chance of being transported.
+Let's explore the VIP variables a bit more. Figure \@ref(fig:VIP-binom) suggests that the chances of being transported are higher for passengers who are in a group where another passenger has a VIP ticket at the same time as having a VIP ticket by itself seems to reduce the chance of being transported.
 
 ```{r VIP-binom, warning = FALSE, message = FALSE, fig.cap="A closer look at the VIP variable and its relation to the response."}
 my_binom_plot(train5, "VIP", "Transported")
 my_binom_plot(train5, "VIPsPerGroup", "Transported")
 ```
 
-Based on what we can see in \@ref(fig:VIP-variable), the passengers that are in groups where more than one passenger has a VIP-ticket are more likely to be transported. This can be related to the fact that VIP-passengers spend more amenities which, in turn, might increase the chances of being transported. 
+Based on what we can see in Figure \@ref(fig:VIP-variable), the passengers that are in groups where more than one passenger has a VIP-ticket are more likely to be transported. This can be related to the fact that VIP-passengers spend more amenities which, in turn, might increase the chances of being transported. 
 
 We will explore the effects of the numerical variables in the next chapter.
 

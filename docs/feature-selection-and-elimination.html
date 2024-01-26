@@ -73,7 +73,7 @@
 <span class="header-section-number">7.1</span> Recursive feature elimination<a class="anchor" aria-label="anchor" href="#recursive-feature-elimination"><i class="fas fa-link"></i></a>
 </h2>
 <p>On method is to create a model with that includes all features and through a resampling process remove sets of variables to test how it improves performance. We will start with our smaller set of interactions since this process is computationally demanding.</p>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train7</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -131,7 +131,7 @@
 <span><span class="co"># unregister()</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Recursive feature elimination with interactions.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_acc</span><span class="op">$</span><span class="va">results</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">.</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Variables</span>, y <span class="op">=</span> <span class="va">Accuracy</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -142,7 +142,7 @@
 Figure 7.1: Estimated performance with recursive feature elimination based on the number of variables that are included
 </p>
 </div>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_bake</span> <span class="op">%&gt;%</span> </span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">rfe_acc</span><span class="op">[[</span><span class="st">"optVariables"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">DataExplorer</span><span class="fu">::</span><span class="fu"><a href="http://boxuancui.github.io/DataExplorer/reference/plot_correlation.html">plot_correlation</a></span><span class="op">(</span><span class="va">.</span>, type <span class="op">=</span> <span class="st">"continuous"</span>, geom_text_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, </span>
@@ -154,7 +154,7 @@ Figure 7.2: Correlation between the first set of optimal variables from the RFE 
 </p>
 </div>
 <p>We see that there are several variables with relatively high correlation that could be introducing noise to our model. Let’s add a step to remove correlated variables and see how it affects performance.</p>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_rec_corr</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span>x <span class="op">=</span> <span class="va">rfe_train</span>, vars <span class="op">=</span> <span class="va">rfe_vars</span><span class="op">$</span><span class="va">Variables</span>, roles <span class="op">=</span> <span class="va">rfe_vars</span><span class="op">$</span><span class="va">Roles</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">TotalSpent</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span>,</span>
 <span>                 <span class="va">TotalSpentPerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -181,7 +181,7 @@ Figure 7.2: Correlation between the first set of optimal variables from the RFE 
 <span><span class="co"># unregister()</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Recursive feature elimination with interactions removed correlated.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_acc_corr</span><span class="op">$</span><span class="va">results</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">.</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Variables</span>, y <span class="op">=</span> <span class="va">Accuracy</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -193,7 +193,7 @@ Figure 7.3: Estimated performance with recursive feature elimination based on th
 </p>
 </div>
 <p>I’m not sure why the results contain variables above 55 that was our tuning max but the model has similar performance as the one without removal of correlations and still considers 45 variables to be optimal.</p>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_opt_vars1</span> <span class="op">&lt;-</span> <span class="va">rfe_acc_corr</span><span class="op">[[</span><span class="st">"optVariables"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">rfe_opt_vars1</span></span>
 <span><span class="co">#&gt;  [1] "VRDeck"                                 </span></span>
@@ -250,7 +250,7 @@ Figure 7.3: Estimated performance with recursive feature elimination based on th
 <span>         RevFormula <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">V2</span>, <span class="st">"'):starts_with('"</span>, <span class="va">V1</span>, <span class="st">"')"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">V1</span>, <span class="va">V2</span>, <span class="va">ForFormula</span>, <span class="va">RevFormula</span><span class="op">)</span></span></code></pre></div>
 <p>For a final run, we can also add the interactions that we considered based on the results from the tree model to this optimal set of variables and see if they improve the model.</p>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
 <span><span class="va">rfe_split_all</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">train7</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
 <span><span class="va">rfe_train_all</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">rfe_split_all</span><span class="op">)</span></span>
@@ -310,7 +310,7 @@ Figure 7.3: Estimated performance with recursive feature elimination based on th
 <span><span class="co"># unregister()</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Recursive feature elimination final.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_acc_all</span><span class="op">$</span><span class="va">results</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">.</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Variables</span>, y <span class="op">=</span> <span class="va">Accuracy</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -322,7 +322,7 @@ Figure 7.4: Estimated performance with recursive feature elimination with all in
 </p>
 </div>
 <p>I’m not sure why the results contain variables above 55 that was our tuning max but the model has similar performance as the one without removal of correlations and still considers 45 variables to be optimal.</p>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_acc_avg</span> <span class="op">&lt;-</span> <span class="va">rfe_acc_all</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">Accuracy</span></span>
 <span></span>
 <span><span class="va">rfe_vars_best</span> <span class="op">&lt;-</span> <span class="va">rfe_acc_all</span><span class="op">[[</span><span class="st">"optVariables"</span><span class="op">]</span><span class="op">]</span></span>
@@ -335,7 +335,7 @@ Figure 7.4: Estimated performance with recursive feature elimination with all in
 <span>         RevFormula <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">V2</span>, <span class="st">"'):starts_with('"</span>, <span class="va">V1</span>, <span class="st">"')"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">V1</span>, <span class="va">V2</span>, <span class="va">ForFormula</span>, <span class="va">RevFormula</span><span class="op">)</span></span></code></pre></div>
 <p>Since I’m not sure why we got results for 170 variables and more, let’s test that set of variables with randomForest to see if the results are consistent.</p>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_vars_best_weird</span> <span class="op">&lt;-</span> <span class="va">rfe_acc_all</span><span class="op">$</span><span class="va">variables</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="fl">170</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">var</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -397,7 +397,7 @@ Figure 7.4: Estimated performance with recursive feature elimination with all in
 <h2>
 <span class="header-section-number">7.2</span> Simulated annealing<a class="anchor" aria-label="anchor" href="#simulated-annealing"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
 <span><span class="va">sa_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">train7</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
 <span><span class="va">sa_train</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">sa_split</span><span class="op">)</span></span>
@@ -469,7 +469,7 @@ Figure 7.4: Estimated performance with recursive feature elimination with all in
 <span><span class="co"># unregister()</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Simulated annealing with 50% inital.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_ann_50_int</span> <span class="op">&lt;-</span> <span class="va">sim_anneal_50_pct</span><span class="op">$</span><span class="va">internal</span></span>
 <span><span class="va">sim_ann_50_int2</span> <span class="op">&lt;-</span> <span class="va">sim_ann_50_int</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -491,7 +491,7 @@ Figure 7.4: Estimated performance with recursive feature elimination with all in
 Figure 7.5: Estimated performance of internal resamples from simulated annealing.
 </p>
 </div>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_ann_50_ext</span> <span class="op">&lt;-</span> <span class="va">sim_anneal_50_pct</span><span class="op">$</span><span class="va">external</span></span>
 <span><span class="va">sim_ann_50_ext2</span> <span class="op">&lt;-</span> <span class="va">sim_ann_50_ext</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -516,7 +516,7 @@ Figure 7.5: Estimated performance of internal resamples from simulated annealing
 Figure 7.6: Estimated performance of external resamples from simulated annealing.
 </p>
 </div>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_ann_50_final</span> <span class="op">&lt;-</span> <span class="va">sim_anneal_50_pct</span><span class="op">$</span><span class="va">sa</span></span>
 <span><span class="va">sim_ann_50_final2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Iter <span class="op">=</span> <span class="va">sim_ann_50_final</span><span class="op">[[</span><span class="st">"internal"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Iter</span>, Accuracy <span class="op">=</span> <span class="va">sim_ann_50_final</span><span class="op">[[</span><span class="st">"internal"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Accuracy</span>,</span>
 <span>                                Subset_Size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">sim_ann_50_final</span><span class="op">[[</span><span class="st">"subsets"</span><span class="op">]</span><span class="op">]</span>, <span class="va">length</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -532,7 +532,7 @@ Figure 7.7: Estimated performance of best resample from simulated annealing.
 </p>
 </div>
 <p>The results from simulated annealing indicate much lower accuracy overall which could be due to the fact that the Naive Bayes model doesn’t perform as well as randomForest did for our recursive feature elimination procedure. The optimal set of variables was 73 which is very similar to the RFE process. Let’s save them for our final model comparison.</p>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sa_vars_best</span> <span class="op">&lt;-</span> <span class="va">sim_anneal_50_pct</span><span class="op">[[</span><span class="st">"optVariables"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">sa_vars_best2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>term <span class="op">=</span> <span class="va">sa_vars_best</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">term</span>, <span class="st">"_x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -542,7 +542,7 @@ Figure 7.7: Estimated performance of best resample from simulated annealing.
 <span>         RevFormula <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"starts_with('"</span>, <span class="va">V2</span>, <span class="st">"'):starts_with('"</span>, <span class="va">V1</span>, <span class="st">"')"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">V1</span>, <span class="va">V2</span>, <span class="va">ForFormula</span>, <span class="va">RevFormula</span><span class="op">)</span></span></code></pre></div>
 <p>If we compare the best variables from the RFE process with the SA process, we can see which one overlap and which don’t.</p>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">best_vars_rfe_sa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html">intersect</a></span><span class="op">(</span><span class="va">rfe_vars_best</span>, <span class="va">sa_vars_best</span><span class="op">)</span></span>
 <span><span class="va">best_vars_rfe_sa</span></span>
 <span><span class="co">#&gt;  [1] "RoomService_x_VRDeck"                 </span></span>
@@ -577,7 +577,7 @@ Figure 7.7: Estimated performance of best resample from simulated annealing.
 <h2>
 <span class="header-section-number">7.3</span> Genetic algorithm<a class="anchor" aria-label="anchor" href="#genetic-algorithm"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set.seed(8584)</span></span>
 <span><span class="co"># ga_split &lt;- initial_split(train7, prop = 0.8)</span></span>
 <span><span class="co"># ga_train &lt;- training(ga_split)</span></span>
@@ -658,7 +658,7 @@ Figure 7.7: Estimated performance of best resample from simulated annealing.
 <span><span class="co"># unregister()</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Genetic algorithm feature selection.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ga_internal</span> <span class="op">&lt;-</span> <span class="va">ga_acc</span><span class="op">$</span><span class="va">internal</span></span>
 <span><span class="va">ga_internal2</span> <span class="op">&lt;-</span> <span class="va">ga_internal</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -681,7 +681,7 @@ Figure 7.7: Estimated performance of best resample from simulated annealing.
 Figure 7.8: Estimated performance of internal resamples from genetic algorithm.
 </p>
 </div>
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ga_external</span> <span class="op">&lt;-</span> <span class="va">ga_acc</span><span class="op">$</span><span class="va">external</span></span>
 <span><span class="va">ga_external2</span> <span class="op">&lt;-</span> <span class="va">ga_external</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -710,7 +710,7 @@ Figure 7.9: Estimated performance of external resamples from genetic algorithm.
 <h2>
 <span class="header-section-number">7.4</span> Check performance with random subsets<a class="anchor" aria-label="anchor" href="#check-performance-with-random-subsets"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># my_subset_size &lt;- length(sim_anneal_50_pct$optVariables)</span></span>
 <span><span class="co"># my_vars &lt;- sa_bake %&gt;%</span></span>
 <span><span class="co">#   select(-c("PassengerId", "Cabin", "Name", "LastName", "Transported")) %&gt;%</span></span>
@@ -742,7 +742,7 @@ Figure 7.9: Estimated performance of external resamples from genetic algorithm.
 <span><span class="co"># unregister()</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Rf random subsets performance.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_acc_avg2</span> <span class="op">&lt;-</span> <span class="va">rfe_acc_avg</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">enframe</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">rf_random_avg</span> <span class="op">&lt;-</span> <span class="fu">map_dbl</span><span class="op">(</span><span class="va">subset_perf</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">TrainAccuracy</span><span class="op">)</span></span>
@@ -765,7 +765,7 @@ Figure 7.10: Comparison of different feature selection results with a random sub
 </p>
 </div>
 <p>We can see that the recursive feature elimination process outperforms the random variable subset. If we test for significance between our RFE results and the best results from the random subset, the p-values confirm that the difference is significant.</p>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/wilcox.test.html">wilcox.test</a></span><span class="op">(</span><span class="va">rfe_acc_avg</span>, <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">rf_random_avg</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">25</span><span class="op">]</span>, paired <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Wilcoxon signed rank exact test</span></span>

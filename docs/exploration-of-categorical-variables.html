@@ -159,7 +159,7 @@ Figure 4.1: Mosaic plots to visualize the relationships between categorical vari
 <h2>
 <span class="header-section-number">4.3</span> Correspondence Analysis<a class="anchor" aria-label="anchor" href="#correspondence-analysis"><i class="fas fa-link"></i></a>
 </h2>
-<p>Correspondence analysis uses the residuals from the contingency table of two variables compared to the frequency table the variables would’ve had if they were unrelated to each other. <a href="exploration-of-categorical-variables.html#fig:correspondence-dest-deck">4.2</a> shows the correspondence analysis between Destination and Deck.</p>
+<p>Correspondence analysis uses the residuals from the contingency table of two variables compared to the frequency table the variables would’ve had if they were unrelated to each other. Figure <a href="exploration-of-categorical-variables.html#fig:correspondence-dest-deck">4.2</a> shows the correspondence analysis between Destination and Deck.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu">FactoMineR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/FactoMineR/man/CA.html">CA</a></span><span class="op">(</span><span class="fu">base</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span>Deck <span class="op">=</span> <span class="va">train4</span><span class="op">$</span><span class="va">Deck</span>, Destination <span class="op">=</span> <span class="va">train4</span><span class="op">$</span><span class="va">Destination</span><span class="op">)</span>, graph <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, </span>
 <span>     title <span class="op">=</span> <span class="st">"Destination and Deck"</span><span class="op">)</span></span></code></pre></div>
@@ -250,7 +250,7 @@ Figure 4.4: All categorical variables plotted as a binomial plots with confidenc
 Figure 4.5: PassengerGroupSize plotted as a binomial plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
 </p>
 </div>
-<p><a href="exploration-of-categorical-variables.html#fig:binom-passgrp">4.5</a> suggests that there might be a difference between passengers who travel alone and those who don’t. Perhaps a binary feature that tracks whether a passenger travels solo or is within a group could be of benefit. Also, perhaps very large groups are less likely to be transported, although we don’t have much data here.</p>
+<p>Figure <a href="exploration-of-categorical-variables.html#fig:binom-passgrp">4.5</a> suggests that there might be a difference between passengers who travel alone and those who don’t. Perhaps a binary feature that tracks whether a passenger travels solo or is within a group could be of benefit. Also, perhaps very large groups are less likely to be transported, although we don’t have much data here.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">my_binom_plot</span><span class="op">(</span><span class="va">train4</span>, <span class="st">"DestinationsPerGroup"</span>, <span class="st">"Transported"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -259,7 +259,7 @@ Figure 4.5: PassengerGroupSize plotted as a binomial plot with confidence interv
 Figure 4.6: DestinationsPerGroup plotted as a binomial plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set.
 </p>
 </div>
-<p><a href="exploration-of-categorical-variables.html#fig:binom-destgrp">4.6</a> suggests that there might be some slight difference between groups of passengers that all travelled to the same destination and those that didn’t. While the differences are small, the presence of this feature might improve some models.</p>
+<p>Figure <a href="exploration-of-categorical-variables.html#fig:binom-destgrp">4.6</a> suggests that there might be some slight difference between groups of passengers that all travelled to the same destination and those that didn’t. While the differences are small, the presence of this feature might improve some models.</p>
 <p>Let’s create a function that will add the new features we’ve discovered to our data.</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">add_grp_features</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">{</span></span>
@@ -270,7 +270,7 @@ Figure 4.6: DestinationsPerGroup plotted as a binomial plot with confidence inte
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">train5</span> <span class="op">&lt;-</span> <span class="fu">add_grp_features</span><span class="op">(</span><span class="va">train4</span><span class="op">)</span></span></code></pre></div>
-<p>Let’s explore the VIP variables a bit more. <a href="#fig:VIP-binom"><strong>??</strong></a> suggests that the chances of being transported are higher for passengers who are in a group where another passenger has a VIP ticket at the same time as having a VIP ticket by itself seems to reduce the chance of being transported.</p>
+<p>Let’s explore the VIP variables a bit more. Figure <a href="#fig:VIP-binom"><strong>??</strong></a> suggests that the chances of being transported are higher for passengers who are in a group where another passenger has a VIP ticket at the same time as having a VIP ticket by itself seems to reduce the chance of being transported.</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">my_binom_plot</span><span class="op">(</span><span class="va">train5</span>, <span class="st">"VIP"</span>, <span class="st">"Transported"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -287,7 +287,7 @@ Figure 4.7: A closer look at the VIP variable and its relation to the response.
 Figure 4.8: A closer look at the VIP variable and its relation to the response.
 </p>
 </div>
-<p>Based on what we can see in <a href="exploration-of-categorical-variables.html#fig:VIP-variable">4.9</a>, the passengers that are in groups where more than one passenger has a VIP-ticket are more likely to be transported. This can be related to the fact that VIP-passengers spend more amenities which, in turn, might increase the chances of being transported.</p>
+<p>Based on what we can see in Figure <a href="exploration-of-categorical-variables.html#fig:VIP-variable">4.9</a>, the passengers that are in groups where more than one passenger has a VIP-ticket are more likely to be transported. This can be related to the fact that VIP-passengers spend more amenities which, in turn, might increase the chances of being transported.</p>
 <p>We will explore the effects of the numerical variables in the next chapter.</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">g1</span> <span class="op">&lt;-</span> <span class="va">train5</span> <span class="op">%&gt;%</span></span>

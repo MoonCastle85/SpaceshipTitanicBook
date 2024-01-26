@@ -38,7 +38,7 @@ train2 <- useful_features(train)
 ```
 
 ## Closer look at missing values
-A closer look at each variable with missing values gives us more insights. For example, every passenger group always starts from the same home planet. \@ref(fig:missing-homeplanet) shows a sample of passenger groups and their home planets. This is one of the patterns of missingness I alluded to earlier and we can use this information to replace missing HomePlanet values for passengers belonging to a group with a known home planet. This will leave us only with passengers who are travelling alone.
+A closer look at each variable with missing values gives us more insights. For example, every passenger group always starts from the same home planet. Figure \@ref(fig:missing-homeplanet) shows a sample of passenger groups and their home planets. This is one of the patterns of missingness I alluded to earlier and we can use this information to replace missing HomePlanet values for passengers belonging to a group with a known home planet. This will leave us only with passengers who are travelling alone.
 ```{r missing-homeplanet, fig.cap = "Sample of missing values for HomePlanet"}
 train2 %>%
   group_by(PassengerGroup) %>%
@@ -52,7 +52,7 @@ train2 %>%
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-We can also see that groups with two or more travelers are never housed in the same cabins as other (non-solo) groups. In other words, a group with two or more passengers can be spread out across several cabins but never share those cabins with other groups of two or more passengers. \@ref(fig:missing-cabin) shows a sample. We can use this information to replace missing cabin values.
+We can also see that groups with two or more travelers are never housed in the same cabins as other (non-solo) groups. In other words, a group with two or more passengers can be spread out across several cabins but never share those cabins with other groups of two or more passengers. Figure \@ref(fig:missing-cabin) shows a sample. We can use this information to replace missing cabin values.
 ```{r missing-cabin, warning = FALSE, fig.cap = "Sample of missing values for Cabin"}
 train2 %>%
   filter(PassengerGroupSize != 1 & Side == "S" & Deck == "G") %>%
@@ -63,7 +63,7 @@ train2 %>%
   theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = "none")
 ```
 
-When we look at the new feature Deck, we can see that some decks seem dedicated to passengers from a specific home planet, see \@ref(fig:missing-deck). This helps us replace even more missing values for HomePlanet.
+When we look at the new feature Deck, we can see that some decks seem dedicated to passengers from a specific home planet, see Figure \@ref(fig:missing-deck). This helps us replace even more missing values for HomePlanet.
 ```{r missing-deck, fig.cap = "Missing values for Deck"}
 train2 %>%
   group_by(Deck) %>%
@@ -248,7 +248,7 @@ sd_skim %>%
   scale_colour_discrete(name = "Non-imputed", labels = "sd", type = "orange")
 ```
 
-The standard deviation for our numeric variables isn't affected by the imputation, although this was expected since we only have 1% of missing data. The same is true for the mean, as can be seen in \@ref(fig:imputation-evaluation-num2).
+The standard deviation for our numeric variables isn't affected by the imputation, although this was expected since we only have 1% of missing data. The same is true for the mean, as can be seen in Figure \@ref(fig:imputation-evaluation-num2).
 
 ```{r imputation-evaluation-num2, fig.cap = "Comparisson of mean for numerical values before and after imputation"}
 mean_skim %>%

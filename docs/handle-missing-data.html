@@ -109,7 +109,7 @@
 <h2>
 <span class="header-section-number">3.2</span> Closer look at missing values<a class="anchor" aria-label="anchor" href="#closer-look-at-missing-values"><i class="fas fa-link"></i></a>
 </h2>
-<p>A closer look at each variable with missing values gives us more insights. For example, every passenger group always starts from the same home planet. <a href="handle-missing-data.html#fig:missing-homeplanet">3.1</a> shows a sample of passenger groups and their home planets. This is one of the patterns of missingness I alluded to earlier and we can use this information to replace missing HomePlanet values for passengers belonging to a group with a known home planet. This will leave us only with passengers who are travelling alone.</p>
+<p>A closer look at each variable with missing values gives us more insights. For example, every passenger group always starts from the same home planet. Figure <a href="handle-missing-data.html#fig:missing-homeplanet">3.1</a> shows a sample of passenger groups and their home planets. This is one of the patterns of missingness I alluded to earlier and we can use this information to replace missing HomePlanet values for passengers belonging to a group with a known home planet. This will leave us only with passengers who are travelling alone.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -127,7 +127,7 @@
 Figure 3.1: Sample of missing values for HomePlanet
 </p>
 </div>
-<p>We can also see that groups with two or more travelers are never housed in the same cabins as other (non-solo) groups. In other words, a group with two or more passengers can be spread out across several cabins but never share those cabins with other groups of two or more passengers. <a href="handle-missing-data.html#fig:missing-cabin">3.2</a> shows a sample. We can use this information to replace missing cabin values.</p>
+<p>We can also see that groups with two or more travelers are never housed in the same cabins as other (non-solo) groups. In other words, a group with two or more passengers can be spread out across several cabins but never share those cabins with other groups of two or more passengers. Figure <a href="handle-missing-data.html#fig:missing-cabin">3.2</a> shows a sample. We can use this information to replace missing cabin values.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">PassengerGroupSize</span> <span class="op">!=</span> <span class="fl">1</span> <span class="op">&amp;</span> <span class="va">Side</span> <span class="op">==</span> <span class="st">"S"</span> <span class="op">&amp;</span> <span class="va">Deck</span> <span class="op">==</span> <span class="st">"G"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -142,7 +142,7 @@ Figure 3.1: Sample of missing values for HomePlanet
 Figure 3.2: Sample of missing values for Cabin
 </p>
 </div>
-<p>When we look at the new feature Deck, we can see that some decks seem dedicated to passengers from a specific home planet, see <a href="handle-missing-data.html#fig:missing-deck">3.3</a>. This helps us replace even more missing values for HomePlanet.</p>
+<p>When we look at the new feature Deck, we can see that some decks seem dedicated to passengers from a specific home planet, see Figure <a href="handle-missing-data.html#fig:missing-deck">3.3</a>. This helps us replace even more missing values for HomePlanet.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Deck</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -348,7 +348,7 @@ Figure 3.5: Missing values for ameneties
 Figure 3.6: Comparisson of standard deviation for numerical values before and after imputation
 </p>
 </div>
-<p>The standard deviation for our numeric variables isn’t affected by the imputation, although this was expected since we only have 1% of missing data. The same is true for the mean, as can be seen in <a href="handle-missing-data.html#fig:imputation-evaluation-num2">3.7</a>.</p>
+<p>The standard deviation for our numeric variables isn’t affected by the imputation, although this was expected since we only have 1% of missing data. The same is true for the mean, as can be seen in Figure <a href="handle-missing-data.html#fig:imputation-evaluation-num2">3.7</a>.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mean_skim</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Metric</span> <span class="op">!=</span> <span class="st">"No imp"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
