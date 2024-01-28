@@ -8,8 +8,158 @@ Let's summarise what we have so far:
 Now we must decide which model to use. There are many options but I will limit myself to three: GLM, RandomForest and Lasso/Ridge.
 Before we get to the models, let's first summarise all the preprocessing of the training data that we've done.
 
-## Summarise preprocess
+## Complete preprocess
+```{r functions, include=FALSE}
+useful_features <- function(x) {
+  x2 <- x %>%
+    mutate(PassengerGroup = str_split_i(PassengerId, "_", 1),
+           LastName = word(Name, -1),
+           Deck = str_split_i(Cabin, "/", 1),
+           CabinNumber = str_split_i(Cabin, "/", 2),
+           Side = str_split_i(Cabin, "/", 3),
+           TotalSpent = RoomService + FoodCourt + ShoppingMall + Spa + VRDeck,
+           PassengerCount = 1) %>% # I added this to use as a count variable in visualizations
+    group_by(PassengerGroup) %>%
+    add_count(PassengerGroup, name = "PassengerGroupSize") %>%
+    mutate(HomePlanetsPerGroup = n_distinct(HomePlanet, na.rm = TRUE),
+           DestinationsPerGroup = n_distinct(Destination, na.rm = TRUE),
+           CabinsPerGroup = n_distinct(Cabin, na.rm = TRUE),
+           TotalSpentPerGroup = sum(TotalSpent, na.rm = TRUE),
+           CryoSleepsPerGroup = n_distinct(CryoSleep, na.rm = TRUE),
+           VIPsPerGroup = n_distinct(VIP, na.rm = TRUE),
+           LastNamesPerGroup = n_distinct(LastName, na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(across(.cols = c(HomePlanet, CryoSleep, Destination, VIP, Transported, Deck, Side, HomePlanetsPerGroup,
+                            PassengerGroupSize, DestinationsPerGroup, CabinsPerGroup, CryoSleepsPerGroup, VIPsPerGroup,
+                            LastNamesPerGroup, PassengerGroup, PassengerId),
+                  .fns = as.factor)) %>%
+    mutate(across(.cols = c(CabinNumber, Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
+                  .fns = as.integer))
+  return(x2)
+}
+
+my_na_replace <- function(d) {
+  d2 <- d %>%
+    # Replace HomePlanet for passengers in groups where the homeplanet is known from the other passengers
+    group_by(PassengerGroup) %>% 
+    fill(HomePlanet, .direction = "downup") %>% 
+    
+    # Replace Cabin by group cabin for groups with group count > 1. Update the Deck, CabinNumber and Side variables.
+    mutate(Cabin2 = Cabin) %>%
+    fill(data = ., Cabin2, .direction = "downup") %>%
+    ungroup() %>%
+    mutate(Cabin = if_else(is.na(Cabin) & PassengerGroupSize != 1, Cabin2, Cabin),
+           Deck = str_split_i(Cabin, "/", 1),
+           CabinNumber = str_split_i(Cabin, "/", 2),
+           Side = str_split_i(Cabin, "/", 3)) %>%
+    select(-Cabin2) %>%
+    
+    # Replace HomePlanet if the passenger is housed on a dedicated Deck
+    mutate(HomePlanet = if_else(is.na(HomePlanet) & Deck == "G", "Earth", HomePlanet),
+           HomePlanet = if_else(is.na(HomePlanet) & Deck %in% c("A", "B", "C"), "Europa", HomePlanet)) %>%
+    
+    # Replace all of VIPs from Earth to FALSE
+    mutate(VIP = if_else(is.na(VIP) & HomePlanet == "Earth", "False", VIP)) %>%
+    
+    # Replace amenities with zero if CryoSleep is TRUE or if Age <= 12
+    # Replace CryoSleep with FALSE if the passenger has spent credits
+    mutate(across(.cols = c(RoomService, FoodCourt, ShoppingMall, Spa, VRDeck), 
+                  .fns = ~ if_else(condition = CryoSleep == "True" | Age <= 12, true = 0, false = .x, missing = .x)),
+           CryoSleep = if_else(TotalSpent > 0 & is.na(CryoSleep), "False", CryoSleep))
+  return(d2)
+}
+
+useful_features2 <- function(x) {
+  x2 <- x %>%
+    mutate(TotalSpent = RoomService + FoodCourt + ShoppingMall + Spa + VRDeck) %>%
+    group_by(PassengerGroup) %>%
+    add_count(PassengerGroup, name = "PassengerGroupSize") %>%
+    mutate(HomePlanetsPerGroup = n_distinct(HomePlanet, na.rm = TRUE),
+           DestinationsPerGroup = n_distinct(Destination, na.rm = TRUE),
+           CabinsPerGroup = n_distinct(Cabin, na.rm = TRUE),
+           TotalSpentPerGroup = sum(TotalSpent, na.rm = TRUE),
+           CryoSleepsPerGroup = n_distinct(CryoSleep, na.rm = TRUE),
+           VIPsPerGroup = n_distinct(VIP, na.rm = TRUE),
+           LastNamesPerGroup = n_distinct(LastName, na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(across(.cols = c(HomePlanet, CryoSleep, Destination, VIP, Transported, Deck, Side, HomePlanetsPerGroup,
+                            PassengerGroupSize, DestinationsPerGroup, CabinsPerGroup, CryoSleepsPerGroup, VIPsPerGroup,
+                            LastNamesPerGroup, PassengerGroup, PassengerId),
+                  .fns = as.factor)) %>%
+    mutate(across(.cols = c(CabinNumber, Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
+                  .fns = as.integer))
+  return(x2)
+}
+
+fix_knn <- function(df) {
+  amenities_summary <- df %>%
+    filter(Age > 12 & TotalSpent > 0) %>%
+    summarise(mean_age = round(mean(Age), 0), .by = c(CryoSleep, Deck))
+  
+  wrong_age <- df %>%
+    filter(Age <= 12 & TotalSpent > 0) %>%
+    left_join(., amenities_summary, by = c("CryoSleep", "Deck")) %>%
+    select(PassengerId, mean_age)
+  
+  wrong_planet <- df %>%
+    filter(HomePlanetsPerGroup != 1) %>%
+    select(PassengerId, PassengerGroup, HomePlanet) %>%
+    group_by(PassengerGroup) %>%
+    mutate(HomePlanet_correct = first(HomePlanet)) %>%
+    ungroup() %>%
+    select(PassengerId, HomePlanet_correct)
+  
+  wrong_deck <- df %>%
+    filter(Deck %in% c("A", "B", "C", "G")) %>%
+    mutate(Deck_correct = case_when(Deck %in% c("A", "B", "C") & HomePlanet == "Earth" ~ "G",
+                                    Deck %in% c("A", "B", "C") & HomePlanet == "Mars" ~ "F",
+                                    Deck == "G" & HomePlanet == "Mars" ~ "F",
+                                    Deck == "G" & HomePlanet == "Europa" ~ "C", .default = Deck)) %>%
+    select(PassengerId, Deck_correct)
+  
+  res <- df %>%
+  left_join(., wrong_age, by = "PassengerId") %>%
+  left_join(., wrong_planet, by = "PassengerId") %>%
+  left_join(., wrong_deck, by = "PassengerId") %>%
+  mutate(Age = if_else(Age <= 12 & TotalSpent > 0, mean_age, Age),
+         RoomService = if_else(CryoSleep == "True", 0, RoomService),
+         FoodCourt = if_else(CryoSleep == "True", 0, FoodCourt),
+         ShoppingMall = if_else(CryoSleep == "True", 0, ShoppingMall),
+         Spa = if_else(CryoSleep == "True", 0, Spa),
+         VRDeck = if_else(CryoSleep == "True", 0, VRDeck),
+         HomePlanet = if_else(HomePlanetsPerGroup != 1, HomePlanet_correct, HomePlanet),
+         Deck_correct = coalesce(Deck_correct, Deck),
+         Deck = Deck_correct) %>%
+  select(-mean_age, -HomePlanet_correct, -Deck_correct)
+  
+  return(res)
+}
+
+add_grp_features <- function(df) {
+  res <- df %>%
+  mutate(Solo = if_else(PassengerGroupSize == 1, 1, 0),
+         LargeGroup = if_else(as.integer(PassengerGroupSize) > 7, 1, 0),
+         TravelTogether = if_else(DestinationsPerGroup == 1, 1, 0))
+}
+
+encode_cat_to_numeric <- function(x) {
+  x <- factor(x, ordered = FALSE)
+  x <- unclass(x)
+  return(x)
+}
+
+add_name_features <- function(df) {
+  res <- df %>%
+  mutate(LastNameAsNumber = encode_cat_to_numeric(LastName)) %>%
+  add_count(x = ., LastNameAsNumber, name = "LastNameCount") %>%
+  mutate(across(.cols = c(PassengerGroup, LastNameAsNumber), .fns = as.integer))
+}
+```
+
+
 ```{r summarise-preprocess}
+train <- read.csv("train.csv", na.strings = "")
+
 # Create group variables, seperate CabinNumber, Deck and Side from Cabin
 train2 <- useful_features(train)
 
@@ -53,6 +203,7 @@ train5 <- add_grp_features(train4)
 train6 <- add_name_features(train5)
 
 # Get our variables in order for modelling
+load("Best variables.RData")
 train7 <- train6 %>%
   select(-c(Cabin, Name, LastName, PassengerCount, HomePlanetsPerGroup)) %>%
   mutate(across(.cols = c(PassengerGroupSize, Solo, LargeGroup, TravelTogether, tidyselect::ends_with("PerGroup")),
@@ -62,16 +213,7 @@ my_vars <- data.frame(Variables = names(train7)) %>%
   mutate(Roles = if_else(Variables %in% c("PassengerId"), "id", "predictor"),
          Roles = if_else(Variables == "Transported", "outcome", Roles))
 
-# final_interactions <- rfe_vars_best2 %>%
-#   select(ForFormula, RevFormula) %>%
-#   unlist() %>%
-#   unname() %>%
-#   unique(.) %>%
-#   str_flatten(., collapse = "+") %>%
-#   str_c("~", .) %>%
-#   as.formula(.)
-# 
-# save(final_interactions, file = "Final interactions.RData")
+
 load("Final interactions.RData")
 
 set.seed(8584)
@@ -177,19 +319,19 @@ show_best(rf_final_tune, metric = "accuracy", n = 20) %>%
 The results from the model tuning indicate that the improvement is very limited with more trees than somewhere around 2000 so I will assume this as the optimal. With tree based models, too much trees can overfit the data so it's a good idea not to
 
 ```{r randomForest}
-rf_final_mod <- rand_forest(trees = 2000, min_n = 5) %>%
-  set_mode("classification") %>%
-  set_engine("randomForest")
-
-rf_final_wf <- glm_final_wf %>%
-  update_model(rf_final_mod)
-
-set.seed(8584)
-rf_final_fit <- fit(rf_final_wf, final_train)
-
-rf_final_pred <- bind_cols(Actual = final_test$Transported, predict(rf_final_fit, final_test))
-rf_final_acc <- accuracy(data = rf_final_pred, truth = Actual, estimate = .pred_class)
-rf_final_acc
+# rf_final_mod <- rand_forest(trees = 2000, min_n = 5) %>%
+#   set_mode("classification") %>%
+#   set_engine("randomForest")
+# 
+# rf_final_wf <- glm_final_wf %>%
+#   update_model(rf_final_mod)
+# 
+# set.seed(8584)
+# rf_final_fit <- fit(rf_final_wf, final_train)
+# 
+# rf_final_pred <- bind_cols(Actual = final_test$Transported, predict(rf_final_fit, final_test))
+# rf_final_acc <- accuracy(data = rf_final_pred, truth = Actual, estimate = .pred_class)
+# rf_final_acc
 ```
 
 

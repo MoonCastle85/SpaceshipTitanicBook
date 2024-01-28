@@ -36,6 +36,7 @@ library(caret)
 library(dlookr)
 library(missRanger)
 library(ggstats)
+library(htmltools)
 
 theme_set(ggthemes::theme_clean(base_size = 24))
 

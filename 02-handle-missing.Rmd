@@ -329,11 +329,11 @@ check_knn %>%
   select(PassengerId, CryoSleep, Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent)
 
 check_knn %>%
-  filter(CryoSleep == TRUE & TotalSpent > 0) %>%
+  filter(CryoSleep == "True" & TotalSpent > 0) %>%
   select(PassengerId, CryoSleep, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent)
 ```
 
-It also didn't break the rule where passengers that are in cryo sleep or are <=12 years old don't spend any credits. Great!
+The imputation didn't break the rule where passengers that are <=12 years old don't spend any credits but it did breat the rule where passengers that are in cryo sleep can't spend credits.
 
 ```{r imputation-evaluation5}
 check_knn %>%
@@ -341,7 +341,7 @@ check_knn %>%
   select(PassengerId, HomePlanet, Deck)
 
 check_knn %>%
-  filter(VIP == TRUE & HomePlanet == "Earth") %>%
+  filter(VIP == "True" & HomePlanet == "Earth") %>%
   select(PassengerId, HomePlanet, VIP)
 ```
 
@@ -379,6 +379,11 @@ fix_knn <- function(df) {
   left_join(., wrong_planet, by = "PassengerId") %>%
   left_join(., wrong_deck, by = "PassengerId") %>%
   mutate(Age = if_else(Age <= 12 & TotalSpent > 0, mean_age, Age),
+         RoomService = if_else(CryoSleep == "True", 0, RoomService),
+         FoodCourt = if_else(CryoSleep == "True", 0, FoodCourt),
+         ShoppingMall = if_else(CryoSleep == "True", 0, ShoppingMall),
+         Spa = if_else(CryoSleep == "True", 0, Spa),
+         VRDeck = if_else(CryoSleep == "True", 0, VRDeck),
          HomePlanet = if_else(HomePlanetsPerGroup != 1, HomePlanet_correct, HomePlanet),
          Deck_correct = coalesce(Deck_correct, Deck),
          Deck = Deck_correct) %>%

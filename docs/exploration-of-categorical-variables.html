@@ -270,26 +270,21 @@ Figure 4.6: DestinationsPerGroup plotted as a binomial plot with confidence inte
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">train5</span> <span class="op">&lt;-</span> <span class="fu">add_grp_features</span><span class="op">(</span><span class="va">train4</span><span class="op">)</span></span></code></pre></div>
-<p>Let’s explore the VIP variables a bit more. Figure <a href="#fig:VIP-binom"><strong>??</strong></a> suggests that the chances of being transported are higher for passengers who are in a group where another passenger has a VIP ticket at the same time as having a VIP ticket by itself seems to reduce the chance of being transported.</p>
+<p>Let’s explore the VIP variables a bit more. Figure <a href="exploration-of-categorical-variables.html#fig:VIP-binom">4.7</a> suggests that the chances of being transported are higher for passengers who are in a group where another passenger has a VIP ticket at the same time as having a VIP ticket by itself seems to reduce the chance of being transported.</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">my_binom_plot</span><span class="op">(</span><span class="va">train5</span>, <span class="st">"VIP"</span>, <span class="st">"Transported"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">v1</span> <span class="op">&lt;-</span> <span class="fu">my_binom_plot</span><span class="op">(</span><span class="va">train5</span>, <span class="st">"VIP"</span>, <span class="st">"Transported"</span><span class="op">)</span></span>
+<span><span class="va">v2</span> <span class="op">&lt;-</span> <span class="fu">my_binom_plot</span><span class="op">(</span><span class="va">train5</span>, <span class="st">"VIPsPerGroup"</span>, <span class="st">"Transported"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">v1</span> <span class="op">+</span> <span class="va">v2</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>axis_titles <span class="op">=</span> <span class="st">"collect_y"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<span style="display:block;" id="fig:VIP-binom-1"></span>
+<span style="display:block;" id="fig:VIP-binom"></span>
 <img src="SpaceshipTitanicBook_files/figure-html/VIP-binom-1.png" alt="A closer look at the VIP variable and its relation to the response." width="672"><p class="caption">
 Figure 4.7: A closer look at the VIP variable and its relation to the response.
 </p>
 </div>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">my_binom_plot</span><span class="op">(</span><span class="va">train5</span>, <span class="st">"VIPsPerGroup"</span>, <span class="st">"Transported"</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<span style="display:block;" id="fig:VIP-binom-2"></span>
-<img src="SpaceshipTitanicBook_files/figure-html/VIP-binom-2.png" alt="A closer look at the VIP variable and its relation to the response." width="672"><p class="caption">
-Figure 4.8: A closer look at the VIP variable and its relation to the response.
-</p>
-</div>
-<p>Based on what we can see in Figure <a href="exploration-of-categorical-variables.html#fig:VIP-variable">4.9</a>, the passengers that are in groups where more than one passenger has a VIP-ticket are more likely to be transported. This can be related to the fact that VIP-passengers spend more amenities which, in turn, might increase the chances of being transported.</p>
+<p>Based on what we can see in Figure <a href="exploration-of-categorical-variables.html#fig:VIP-variable">4.8</a>, the passengers that are in groups where more than one passenger has a VIP-ticket are more likely to be transported. This can be related to the fact that VIP-passengers spend more amenities which, in turn, might increase the chances of being transported.</p>
 <p>We will explore the effects of the numerical variables in the next chapter.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">g1</span> <span class="op">&lt;-</span> <span class="va">train5</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">VIP</span>, <span class="va">Transported</span>, <span class="va">VIPsPerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">VIPsPerGroup</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -313,7 +308,7 @@ Figure 4.8: A closer look at the VIP variable and its relation to the response.
 <div class="figure">
 <span style="display:block;" id="fig:VIP-variable"></span>
 <img src="SpaceshipTitanicBook_files/figure-html/VIP-variable-1.png" alt="A closer look at VIP and VIPsPerGroup against the response." width="672"><p class="caption">
-Figure 4.9: A closer look at VIP and VIPsPerGroup against the response.
+Figure 4.8: A closer look at VIP and VIPsPerGroup against the response.
 </p>
 </div>
 
@@ -347,7 +342,7 @@ Figure 4.9: A closer look at VIP and VIPsPerGroup against the response.
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-26.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-28.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

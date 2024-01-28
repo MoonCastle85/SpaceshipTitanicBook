@@ -191,8 +191,10 @@ train5 <- add_grp_features(train4)
 Let's explore the VIP variables a bit more. Figure \@ref(fig:VIP-binom) suggests that the chances of being transported are higher for passengers who are in a group where another passenger has a VIP ticket at the same time as having a VIP ticket by itself seems to reduce the chance of being transported.
 
 ```{r VIP-binom, warning = FALSE, message = FALSE, fig.cap="A closer look at the VIP variable and its relation to the response."}
-my_binom_plot(train5, "VIP", "Transported")
-my_binom_plot(train5, "VIPsPerGroup", "Transported")
+v1 <- my_binom_plot(train5, "VIP", "Transported")
+v2 <- my_binom_plot(train5, "VIPsPerGroup", "Transported")
+
+v1 + v2 + plot_layout(axis_titles = "collect_y")
 ```
 
 Based on what we can see in Figure \@ref(fig:VIP-variable), the passengers that are in groups where more than one passenger has a VIP-ticket are more likely to be transported. This can be related to the fact that VIP-passengers spend more amenities which, in turn, might increase the chances of being transported. 

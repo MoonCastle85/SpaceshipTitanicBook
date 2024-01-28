@@ -74,12 +74,14 @@
 </ol>
 <p>Now we must decide which model to use. There are many options but I will limit myself to three: GLM, RandomForest and Lasso/Ridge.
 Before we get to the models, let’s first summarise all the preprocessing of the training data that we’ve done.</p>
-<div id="summarise-preprocess" class="section level2" number="8.1">
+<div id="complete-preprocess" class="section level2" number="8.1">
 <h2>
-<span class="header-section-number">8.1</span> Summarise preprocess<a class="anchor" aria-label="anchor" href="#summarise-preprocess"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.1</span> Complete preprocess<a class="anchor" aria-label="anchor" href="#complete-preprocess"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create group variables, seperate CabinNumber, Deck and Side from Cabin</span></span>
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="st">"train.csv"</span>, na.strings <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create group variables, seperate CabinNumber, Deck and Side from Cabin</span></span>
 <span><span class="va">train2</span> <span class="op">&lt;-</span> <span class="fu">useful_features</span><span class="op">(</span><span class="va">train</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Replace structurally missing NA</span></span>
@@ -122,6 +124,7 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <span><span class="va">train6</span> <span class="op">&lt;-</span> <span class="fu">add_name_features</span><span class="op">(</span><span class="va">train5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get our variables in order for modelling</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Best variables.RData"</span><span class="op">)</span></span>
 <span><span class="va">train7</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Cabin</span>, <span class="va">Name</span>, <span class="va">LastName</span>, <span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">PassengerGroupSize</span>, <span class="va">Solo</span>, <span class="va">LargeGroup</span>, <span class="va">TravelTogether</span>, <span class="fu">tidyselect</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">ends_with</a></span><span class="op">(</span><span class="st">"PerGroup"</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -131,16 +134,7 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <span>  <span class="fu">mutate</span><span class="op">(</span>Roles <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Variables</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PassengerId"</span><span class="op">)</span>, <span class="st">"id"</span>, <span class="st">"predictor"</span><span class="op">)</span>,</span>
 <span>         Roles <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="st">"Transported"</span>, <span class="st">"outcome"</span>, <span class="va">Roles</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># final_interactions &lt;- rfe_vars_best2 %&gt;%</span></span>
-<span><span class="co">#   select(ForFormula, RevFormula) %&gt;%</span></span>
-<span><span class="co">#   unlist() %&gt;%</span></span>
-<span><span class="co">#   unname() %&gt;%</span></span>
-<span><span class="co">#   unique(.) %&gt;%</span></span>
-<span><span class="co">#   str_flatten(., collapse = "+") %&gt;%</span></span>
-<span><span class="co">#   str_c("~", .) %&gt;%</span></span>
-<span><span class="co">#   as.formula(.)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># save(final_interactions, file = "Final interactions.RData")</span></span>
+<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Final interactions.RData"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
@@ -168,7 +162,7 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <h2>
 <span class="header-section-number">8.2</span> GLM<a class="anchor" aria-label="anchor" href="#glm"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glm_final_bake</span> <span class="op">&lt;-</span> <span class="va">final_rec</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">prep</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">bake</span><span class="op">(</span>new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
@@ -202,7 +196,7 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <h2>
 <span class="header-section-number">8.3</span> GLMNET Lasso/Ridge<a class="anchor" aria-label="anchor" href="#glmnet-lassoridge"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">best_glm_params</span> <span class="op">&lt;-</span> <span class="fu">select_best</span><span class="op">(</span><span class="va">pen_int_tune</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">glmnet_final_mod</span> <span class="op">&lt;-</span> <span class="fu">logistic_reg</span><span class="op">(</span>penalty <span class="op">=</span> <span class="fu">pluck</span><span class="op">(</span><span class="va">best_glm_params</span><span class="op">$</span><span class="va">penalty</span><span class="op">)</span>, mixture <span class="op">=</span> <span class="fu">pluck</span><span class="op">(</span><span class="va">best_glm_params</span><span class="op">$</span><span class="va">mixture</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -220,13 +214,13 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
 <span><span class="co">#&gt;   .metric  .estimator .estimate</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 accuracy binary         0.790</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 accuracy binary         0.787</span></span></code></pre></div>
 </div>
 <div id="randomforest" class="section level2" number="8.4">
 <h2>
 <span class="header-section-number">8.4</span> RandomForest<a class="anchor" aria-label="anchor" href="#randomforest"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
 <span><span class="va">rf_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span>, save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">rf_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>trees <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">2000</span>, <span class="fl">10000</span><span class="op">)</span>, min_n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
@@ -261,24 +255,20 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <div class="inline-figure">
 <img src="SpaceshipTitanicBook_files/figure-html/randomForest-tune-1.png" width="672">
 The results from the model tuning indicate that the improvement is very limited with more trees than somewhere around 2000 so I will assume this as the optimal. With tree based models, too much trees can overfit the data so it’s a good idea not to</div>
-<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rf_final_mod</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span>trees <span class="op">=</span> <span class="fl">2000</span>, min_n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">rf_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">rf_final_mod</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
-<span><span class="va">rf_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">rf_final_wf</span>, <span class="va">final_train</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">rf_final_pred</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>Actual <span class="op">=</span> <span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">rf_final_fit</span>, <span class="va">final_test</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">rf_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy</span><span class="op">(</span>data <span class="op">=</span> <span class="va">rf_final_pred</span>, truth <span class="op">=</span> <span class="va">Actual</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span></span>
-<span><span class="va">rf_final_acc</span></span>
-<span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
-<span><span class="co">#&gt;   .metric  .estimator .estimate</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 accuracy binary         0.799</span></span></code></pre></div>
+<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># rf_final_mod &lt;- rand_forest(trees = 2000, min_n = 5) %&gt;%</span></span>
+<span><span class="co">#   set_mode("classification") %&gt;%</span></span>
+<span><span class="co">#   set_engine("randomForest")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># rf_final_wf &lt;- glm_final_wf %&gt;%</span></span>
+<span><span class="co">#   update_model(rf_final_mod)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># set.seed(8584)</span></span>
+<span><span class="co"># rf_final_fit &lt;- fit(rf_final_wf, final_train)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># rf_final_pred &lt;- bind_cols(Actual = final_test$Transported, predict(rf_final_fit, final_test))</span></span>
+<span><span class="co"># rf_final_acc &lt;- accuracy(data = rf_final_pred, truth = Actual, estimate = .pred_class)</span></span>
+<span><span class="co"># rf_final_acc</span></span></code></pre></div>
 
 </div>
 </div>
@@ -289,7 +279,7 @@ The results from the model tuning indicate that the improvement is very limited 
     <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
       <ul class="nav navbar-nav">
 <li><a class="nav-link" href="#final-model-exploration"><span class="header-section-number">8</span> Final model exploration</a></li>
-<li><a class="nav-link" href="#summarise-preprocess"><span class="header-section-number">8.1</span> Summarise preprocess</a></li>
+<li><a class="nav-link" href="#complete-preprocess"><span class="header-section-number">8.1</span> Complete preprocess</a></li>
 <li><a class="nav-link" href="#glm"><span class="header-section-number">8.2</span> GLM</a></li>
 <li><a class="nav-link" href="#glmnet-lassoridge"><span class="header-section-number">8.3</span> GLMNET Lasso/Ridge</a></li>
 <li><a class="nav-link" href="#randomforest"><span class="header-section-number">8.4</span> RandomForest</a></li>
@@ -310,7 +300,7 @@ The results from the model tuning indicate that the improvement is very limited 
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-26.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-28.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

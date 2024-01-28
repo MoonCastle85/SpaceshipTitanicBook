@@ -73,7 +73,7 @@
 <span class="header-section-number">5.1</span> Name variable<a class="anchor" aria-label="anchor" href="#name-variable"><i class="fas fa-link"></i></a>
 </h2>
 <p>First, let’s transform the name variable into numerical values. We can assume that there is no rank order of the names based on the fact that the variable distribution is uniform (see Figure <a href="early-data-exploration.html#fig:frequencies">2.1</a>). Here I use a very simple encoding to convert the names into numbers.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">encode_cat_to_numeric</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">x</span>, ordered <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/class.html">unclass</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
@@ -89,7 +89,7 @@
 <span></span>
 <span><span class="va">train6</span> <span class="op">&lt;-</span> <span class="fu">add_name_features</span><span class="op">(</span><span class="va">train5</span><span class="op">)</span></span></code></pre></div>
 <p>Let’s also explore our count values for names visually to see how they look against the response.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df1</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">Transported</span>, <span class="va">LastNamesPerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">LastNamesPerGroup</span>, <span class="va">Transported</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -124,7 +124,7 @@ Figure 5.1: Exploration of the counts of the LastName variable where LastNameCou
 <span class="header-section-number">5.2</span> Age, CabinNumber and LastNames<a class="anchor" aria-label="anchor" href="#age-cabinnumber-and-lastnames"><i class="fas fa-link"></i></a>
 </h2>
 <p>Kuhn and Johnson propose a smoothing function using generalized additive models that use penalized regression to create smoothing for numeric variables against the response. I’ve modified their function somewhat.</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_smooth_plot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">d</span>, <span class="va">v</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">TransportedRate</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">d</span><span class="op">$</span><span class="va">Transported</span> <span class="op">==</span> <span class="st">"True"</span><span class="op">)</span></span>
 <span>  </span>
@@ -166,7 +166,7 @@ Figure 5.2: General additive model (GAM) plots for Age with smoothed confidence 
 </p>
 </div>
 <p>Passengers younger that 15 years of age seem to have a higher chance to be transported, with the effect being more significant the younger the passenger is. For the rest of the passengers, age doesn’t seem to matter much. Here we remember that passengers who were 12 years old or younger never spent credits on amenities so the real divide might be at that number, rather than at 15. We’ll remember this when we consider which features we might want to create.</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span>, <span class="st">"PassengerGroup"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:smooth-passengergroup"></span>
@@ -175,7 +175,7 @@ Figure 5.3: General additive model (GAM) plots for PassengerGroup with smoothed 
 </p>
 </div>
 <p>Passenger groups seem to have some effect but it’s limited.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span>, <span class="st">"CabinNumber"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:smooth-cabinnumber"></span>
@@ -184,7 +184,7 @@ Figure 5.4: General additive model (GAM) plots for CabinNumber with smoothed con
 </p>
 </div>
 <p>CabinNumber shows stronger effects than passengergroup. If we look closer at the cabins around the number 1000, we see that all of those cabins are in decks F and G. If we look back at Figure <a href="exploration-of-categorical-variables.html#fig:all-binom-plots">4.4</a> that shows Deck against the response, we can see that these decks show a smaller chance to be transported. This might suggest that the addition of the cabin number could provide a way for the models to find subgroups with a different response compared to the average for the decks.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span>, <span class="st">"LastNameAsNumber"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:smooth-lastname"></span>
@@ -199,7 +199,7 @@ Figure 5.5: General additive model (GAM) plots for LastNameAsNumber with smoothe
 <span class="header-section-number">5.3</span> Amenities<a class="anchor" aria-label="anchor" href="#amenities"><i class="fas fa-link"></i></a>
 </h2>
 <p>The amenity variables that are zero might reflect the fact that the passenger is in cryosleep so let’s filter that out before we plot them.</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">s1</span> <span class="op">&lt;-</span> <span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"RoomService"</span><span class="op">)</span></span>
 <span><span class="va">s2</span> <span class="op">&lt;-</span> <span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"Spa"</span><span class="op">)</span></span>
 <span><span class="va">s3</span> <span class="op">&lt;-</span> <span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"VRDeck"</span><span class="op">)</span></span>
@@ -212,7 +212,7 @@ Figure 5.6: General additive model (GAM) plots for RoomService, Spa and VRDeck w
 </p>
 </div>
 <p>Passengers who spent credits on RoomService, Spa and VRDeck seem to have been less likely to be transported and the effects seem large.</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">s4</span> <span class="op">&lt;-</span> <span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"FoodCourt"</span><span class="op">)</span></span>
 <span><span class="va">s5</span> <span class="op">&lt;-</span> <span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"ShoppingMall"</span><span class="op">)</span></span>
 <span></span>
@@ -224,7 +224,7 @@ Figure 5.7: General additive model (GAM) plots for FoodCourt and ShoppingMall wi
 </p>
 </div>
 <p>The reverse is true for passengers who spent credits at the FoodCourt or ShoppingMall who instead seem to have been more likely to be transported.</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">my_smooth_plot</span><span class="op">(</span><span class="va">train6</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">CryoSleep</span> <span class="op">==</span> <span class="st">"False"</span><span class="op">)</span>, <span class="st">"TotalSpent"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:totalspent"></span>
@@ -239,7 +239,7 @@ Figure 5.8: General additive model (GAM) plots for TotalSpent with smoothed conf
 <span class="header-section-number">5.4</span> Correlations<a class="anchor" aria-label="anchor" href="#correlations"><i class="fas fa-link"></i></a>
 </h2>
 <p>We can see that PassengerGroup and CabinNumber are highly correlated with each other could cause problems with some models that are sensitive to correlated variables. We should consider using one of of each variable and see which one gives better results.</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train6</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">DataExplorer</span><span class="fu">::</span><span class="fu"><a href="http://boxuancui.github.io/DataExplorer/reference/plot_correlation.html">plot_correlation</a></span><span class="op">(</span><span class="va">.</span>, type <span class="op">=</span> <span class="st">"continuous"</span>, geom_text_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, </span>
@@ -276,7 +276,7 @@ Figure 5.8: General additive model (GAM) plots for TotalSpent with smoothed conf
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-26.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-28.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

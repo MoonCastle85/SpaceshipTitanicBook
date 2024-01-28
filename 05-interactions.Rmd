@@ -9,17 +9,18 @@ Of course, we won't know the extent of the improvement until we test the interac
 Since we only have a few categorical variables, let's visualize all possible interactions. Here I use the default `glm` logistic regression model where the formula:
 `Transported ~ (.)^2` that amounts to *Outcome \~ Variable_1 + Variable_2 + Variable_1 x Variable_2*
 
-```{r interactions-all, warning = FALSE, cache=TRUE, message=FALSE, fig.cap = "The effect of interactions between all pairs of variables against the response with confidence intervals included."}
+```{r interactions-cat, warning = FALSE, cache=TRUE, message=FALSE}
 plot_simple_int <- function(df, v1, v2) {
   tmp_vars <- c("Transported", v1, v2)
   tmp_model <- glm(Transported ~ (.)^2, data = df[, tmp_vars], family = binomial())
   p <- interactions::cat_plot(tmp_model, pred = {{ v1 }}, modx = {{ v2 }}, geom = "line", colors = c25,
-                       main.title = paste(v1, "and", v2))
+                       main.title = paste(v1, "and", v2)) +
+    theme(text = element_text(size = 40), plot.title = element_text(size = 40))
   return(p)
 }
 
 preds_cat <- c("CryoSleep", "HomePlanet", "Destination", "VIP", "Deck", "Side")
-pairs <- combn(preds_cat, 2, simplify = FALSE)
+pairs_cat <- combn(preds_cat, 2, simplify = FALSE)
 c25 <- c("dodgerblue2", "#E31A1C", "green4", "#6A3D9A", "#FF7F00", "black", "gold1", "skyblue2", "#FB9A99", "palegreen2", "#CAB2D6",
   "#FDBF6F", "gray70", "khaki2", "maroon", "orchid1", "deeppink1", "blue1", "steelblue4", "darkturquoise", "green1", "yellow4",
   "yellow3", "darkorange4", "brown") # Had to add extra colours because I couldn't get `cat_plot` to work with defaults
@@ -28,13 +29,16 @@ save_plot <- function(p, i) {
   ggsave(filename = paste0("PairInt", i, ".png"), plot = p)
 }
 
-pair_int_plots <- pairs %>%
-  map(.x = ., .f = \(vp) plot_simple_int(train5, vp[1], vp[2]))
+# cat_pair_int_plots <- pairs_cat %>%
+#   map(.x = ., .f = \(vp) plot_simple_int(train6, vp[1], vp[2]))
+# 
+# plotsToSVG <- walk2(.x = cat_pair_int_plots, .y = seq_along(cat_pair_int_plots), .f = save_plot)
+# plotsToSVG <- map(1:length(cat_pair_int_plots), .f = \(i) paste0("PairInt", i, ".png"))
+# save(plotsToSVG, file = "Plots cat.RData")
+load("Plots cat.RData")
 
-plotsToSVG <- walk2(.x = pair_int_plots, .y = seq_along(pair_int_plots), .f = save_plot)
-plotsToSVG <- map(1:length(pair_int_plots), .f = \(i) paste0("PairInt", i, ".png"))
 slickR::slickR(plotsToSVG, height = "480px", width = "672px") +
-  slickR::settings(slidesToShow = 1)
+  slickR::settings(slidesToShow = 1, dots = TRUE)
 ```
 
 Parallel lines indicate no significant interaction effects while lines that cross indicate a potential for a significant interactions. I'll highlight a few interactions below.
@@ -50,6 +54,46 @@ plot_simple_int(train6, "Deck", "Side")
 ```
 
 The interaction between Deck and Side, however, seems to show only a minor effect, if any.
+
+```{r interactions-all, warning = FALSE, message=FALSE, cache=TRUE}
+plot_simple_int2 <- function(df, v1, v2) {
+  tmp_vars <- c("Transported", v1, v2)
+  tmp_model <- glm(Transported ~ (.)^2, data = df[, tmp_vars], family = binomial())
+  p <- interactions::interact_plot(tmp_model, pred = {{ v1 }}, modx = {{ v2 }}, geom = "line", colors = c25,
+                       main.title = paste(v1, "and", v2)) +
+    scale_x_log10() +
+    theme(text = element_text(size = 40), plot.title = element_text(size = 40))
+  return(p)
+}
+
+preds_num <- c("Age", "RoomService", "FoodCourt", "ShoppingMall", "Spa", "VRDeck", "CabinNumber", "LastNameAsNumber",
+               "PassengerGroup", "CryoSleep", "HomePlanet", "Destination", "VIP", "Deck", "Side")
+pairs_num <- combn(preds_num, 2, simplify = FALSE)
+pairs_num <- pairs_num[1:90]
+
+save_plot2 <- function(p, i) {
+  ggsave(filename = paste0("PairIntNum", i, ".png"), plot = p)
+}
+
+# num_pair_int_plots <- pairs_num %>%
+#   map(.x = ., .f = \(vp) plot_simple_int2(train6, vp[1], vp[2]))
+# 
+# plotsToSVG2 <- walk2(.x = num_pair_int_plots, .y = seq_along(num_pair_int_plots), .f = save_plot2)
+# plotsToSVG2 <- map(1:length(num_pair_int_plots), .f = \(i) paste0("PairIntNum", i, ".png"))
+# save(plotsToSVG2, file = "Plots num.RData")
+load("Plots num.RData")
+
+slickR::slickR(plotsToSVG2[1:45], height = "480px", width = "672px") +
+  slickR::settings(slidesToShow = 1, dots = TRUE)
+```
+
+```{r interactions-all2, warning = FALSE, message=FALSE, cache=TRUE}
+slickR::slickR(plotsToSVG2[46:90], height = "480px", width = "672px") +
+  slickR::settings(slidesToShow = 1, dots = TRUE)
+```
+
+
+Based on what we see in the figures above, there seem to be large interaction effects between the numerical variables, especially between the amenities. We'll keep this in mind as we explore further.
 
 ## Interaction significance with only variable pairs and their interactions
 One problem with the above visual approach is that we don't know if these interaction effects are real - in the sense they represent some true relationship with the outcome - or if they're so called false positives - that is, random effects that happened to be present in the training data. For example, does the fact that passengers from Earth seem less likely to be transported even when in cryo sleep reflect some true aspect of the spacetime anomaly that caused the transportation to another dimension or is this pattern just something that happened this time on pure chance? Another way to think of this is: if the Spaceship Titanic were to pass through this spacetime anomaly a thousand times, would the pattern persist?
@@ -304,7 +348,6 @@ show_best(pen_tune, metric = "accuracy", n = 20) %>%
   ggplot(aes(x = penalty, y = mean, label = mixture, colour = mixture)) +
   geom_line() +
   geom_point() +
-  scale_x_log10() +
   labs(title = "Tune results without interactions", x = "Lambda penalty", y = "Resample accuracy", colour = "Alpha")
 ```
 
@@ -330,6 +373,8 @@ pen_int_rec <- recipe(x = pen_train, vars = my_vars$Variables, roles = my_vars$R
   step_dummy(all_nominal_predictors()) %>%
   step_interact(int_formula) %>%
   step_zv(all_predictors())
+
+pen_grid <- expand.grid(mixture = c(0.2, 0.6, 1), penalty = c(1e-04, 5e-04, 1e-03, 5e-03))
   
 # my_cluster <- makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
@@ -349,60 +394,57 @@ load("Penalized regression with interactions.RData")
 
 We see the results from the penalized regression model with interactions below.
 
-```{r pen-reg-with-int2, warning = FALSE, message = FALSE}
-pen_int_best <- fit_best(pen_int_tune)
-pen_int_coef <- pen_int_best %>%
-  tidy()
-```
-
-```{r pen-reg-with-int3, warning = FALSE, message = FALSE, fig.cap = "Tuning results for a Lasso/Ridge regression with interaction effects."}
-show_best(pen_int_tune, metric = "accuracy", n = 20) %>%
+```{r pen-reg-with-int2, warning = FALSE, message = FALSE, fig.cap = "Tuning results for a Lasso/Ridge regression with interaction effects."}
+show_best(pen_int_tune, metric = "accuracy", n = 40) %>%
   mutate(mixture = as.factor(round(mixture, 2))) %>%
   ggplot(aes(x = penalty, y = mean, label = mixture, colour = mixture)) +
   geom_line() +
   geom_point() +
-  scale_x_log10() +
   labs(title = "Tune results with interactions", x = "Lambda penalty", y = "Resample accuracy", colour = "Alpha")
 ```
 
-The regression model still favours the pure Lasso ($\alpha = 1$) but with a higher penalty $\lambda = 0.0005$. Out of 490 total variables with interaction effects, it selected 296 for the best accuracy which was close to 0.80. Compared to the model without interactions effects (accuracy = 0.79), this doesn't seem like the greatest improvement. 
+The regression model now favours the a mixed Lasso/Ridge ($\alpha = 0.6$) but with a higher penalty $\lambda = 0.005$. Out of 490 total variables including interaction effects, it selected 170 for the best accuracy which was somewhat above 0.80. Compared to the model without interactions effects (accuracy = 0.79), it's a small improvement. 
 
-We can look at the best variables with interactions below.
+The top ten variables from the penalized regression are below.
 
-```{r pen-reg-int-top}
-pen_int_top <- pen_int_coef %>%
+```{r pen-reg-int-top, cache=TRUE, warning = FALSE, message = FALSE, fig.cap = "Top variables from the Lasso/Ridge regression with interaction effects."}
+pen_int_best <- fit_best(pen_int_tune)
+pen_int_coef <- pen_int_best %>%
+  tidy()
+
+pen_int_coef %>%
   select(-penalty) %>%
-  filter(estimate != 0) %>%
+  filter(estimate != 0 & term != "(Intercept)") %>%
   arrange(desc(abs(estimate))) %>%
-  slice(1:10)
-
-pen_int_top
+  slice(1:20) %>%
+  ggplot(., aes(x = abs(estimate), y = reorder(term, abs(estimate)))) +
+  geom_col() +
+  geom_vline(aes(xintercept = 0.55, colour = "red", linetype = "dashed")) +
+  labs(x = "Regression coefficient (abs)", y = "Variable") +
+  theme(legend.position = "none")
 ```
 
-It's surprising to see that the strongest effects were between Deck & Side, which we visually inspected in Figure \@ref(fig:int-deck-side) where it looked as if the effect of the interaction wasn't very large. It also didn't show up in our pairwise exploration 
+It's surprising to see that the strongest effect was between Deck & Side, which we visually inspected in Figure \@ref(fig:int-deck-side) where it looked as if the effect of the interaction wasn't very large. It also didn't show up in our pairwise exploration which perhaps indicates that this interaction is overfitted. 
 
-The most important variables were almost all interaction effects such as CryoSleep & Deck, HomePlanet & CryoSleep and so on. If we go back to our visualizations, we see that Deck = F does seem to have an effect when CryoSleep changes from False to True and this is true for the change between homeplanets, as well.
-
-The original variables that made the top ten list were VRDeck, Spa and Cryosleep. From our smoothed graphs, we saw that any credits spent on VRDeck significantly reduced the chances of being transported so this also makes sense. 
-
-Let's add these discoveries to our important variable list.
+The other variables amont the 20 most important were all interaction effects where we see returning contenders like CryoSleep & HomePlanet, CryoSleep & Deck, HomePlanet & Deck and so on. Although the reduction is gradual, the last "big" drop is just above a coefficient of 0.5 (absolute value), indicated by the red line. Let's add these interactions to a data frame we can use later.
 
 ```{r int-pen-reg-store}
-int_vars_very_imp2 <- pen_int_top %>%
+pen_int_vars <- pen_int_coef %>%
+  select(-penalty) %>%
+  filter(abs(estimate) > 0.55 & term != "(Intercept)") %>%
   filter(str_detect(term, "_x_")) %>%
   mutate(V1 = str_split_i(term, "_", 1),
          V2 = str_split_i(term, "_", -2),
          ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')"),
          RevFormula = str_c("starts_with('", V2, "'):starts_with('", V1, "')")) %>%
-  select(V1, V2, ForFormula, RevFormula) %>%
-  bind_rows(int_vars_very_imp, .)
-
-int_vars_very_imp2
+  select(V1, V2, ForFormula, RevFormula)
 ```
 
 ## Tree model interactions
-Max and Kuhn also offer another method for discovering interaction effects by the use of a tree-based model like random forest. The algorithm doesn't evaluate the effects of interactions but it does rank the original variables based on their importance which can be used to model interaction effects in a second stage.
-```{r tree-based-var-imp, cache = TRUE, fig.cap = "Variable importance based on a the ranger tree-model"}
+Another method for indirectly discovering interaction effects is by the use of a tree-based model like randomForest. Kuhn and Johnson explain it better in their book but in essence, tree models are by their nature interaction models since they look at thresholds for different variables to split the tree into branches and the splits often involve another variable at the next (or previous) junction. 
+
+The results from a randomForest model doesn't provide interactions themselves but ranks the original variables based on their importance which can be used to model interaction effects in a second stage.
+```{r tree-based-var-imp, cache = TRUE}
 df_tree <- train6 %>%
   mutate(across(.cols = c(PassengerGroupSize, Solo, LargeGroup, TravelTogether, tidyselect::ends_with("PerGroup")),
                 .fns = as.integer))
@@ -437,26 +479,51 @@ rf_imp <- tibble(Predictor = names(rf_mod$variable.importance),
                  Importance = unname(rf_mod$variable.importance))
 ```
 
-
-```{r tree-based-var-imp2, fig.cap = "Variable importance based on a the ranger tree-model"}
+```{r tree-based-var-imp2, fig.cap = "Variable importance based on a the ranger tree model"}
 ggplot(rf_imp, aes(x = reorder(Predictor, Importance), y = Importance)) +
   geom_bar(stat = "identity") +
   coord_flip() +
   xlab("")
 ```
 
-The tree model heavily favours the amenity variables as well as some other variables that our penalized model didn't consider important enough. We saw, however, from our numerical analysis, that many of the amenities had large effects on the response and so perhaps their interactions do, as well? Based on the ranking from the tree model, as well as our exploration from earlier, let's add additional interactions that might be interesting to explore.
+The tree model heavily favours the amenity variables as well as a few other variables that our penalized model didn't consider important enough. Based on the ranking in Figure \@ref(fig:tree-based-var-imp2), there is a clear cutoff after the LastNameCount feature. 
+
+If we return to our plotted interactions from from the earlier figures, we can visually inspect some combinations before we select a final set to test. Some interactions that seem large are:
+
+- Age & RoomService
+- Age & Spa
+- Age & VRDeck
+- Age & CabinNumber
+- Age & PassengerGroup
+
+- RoomService & Spa
+- RoomService & VRDeck
+
+- FoodCourt & ShoppingMall
+- FoodCourt & Spa
+- FoodCourt & VRDeck
+- FoodCourt & LastNameAsNumber
+- FoodCourt & PassengerGroup
+
+- ShoppingMall & Spa
+- ShoppingMall & VRDeck
+- ShoppingMall & CabinNumber
+- ShoppingMall & LastNameAsNumber
+- ShoppingMall & PassengerGroup
+
+- CabinNumber & LastNameAsNumber
+- CabinNumber & PassengerGroup
+
+Let's add them to another set of possible interactions!
 
 ```{r tree-int-important}
-tree_int_vars <- rf_imp %>%
-  filter(Importance > 150) %>%
-  pull(Predictor) %>%
-  combn(., 2, simplify = TRUE) %>%
-  t() %>%
-  as.data.frame(.) %>%
-  mutate(V1 = str_split_i(V1, "_", 1),
-         V2 = str_split_i(V2, "_", 1),
-         ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')"),
+tree_int_vars <- data.frame(
+  V1 = c(rep("Age", 5), rep("RoomService", 2), rep("FoodCourt", 5), rep("ShoppingMall", 5), rep("CabinNumber", 2)),
+  V2 = c("RoomService", "Spa", "VRDeck", "CabinNumber", "PassengerGroup", "Spa", "VRDeck", "ShoppingMall", "Spa", "VRDeck",
+         "LastNameAsNumber", "PassengerGroup", "Spa", "VRDeck", "CabinNumber", "LastNameAsNumber", "PassengerGroup",
+         "LastNameAsNumber", "PassengerGroup")
+  ) %>%
+  mutate(ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')"),
          RevFormula = str_c("starts_with('", V2, "'):starts_with('", V1, "')"))
 ```
 
