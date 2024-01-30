@@ -78,12 +78,9 @@ rfe_acc$results %>%
 There is some strange behaviour that extends the number of variables beyond our specified sizes so we'll just ignore those results. What the results from Figure \@ref(fig:recurs-feat-no-corr2) indicate is that more variables seems to improve the model. However, some of the variables, including dummy variables and interactions, could be highly correlated which might skew the resulting feature set. 
 
 ```{r recurs-feat-no-corr3, fig.cap="Correlation between the first set of optimal variables from the RFE model."}
-rfe_rec %>%
-  prep() %>%
-  bake(new_data = NULL) %>%
+rfe_bake %>%
   select(rfe_acc[["optVariables"]]) %>%
-  DataExplorer::plot_correlation(., type = "continuous", geom_text_args = list(size = 10), 
-                   theme_config = list(text = element_text(size = 8), axis.text.x = element_text(angle = 90)))
+  DataExplorer::plot_correlation(., type = "continuous", theme_config = list(axis.text.x = element_text(angle = 90)))
 ```
 
 We see that there are clusters of high correlation between the variables so let's add a step to remove them and see how it affects performance.
@@ -483,7 +480,7 @@ subset_ctrl <- trainControl(method = "cv", classProbs = TRUE, summaryFunction = 
 load("Random subsets performance.RData")
 ```
 
-```{r feature-selection-comparison, fig.cap="Comparison of different feature selection results against a random subset result."}
+```{r feature-selection-comparison, warning=FALSE, fig.cap="Comparison of different feature selection results against a random subset result."}
 rf_random_avg <- map_dbl(subset_perf, .f = \(x) x$TrainAccuracy) %>%
   enframe()
 
@@ -494,7 +491,8 @@ ggplot() +
   geom_point(data = ga_external_avg, aes(x = Iter, y = Accuracy, colour = "GA")) +
   geom_point(data = rf_random_avg, aes(x = name, y = value, colour = "Random")) +
   scale_colour_manual(values = c("RFE Pen" = "green", "RFE Tree" = "blue", "SA" = "orange", "GA" = "red", "Random" = "darkgrey")) +
-  labs(x = "Iterations", y = "Accuracy", colour = "Method")
+  labs(x = "Iterations", y = "Accuracy", colour = "Method") +
+  lims(y = c(0.6, 0.8))
 ```
 
 We can see that both the recursive feature elimination process and the genetic algorithm outperforms the random variable subset but that the simulated annealing process doesn't. A test of significance shows us that the differences are relevant.

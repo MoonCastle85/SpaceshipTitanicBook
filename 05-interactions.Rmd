@@ -9,7 +9,7 @@ Of course, we won't know the extent of the improvement until we test the interac
 Since we only have a few categorical variables, let's visualize all possible interactions. Here I use the default `glm` logistic regression model where the formula:
 `Transported ~ (.)^2` that amounts to *Outcome \~ Variable_1 + Variable_2 + Variable_1 x Variable_2*
 
-```{r interactions-cat, warning = FALSE, cache=TRUE, message=FALSE}
+```{r interactions-cat, warning = FALSE, cache=TRUE, message=FALSE, fig.cap="Interaction effects for pairs of categorical variables and against the response."}
 plot_simple_int <- function(df, v1, v2) {
   tmp_vars <- c("Transported", v1, v2)
   tmp_model <- glm(Transported ~ (.)^2, data = df[, tmp_vars], family = binomial())
@@ -32,15 +32,16 @@ save_plot <- function(p, i) {
 # cat_pair_int_plots <- pairs_cat %>%
 #   map(.x = ., .f = \(vp) plot_simple_int(train6, vp[1], vp[2]))
 # 
-# plotsToSVG <- walk2(.x = cat_pair_int_plots, .y = seq_along(cat_pair_int_plots), .f = save_plot)
-# plotsToSVG <- map(1:length(cat_pair_int_plots), .f = \(i) paste0("PairInt", i, ".png"))
-# save(plotsToSVG, file = "Plots cat.RData")
+# cat_plots <- walk2(.x = cat_pair_int_plots, .y = seq_along(cat_pair_int_plots), .f = save_plot)
+# cat_slick <- map(1:length(cat_pair_int_plots), .f = \(i) paste0("PairInt", i, ".png"))
+# save(cat_slick, file = "Plots cat.RData")
 load("Plots cat.RData")
 
-slickR::slickR(plotsToSVG, height = "480px", width = "672px") +
+slickR::slickR(cat_slick, height = "480px", width = "672px") +
   slickR::settings(slidesToShow = 1, dots = TRUE)
 ```
-
+  
+  
 Parallel lines indicate no significant interaction effects while lines that cross indicate a potential for a significant interactions. I'll highlight a few interactions below.
 
 ```{r int-cryo-home, warning = FALSE, cache=TRUE, fig.cap = "Interaction between CryoSleep and HomePlanet"}
@@ -53,9 +54,11 @@ The interaction between CryoSleep and HomePlanet suggests that passengers from E
 plot_simple_int(train6, "Deck", "Side")
 ```
 
-The interaction between Deck and Side, however, seems to show only a minor effect, if any.
+The interaction between Deck and Side, however, seems to show only a minor effect, if any. 
 
-```{r interactions-all, warning = FALSE, message=FALSE, cache=TRUE}
+Figures \@ref(fig:interactions-all) and \@ref(fig:interactions-all2) below show all the interaction affects between both numerical and categoriacal variables.
+
+```{r interactions-all, warning = FALSE, message=FALSE, cache=TRUE, fig.cap="Interaction effects for pairs of variables against the response. Part 1."}
 plot_simple_int2 <- function(df, v1, v2) {
   tmp_vars <- c("Transported", v1, v2)
   tmp_model <- glm(Transported ~ (.)^2, data = df[, tmp_vars], family = binomial())
@@ -78,20 +81,19 @@ save_plot2 <- function(p, i) {
 # num_pair_int_plots <- pairs_num %>%
 #   map(.x = ., .f = \(vp) plot_simple_int2(train6, vp[1], vp[2]))
 # 
-# plotsToSVG2 <- walk2(.x = num_pair_int_plots, .y = seq_along(num_pair_int_plots), .f = save_plot2)
-# plotsToSVG2 <- map(1:length(num_pair_int_plots), .f = \(i) paste0("PairIntNum", i, ".png"))
-# save(plotsToSVG2, file = "Plots num.RData")
+# int_plots_slick <- walk2(.x = num_pair_int_plots, .y = seq_along(num_pair_int_plots), .f = save_plot2)
+# int_plots_slick <- map(1:length(num_pair_int_plots), .f = \(i) paste0("PairIntNum", i, ".png"))
+# save(int_plots_slick, file = "Plots num.RData")
 load("Plots num.RData")
 
-slickR::slickR(plotsToSVG2[1:45], height = "480px", width = "672px") +
+slickR::slickR(int_plots_slick[1:45], height = "480px", width = "672px") +
   slickR::settings(slidesToShow = 1, dots = TRUE)
 ```
-
-```{r interactions-all2, warning = FALSE, message=FALSE, cache=TRUE}
-slickR::slickR(plotsToSVG2[46:90], height = "480px", width = "672px") +
+  
+```{r interactions-all2, warning = FALSE, message=FALSE, cache=TRUE, fig.cap="Interaction effects for pairs of variables against the response. Part 2."}
+slickR::slickR(int_plots_slick[46:90], height = "480px", width = "672px") +
   slickR::settings(slidesToShow = 1, dots = TRUE)
 ```
-
 
 Based on what we see in the figures above, there seem to be large interaction effects between the numerical variables, especially between the amenities. We'll keep this in mind as we explore further.
 

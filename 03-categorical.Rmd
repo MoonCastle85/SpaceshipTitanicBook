@@ -76,13 +76,17 @@ my_tables <- list(
   base::table(Side = train4$Side, VIP = train4$VIP)
 )
 
-mosaic_plots <- map2(.x = my_tables, .y = 1:length(my_tables), .f = \(t, it) my_mosaic(dtab = t, i = it))
+# mosaic_plots <- map2(.x = my_tables, .y = 1:length(my_tables), .f = \(t, it) my_mosaic(dtab = t, i = it))
+# mosaic_slick <- map(1:length(mosaic_plots), .f = \(i) paste0("Mosaic", i, ".png"))
+# save(mosaic_slick, file = "Mosaic slick plots.RData")
 
-plotsToSVG <- map(1:length(mosaic_plots), .f = \(i) paste0("Mosaic", i, ".png"))
-slickR::slickR(plotsToSVG, height = "480px", width = "672px") +
-  slickR::settings(slidesToShow = 1)
+load("Mosaic slick plots.RData")
+slickR::slickR(mosaic_slick, height = "480px", width = "672px") +
+  slickR::settings(slidesToShow = 1, dots = TRUE)
 ```
-
+  
+  
+  
 The mosaic plot can be read from horisontally where we can see how the height of the bars changes with different (vertical) values of the other variable. For example, we see how the share of passengers that are in cryosleep changes with the deck and we know from the Chi\^2 test that the change is significant. 
 
 We can return to this visual understanding of the relationship between the categorical variables whenever we want to check if some relationship metric makes sense. For example, we can see that the differences between Side and some of the variables that didn't fall outside the 5% p-value, like HomePlanet, seem relatively small.
@@ -155,12 +159,18 @@ binom_plots <- train4 %>%
   summarise(across(.cols = -c(Cabin, Name, LastName, PassengerId, Transported, PassengerGroup), .fns = list)) %>%
   imap(.f = ~my_binom_plot(train4, .y, "Transported"))
 
-plotsToSVG <- walk2(.x = binom_plots, .y = seq_along(binom_plots), .f = save_plot)
-plotsToSVG <- map(1:length(binom_plots), .f = \(i) paste0("Binomial", i, ".png"))
-slickR::slickR(plotsToSVG, height = "480px", width = "672px") +
-  slickR::settings(slidesToShow = 1)
-```
+# binom_plots2 <- walk2(.x = binom_plots, .y = seq_along(binom_plots), .f = save_plot)
+# binom_slick <- map(1:length(binom_plots), .f = \(i) paste0("Binomial", i, ".png"))
+# save(binom_slick, file = "Biomial slick plots.RData")
 
+load("Biomial slick plots.RData")
+slickR::slickR(binom_slick, height = "480px", width = "672px") +
+  slickR::settings(slidesToShow = 1, dots = TRUE)
+```
+  
+  
+  
+  
 We see a lot of interesting details so let us focus on a few of our features that relate to the passenger group.
 
 ```{r binom-passgrp, warning = FALSE, message = FALSE, fig.cap = "PassengerGroupSize plotted as a binomial plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}

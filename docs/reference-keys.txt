@@ -7,6 +7,7 @@ fig:missing-cabin
 fig:missing-deck
 fig:missing-vip
 fig:missing-age
+fig:manual-imputation
 fig:imputation-evaluation-num
 fig:imputation-evaluation-num2
 fig:imputation-evaluation-home
@@ -28,8 +29,11 @@ fig:smooth-lastname
 fig:roomservice
 fig:shoppingmall
 fig:totalspent
+fig:interactions-cat
 fig:int-cryo-home
 fig:int-deck-side
+fig:interactions-all
+fig:interactions-all2
 fig:pen-reg-without-int2
 fig:pen-reg-with-int2
 fig:pen-reg-int-top
@@ -46,6 +50,8 @@ fig:genetic-internal
 fig:genetic-external
 fig:feature-selection-comparison
 fig:rf-random-comparison-sign
+fig:glm-without-int
+fig:glmnet-without-int
 introduction
 early-data-exploration
 overview-of-the-data

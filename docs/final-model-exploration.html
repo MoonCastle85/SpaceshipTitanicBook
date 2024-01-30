@@ -125,12 +125,10 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <span></span>
 <span><span class="co"># Get our variables in order for modelling</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Best variables.RData"</span><span class="op">)</span></span>
-<span><span class="va">train7</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Cabin</span>, <span class="va">Name</span>, <span class="va">LastName</span>, <span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">PassengerGroupSize</span>, <span class="va">Solo</span>, <span class="va">LargeGroup</span>, <span class="va">TravelTogether</span>, <span class="fu">tidyselect</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">ends_with</a></span><span class="op">(</span><span class="st">"PerGroup"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                .fns <span class="op">=</span> <span class="va">as.integer</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">final_df</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="fu">all_of</span><span class="op">(</span><span class="va">best_vars</span><span class="op">)</span>, <span class="va">Transported</span>, <span class="va">PassengerId</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">my_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">train7</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">my_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">final_df</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>Roles <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Variables</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PassengerId"</span><span class="op">)</span>, <span class="st">"id"</span>, <span class="st">"predictor"</span><span class="op">)</span>,</span>
 <span>         Roles <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="st">"Transported"</span>, <span class="st">"outcome"</span>, <span class="va">Roles</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -138,22 +136,20 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Final interactions.RData"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
-<span><span class="va">final_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">train7</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">final_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">final_df</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
 <span><span class="va">final_train</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">final_split</span><span class="op">)</span></span>
 <span><span class="va">final_test</span> <span class="op">&lt;-</span> <span class="fu">testing</span><span class="op">(</span><span class="va">final_split</span><span class="op">)</span></span>
 <span><span class="va">final_folds</span> <span class="op">&lt;-</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">final_train</span>, v <span class="op">=</span> <span class="fl">10</span>, repeats <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">final_rec_int</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span>x <span class="op">=</span> <span class="va">final_train</span>, vars <span class="op">=</span> <span class="va">my_vars</span><span class="op">$</span><span class="va">Variables</span>, roles <span class="op">=</span> <span class="va">my_vars</span><span class="op">$</span><span class="va">Roles</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">TotalSpent</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span>,</span>
-<span>                 <span class="va">TotalSpentPerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="fu">all_numeric_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_dummy</span><span class="op">(</span><span class="fu">all_nominal_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_interact</span><span class="op">(</span><span class="va">final_interactions</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_zv</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_corr</span><span class="op">(</span><span class="fu">all_numeric_predictors</span><span class="op">(</span><span class="op">)</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">final_rec</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span>x <span class="op">=</span> <span class="va">final_train</span>, vars <span class="op">=</span> <span class="va">my_vars</span><span class="op">$</span><span class="va">Variables</span>, roles <span class="op">=</span> <span class="va">my_vars</span><span class="op">$</span><span class="va">Roles</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">TotalSpent</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span>,</span>
-<span>                 <span class="va">TotalSpentPerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="fu">all_numeric_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_dummy</span><span class="op">(</span><span class="fu">all_nominal_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_zv</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_corr</span><span class="op">(</span><span class="fu">all_numeric_predictors</span><span class="op">(</span><span class="op">)</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
@@ -180,24 +176,32 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
 <span><span class="va">glm_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">glm_final_wf</span>, <span class="va">final_train</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: glm.fit: fitted probabilities numerically 0 or 1</span></span>
-<span><span class="co">#&gt; occurred</span></span>
+<span><span class="va">glm_fitted</span> <span class="op">&lt;-</span> <span class="fu">extract_fit_engine</span><span class="op">(</span><span class="va">glm_final_fit</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">glm_final_pred</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>Actual <span class="op">=</span> <span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">glm_final_fit</span>, <span class="va">final_test</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">glm_final_acc_int</span> <span class="op">&lt;-</span> <span class="fu">accuracy</span><span class="op">(</span>data <span class="op">=</span> <span class="va">glm_final_pred</span>, truth <span class="op">=</span> <span class="va">Actual</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span></span>
-<span><span class="va">glm_final_acc_int</span></span>
+<span><span class="va">glm_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">glm_final_fit</span>, <span class="va">final_test</span><span class="op">)</span></span>
+<span><span class="va">glm_est_pred</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span><span class="va">final_test</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PassengerId"</span>, <span class="st">"Transported"</span><span class="op">)</span><span class="op">]</span>, <span class="va">glm_final_pred</span><span class="op">)</span></span>
+<span><span class="fu">accuracy</span><span class="op">(</span>data <span class="op">=</span> <span class="va">glm_est_pred</span>, truth <span class="op">=</span> <span class="va">Transported</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
 <span><span class="co">#&gt;   .metric  .estimator .estimate</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 accuracy binary         0.791</span></span></code></pre></div>
-<p>The results from the GLM model aren’t great but are close to the ones we expected from our resampling and feature evaluation process.</p>
+<span><span class="co">#&gt; 1 accuracy binary         0.640</span></span></code></pre></div>
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sjPlot</span><span class="fu">::</span><span class="fu"><a href="https://strengejacke.github.io/sjPlot/reference/plot_model.html">plot_model</a></span><span class="op">(</span><span class="va">glm_fitted</span>, type <span class="op">=</span> <span class="st">"resid"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:glm-without-int"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/glm-without-int-1.png" alt="Residuals from the GLM model fitted without interactions." width="672"><p class="caption">
+Figure 8.1: Residuals from the GLM model fitted without interactions.
+</p>
+</div>
+<p>We can see from the results of residuals in Figure <a href="final-model-exploration.html#fig:glm-without-int">8.1</a> that the GLM model (red lines) does pretty well against the categorical variables but does poorly against the numerical ones. This is because these variables don’t have a linear relationship to the response, as we’ve seen in our exploratory chapter of numerical variables. The accuracy is very low, 0.64.</p>
 </div>
 <div id="glmnet-lassoridge" class="section level2" number="8.3">
 <h2>
 <span class="header-section-number">8.3</span> GLMNET Lasso/Ridge<a class="anchor" aria-label="anchor" href="#glmnet-lassoridge"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">best_glm_params</span> <span class="op">&lt;-</span> <span class="fu">select_best</span><span class="op">(</span><span class="va">pen_int_tune</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Penalized regression with interactions.RData"</span><span class="op">)</span></span>
+<span><span class="va">best_glm_params</span> <span class="op">&lt;-</span> <span class="fu">select_best</span><span class="op">(</span><span class="va">pen_int_tune</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">glmnet_final_mod</span> <span class="op">&lt;-</span> <span class="fu">logistic_reg</span><span class="op">(</span>penalty <span class="op">=</span> <span class="fu">pluck</span><span class="op">(</span><span class="va">best_glm_params</span><span class="op">$</span><span class="va">penalty</span><span class="op">)</span>, mixture <span class="op">=</span> <span class="fu">pluck</span><span class="op">(</span><span class="va">best_glm_params</span><span class="op">$</span><span class="va">mixture</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"glmnet"</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span>
@@ -207,20 +211,31 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
 <span><span class="va">glmnet_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">glmnet_final_wf</span>, <span class="va">final_train</span><span class="op">)</span></span>
+<span><span class="va">glmnet_fitted</span> <span class="op">&lt;-</span> <span class="fu">extract_fit_engine</span><span class="op">(</span><span class="va">glmnet_final_fit</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">glmnet_final_pred</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>Actual <span class="op">=</span> <span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">glmnet_final_fit</span>, <span class="va">final_test</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">glmnet_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy</span><span class="op">(</span>data <span class="op">=</span> <span class="va">glmnet_final_pred</span>, truth <span class="op">=</span> <span class="va">Actual</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span></span>
-<span><span class="va">glmnet_final_acc</span></span>
+<span><span class="va">glmnet_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">glmnet_final_fit</span>, <span class="va">final_test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">glmnet_est_pred</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span><span class="va">final_test</span>, <span class="va">glmnet_final_pred</span><span class="op">)</span></span>
+<span><span class="fu">accuracy</span><span class="op">(</span>data <span class="op">=</span> <span class="va">glmnet_est_pred</span>, truth <span class="op">=</span> <span class="va">Transported</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
 <span><span class="co">#&gt;   .metric  .estimator .estimate</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 accuracy binary         0.787</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 accuracy binary         0.637</span></span></code></pre></div>
+<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">glmnet_fitted</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:glmnet-without-int"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/glmnet-without-int-1.png" alt="Residuals from the penalized Lasso/Ridge model fitted without interactions." width="672"><p class="caption">
+Figure 8.2: Residuals from the penalized Lasso/Ridge model fitted without interactions.
+</p>
+</div>
+<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># sjPlot::plot_model(glmnet_fitted)</span></span></code></pre></div>
 </div>
 <div id="randomforest" class="section level2" number="8.4">
 <h2>
 <span class="header-section-number">8.4</span> RandomForest<a class="anchor" aria-label="anchor" href="#randomforest"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
 <span><span class="va">rf_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span>, save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">rf_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>trees <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">2000</span>, <span class="fl">10000</span><span class="op">)</span>, min_n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
@@ -255,20 +270,28 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <div class="inline-figure">
 <img src="SpaceshipTitanicBook_files/figure-html/randomForest-tune-1.png" width="672">
 The results from the model tuning indicate that the improvement is very limited with more trees than somewhere around 2000 so I will assume this as the optimal. With tree based models, too much trees can overfit the data so it’s a good idea not to</div>
-<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># rf_final_mod &lt;- rand_forest(trees = 2000, min_n = 5) %&gt;%</span></span>
-<span><span class="co">#   set_mode("classification") %&gt;%</span></span>
-<span><span class="co">#   set_engine("randomForest")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># rf_final_wf &lt;- glm_final_wf %&gt;%</span></span>
-<span><span class="co">#   update_model(rf_final_mod)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># set.seed(8584)</span></span>
-<span><span class="co"># rf_final_fit &lt;- fit(rf_final_wf, final_train)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># rf_final_pred &lt;- bind_cols(Actual = final_test$Transported, predict(rf_final_fit, final_test))</span></span>
-<span><span class="co"># rf_final_acc &lt;- accuracy(data = rf_final_pred, truth = Actual, estimate = .pred_class)</span></span>
-<span><span class="co"># rf_final_acc</span></span></code></pre></div>
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rf_best_tune</span> <span class="op">&lt;-</span> <span class="fu">select_best</span><span class="op">(</span><span class="va">rf_final_tune</span><span class="op">)</span></span>
+<span><span class="va">rf_final_mod</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span>trees <span class="op">=</span> <span class="va">rf_best_tune</span><span class="op">$</span><span class="va">trees</span>, min_n <span class="op">=</span> <span class="va">rf_best_tune</span><span class="op">$</span><span class="va">min_n</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rf_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">rf_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">rf_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">rf_final_wf</span>, <span class="va">final_train</span><span class="op">)</span></span>
+<span><span class="va">rf_fitted</span> <span class="op">&lt;-</span> <span class="fu">extract_fit_engine</span><span class="op">(</span><span class="va">rf_final_fit</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rf_final_pred</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>Actual <span class="op">=</span> <span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">rf_final_fit</span>, <span class="va">final_test</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">rf_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy</span><span class="op">(</span>data <span class="op">=</span> <span class="va">rf_final_pred</span>, truth <span class="op">=</span> <span class="va">Actual</span>, estimate <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span></span>
+<span><span class="va">rf_final_acc</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
+<span><span class="co">#&gt;   .metric  .estimator .estimate</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 accuracy binary         0.749</span></span>
+<span></span>
+<span><span class="co"># sjPlot::plot_model(rf_fitted)</span></span></code></pre></div>
 
 </div>
 </div>
@@ -300,7 +323,7 @@ The results from the model tuning indicate that the improvement is very limited 
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-28.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-30.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

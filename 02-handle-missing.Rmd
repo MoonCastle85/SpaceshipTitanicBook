@@ -101,7 +101,7 @@ train2 %>%
 
 ## Replace data with manual rules
 I've summed up all of these replacement rules in the function below.
-```{r manual-imputation}
+```{r manual-imputation, fig.cap="Missing values after manual replacement."}
 my_na_replace <- function(d) {
   d2 <- d %>%
     # Replace HomePlanet for passengers in groups where the homeplanet is known from the other passengers
@@ -333,7 +333,7 @@ check_knn %>%
   select(PassengerId, CryoSleep, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent)
 ```
 
-The imputation didn't break the rule where passengers that are <=12 years old don't spend any credits but it did breat the rule where passengers that are in cryo sleep can't spend credits.
+The imputation didn't break the rule where passengers that are <=12 years old don't spend any credits but it did break the rule where passengers that are in cryo sleep can't spend credits.
 
 ```{r imputation-evaluation5}
 check_knn %>%
@@ -345,7 +345,7 @@ check_knn %>%
   select(PassengerId, HomePlanet, VIP)
 ```
 
-The only rule breaking is regarding the Deck variable where some passengers have been imputed as being housed on decks despite travelling from the 'wrong' homeplanet for that deck. We can deal with this in a general function that checks for all the 'rules' and adjusts.
+Another rule that was broken regards the Deck variable where some passengers have been imputed as being housed on decks despite travelling from the 'wrong' homeplanet for that deck. We can deal with this in a general function that checks for all the 'rules' and adjusts.
 
 ```{r manual-imp-correction, fig.cap = "Missing values overview after imputation"}
 fix_knn <- function(df) {

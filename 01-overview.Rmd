@@ -36,7 +36,7 @@ save_plot <- function(p, i) {
 plotsToSVG <- walk2(.x = my_frq, .y = seq_along(my_frq), .f = save_plot)
 plotsToSVG <- map(1:length(my_frq), .f = \(i) paste0("Variable", i, ".png"))
 slickR::slickR(plotsToSVG, height = "480px", width = "672px") +
-  slickR::settings(slidesToShow = 1)
+  slickR::settings(slidesToShow = 1, dots = TRUE)
 ```
 
 All of the numeric variables are right-skewed, which means they have outliers to the right of the horizontal axis and the amenities (RoomService, FoodCourt etc) have a high proportion of zero values. The difference in scales is also large. We will need to apply some kind of preproces to scale them down to help out models like K-nearest-neighbors (KNN). We might also need to add binary features (yes/no or 1/0) for the amenities that are zero to perhaps help the models differentiate them from the rest.
@@ -47,8 +47,7 @@ The Cabin and Name variables have a near uniform distribution which implies that
 ```{r correlation, results = "hide", warning = FALSE, message = FALSE, fig.cap = "Correlation between numerical predictor variables"}
 train %>%
   na.omit(.) %>%
-DataExplorer::plot_correlation(., type = "all", theme_config = list(text = element_text(size = 20), 
-                                                                    axis.text.x = element_text(angle = 90)))
+DataExplorer::plot_correlation(., type = "all", theme_config = list(axis.text.x = element_text(angle = 90)))
 ```
 
 We see that there's some relatively high correlation between home planets and destinations as well as a moderate correlation between CryoSleep and Transported which already gives us a hint that CryoSleep might be important. Otherwise, the variables seem relatively uncorrelated which is a good thing since some models cannot handle variables that are too correlated.

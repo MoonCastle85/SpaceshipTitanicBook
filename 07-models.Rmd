@@ -204,12 +204,10 @@ train6 <- add_name_features(train5)
 
 # Get our variables in order for modelling
 load("Best variables.RData")
-train7 <- train6 %>%
-  select(-c(Cabin, Name, LastName, PassengerCount, HomePlanetsPerGroup)) %>%
-  mutate(across(.cols = c(PassengerGroupSize, Solo, LargeGroup, TravelTogether, tidyselect::ends_with("PerGroup")),
-                .fns = as.integer))
+final_df <- train6 %>%
+  select(all_of(best_vars), Transported, PassengerId)
 
-my_vars <- data.frame(Variables = names(train7)) %>%
+my_vars <- data.frame(Variables = names(final_df)) %>%
   mutate(Roles = if_else(Variables %in% c("PassengerId"), "id", "predictor"),
          Roles = if_else(Variables == "Transported", "outcome", Roles))
 
@@ -217,30 +215,27 @@ my_vars <- data.frame(Variables = names(train7)) %>%
 load("Final interactions.RData")
 
 set.seed(8584)
-final_split <- initial_split(train7, prop = 0.8)
+final_split <- initial_split(final_df, prop = 0.8)
 final_train <- training(final_split)
 final_test <- testing(final_split)
 final_folds <- vfold_cv(final_train, v = 10, repeats = 5)
 
 final_rec_int <- recipe(x = final_train, vars = my_vars$Variables, roles = my_vars$Roles) %>%
-  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent, CabinNumber, LastNameAsNumber, PassengerGroup,
-                 TotalSpentPerGroup) %>%
+  step_normalize(all_numeric_predictors()) %>%
   step_dummy(all_nominal_predictors()) %>%
   step_interact(final_interactions) %>%
   step_zv(all_predictors()) %>%
   step_corr(all_numeric_predictors(), threshold = 0.5)
 
 final_rec <- recipe(x = final_train, vars = my_vars$Variables, roles = my_vars$Roles) %>%
-  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent, CabinNumber, LastNameAsNumber, PassengerGroup,
-                 TotalSpentPerGroup) %>%
+  step_normalize(all_numeric_predictors()) %>%
   step_dummy(all_nominal_predictors()) %>%
   step_zv(all_predictors()) %>%
   step_corr(all_numeric_predictors(), threshold = 0.5)
 ```
 
-
 ## GLM
-```{r glm}
+```{r glm, warning=FALSE}
 glm_final_bake <- final_rec %>%
   prep() %>%
   bake(new_data = NULL)
@@ -258,15 +253,22 @@ glm_final_wf <- workflow() %>%
 
 set.seed(8584)
 glm_final_fit <- fit(glm_final_wf, final_train)
+glm_fitted <- extract_fit_engine(glm_final_fit)
 
-glm_final_pred <- bind_cols(Actual = final_test$Transported, predict(glm_final_fit, final_test))
-glm_final_acc_int <- accuracy(data = glm_final_pred, truth = Actual, estimate = .pred_class)
-glm_final_acc_int
+glm_final_pred <- predict(glm_final_fit, final_test)
+glm_est_pred <- bind_cols(final_test[, c("PassengerId", "Transported")], glm_final_pred)
+accuracy(data = glm_est_pred, truth = Transported, estimate = .pred_class)
 ```
-The results from the GLM model aren't great but are close to the ones we expected from our resampling and feature evaluation process.
+
+```{r glm-without-int, warning=FALSE, message=FALSE, fig.cap="Residuals from the GLM model fitted without interactions."}
+sjPlot::plot_model(glm_fitted, type = "resid")
+```
+
+We can see from the results of residuals in Figure \@ref(fig:glm-without-int) that the GLM model (red lines) does pretty well against the categorical variables but does poorly against the numerical ones. This is because these variables don't have a linear relationship to the response, as we've seen in our exploratory chapter of numerical variables. The accuracy is very low, 0.64.
 
 ## GLMNET Lasso/Ridge
 ```{r glmnet}
+load("Penalized regression with interactions.RData")
 best_glm_params <- select_best(pen_int_tune)
 
 glmnet_final_mod <- logistic_reg(penalty = pluck(best_glm_params$penalty), mixture = pluck(best_glm_params$mixture)) %>%
@@ -277,11 +279,20 @@ glmnet_final_wf <- glm_final_wf %>%
 
 set.seed(8584)
 glmnet_final_fit <- fit(glmnet_final_wf, final_train)
+glmnet_fitted <- extract_fit_engine(glmnet_final_fit)
 
-glmnet_final_pred <- bind_cols(Actual = final_test$Transported, predict(glmnet_final_fit, final_test))
-glmnet_final_acc <- accuracy(data = glmnet_final_pred, truth = Actual, estimate = .pred_class)
-glmnet_final_acc
+glmnet_final_pred <- predict(glmnet_final_fit, final_test, type = "class")
+glmnet_est_pred <- bind_cols(final_test, glmnet_final_pred)
+accuracy(data = glmnet_est_pred, truth = Transported, estimate = .pred_class)
+
+
 ```
+
+```{r glmnet-without-int, warning=FALSE, message=FALSE, fig.cap="Residuals from the penalized Lasso/Ridge model fitted without interactions."}
+plot(glmnet_fitted)
+# sjPlot::plot_model(glmnet_fitted)
+```
+
 ## RandomForest
 ```{r randomForest-tune}
 my_acc <- metric_set(accuracy)
@@ -319,19 +330,23 @@ show_best(rf_final_tune, metric = "accuracy", n = 20) %>%
 The results from the model tuning indicate that the improvement is very limited with more trees than somewhere around 2000 so I will assume this as the optimal. With tree based models, too much trees can overfit the data so it's a good idea not to
 
 ```{r randomForest}
-# rf_final_mod <- rand_forest(trees = 2000, min_n = 5) %>%
-#   set_mode("classification") %>%
-#   set_engine("randomForest")
-# 
-# rf_final_wf <- glm_final_wf %>%
-#   update_model(rf_final_mod)
-# 
-# set.seed(8584)
-# rf_final_fit <- fit(rf_final_wf, final_train)
-# 
-# rf_final_pred <- bind_cols(Actual = final_test$Transported, predict(rf_final_fit, final_test))
-# rf_final_acc <- accuracy(data = rf_final_pred, truth = Actual, estimate = .pred_class)
-# rf_final_acc
+rf_best_tune <- select_best(rf_final_tune)
+rf_final_mod <- rand_forest(trees = rf_best_tune$trees, min_n = rf_best_tune$min_n) %>%
+  set_mode("classification") %>%
+  set_engine("randomForest")
+
+rf_final_wf <- glm_final_wf %>%
+  update_model(rf_final_mod)
+
+set.seed(8584)
+rf_final_fit <- fit(rf_final_wf, final_train)
+rf_fitted <- extract_fit_engine(rf_final_fit)
+
+rf_final_pred <- bind_cols(Actual = final_test$Transported, predict(rf_final_fit, final_test))
+rf_final_acc <- accuracy(data = rf_final_pred, truth = Actual, estimate = .pred_class)
+rf_final_acc
+
+# sjPlot::plot_model(rf_fitted)
 ```
 
 

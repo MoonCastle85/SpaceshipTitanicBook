@@ -138,8 +138,7 @@ We can see that PassengerGroup and CabinNumber are highly correlated with each o
 ```{r correlation-numeric}
 train6 %>%
   select(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, CabinNumber, LastNameAsNumber, PassengerGroup) %>%
-  DataExplorer::plot_correlation(., type = "continuous", geom_text_args = list(size = 10), 
-                   theme_config = list(text = element_text(size = 15), axis.text.x = element_text(angle = 90)))
+  DataExplorer::plot_correlation(., type = "continuous", theme_config = list(axis.text.x = element_text(angle = 90)))
 ```
 
 ```{r remove-04, include=FALSE}
