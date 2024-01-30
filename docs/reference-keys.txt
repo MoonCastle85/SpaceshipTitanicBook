@@ -50,8 +50,6 @@ fig:genetic-internal
 fig:genetic-external
 fig:feature-selection-comparison
 fig:rf-random-comparison-sign
-fig:glm-without-int
-fig:glmnet-without-int
 introduction
 early-data-exploration
 overview-of-the-data

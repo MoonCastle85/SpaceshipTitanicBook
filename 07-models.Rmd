@@ -29,7 +29,7 @@ useful_features <- function(x) {
            VIPsPerGroup = n_distinct(VIP, na.rm = TRUE),
            LastNamesPerGroup = n_distinct(LastName, na.rm = TRUE)) %>%
     ungroup() %>%
-    mutate(across(.cols = c(HomePlanet, CryoSleep, Destination, VIP, Transported, Deck, Side, HomePlanetsPerGroup,
+    mutate(across(.cols = c(HomePlanet, CryoSleep, Destination, VIP, Deck, Side, HomePlanetsPerGroup,
                             PassengerGroupSize, DestinationsPerGroup, CabinsPerGroup, CryoSleepsPerGroup, VIPsPerGroup,
                             LastNamesPerGroup, PassengerGroup, PassengerId),
                   .fns = as.factor)) %>%
@@ -82,7 +82,7 @@ useful_features2 <- function(x) {
            VIPsPerGroup = n_distinct(VIP, na.rm = TRUE),
            LastNamesPerGroup = n_distinct(LastName, na.rm = TRUE)) %>%
     ungroup() %>%
-    mutate(across(.cols = c(HomePlanet, CryoSleep, Destination, VIP, Transported, Deck, Side, HomePlanetsPerGroup,
+    mutate(across(.cols = c(HomePlanet, CryoSleep, Destination, VIP, Deck, Side, HomePlanetsPerGroup,
                             PassengerGroupSize, DestinationsPerGroup, CabinsPerGroup, CryoSleepsPerGroup, VIPsPerGroup,
                             LastNamesPerGroup, PassengerGroup, PassengerId),
                   .fns = as.factor)) %>%
@@ -154,11 +154,19 @@ add_name_features <- function(df) {
   add_count(x = ., LastNameAsNumber, name = "LastNameCount") %>%
   mutate(across(.cols = c(PassengerGroup, LastNameAsNumber), .fns = as.integer))
 }
+
+rev_normalization <- function(v, rec) { # Custom function that will "unnormalise" numeric values inside mutate(across())
+  tidy_rec <- tidy(rec, number = 1)
+  v2 <- v * filter(tidy_rec, terms == cur_column() & statistic == "sd")$value + 
+    filter(tidy_rec, terms == cur_column() & statistic == "mean")$value
+  v3 <- round(v2, 0)
+  return(v3)
+}
 ```
 
 
-```{r summarise-preprocess}
-train <- read.csv("train.csv", na.strings = "")
+```{r summarise-preprocess, warning=FALSE, message=FALSE}
+train <- read_csv("train.csv", na = "")
 
 # Create group variables, seperate CabinNumber, Deck and Side from Cabin
 train2 <- useful_features(train)
@@ -203,15 +211,16 @@ train5 <- add_grp_features(train4)
 train6 <- add_name_features(train5)
 
 # Get our variables in order for modelling
-load("Best variables.RData")
 final_df <- train6 %>%
-  select(all_of(best_vars), Transported, PassengerId)
+  select(-c(PassengerCount, HomePlanetsPerGroup, Cabin, Name, LastName)) %>%
+  mutate(across(.cols = c(PassengerGroupSize, ends_with("PerGroup")), .fns = as.integer),
+         Transported = as.factor(Transported))
 
 my_vars <- data.frame(Variables = names(final_df)) %>%
   mutate(Roles = if_else(Variables %in% c("PassengerId"), "id", "predictor"),
          Roles = if_else(Variables == "Transported", "outcome", Roles))
 
-
+load("Best variables.RData")
 load("Final interactions.RData")
 
 set.seed(8584)
@@ -220,18 +229,13 @@ final_train <- training(final_split)
 final_test <- testing(final_split)
 final_folds <- vfold_cv(final_train, v = 10, repeats = 5)
 
-final_rec_int <- recipe(x = final_train, vars = my_vars$Variables, roles = my_vars$Roles) %>%
-  step_normalize(all_numeric_predictors()) %>%
+final_rec <- recipe(x = final_train, vars = my_vars$Variables, roles = my_vars$Roles) %>%
+  step_scale(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, PassengerGroup, CabinNumber, TotalSpent, TotalSpentPerGroup,
+             LastNameAsNumber) %>%
   step_dummy(all_nominal_predictors()) %>%
   step_interact(final_interactions) %>%
   step_zv(all_predictors()) %>%
-  step_corr(all_numeric_predictors(), threshold = 0.5)
-
-final_rec <- recipe(x = final_train, vars = my_vars$Variables, roles = my_vars$Roles) %>%
-  step_normalize(all_numeric_predictors()) %>%
-  step_dummy(all_nominal_predictors()) %>%
-  step_zv(all_predictors()) %>%
-  step_corr(all_numeric_predictors(), threshold = 0.5)
+  step_select(all_outcomes(), contains("_x_"), all_of(matches(str_c(best_vars, collapse = "|"))), skip = TRUE)
 ```
 
 ## GLM
@@ -256,12 +260,7 @@ glm_final_fit <- fit(glm_final_wf, final_train)
 glm_fitted <- extract_fit_engine(glm_final_fit)
 
 glm_final_pred <- predict(glm_final_fit, final_test)
-glm_est_pred <- bind_cols(final_test[, c("PassengerId", "Transported")], glm_final_pred)
-accuracy(data = glm_est_pred, truth = Transported, estimate = .pred_class)
-```
-
-```{r glm-without-int, warning=FALSE, message=FALSE, fig.cap="Residuals from the GLM model fitted without interactions."}
-sjPlot::plot_model(glm_fitted, type = "resid")
+confusionMatrix(data = glm_final_pred$.pred_class, reference = final_test$Transported)
 ```
 
 We can see from the results of residuals in Figure \@ref(fig:glm-without-int) that the GLM model (red lines) does pretty well against the categorical variables but does poorly against the numerical ones. This is because these variables don't have a linear relationship to the response, as we've seen in our exploratory chapter of numerical variables. The accuracy is very low, 0.64.
@@ -282,15 +281,7 @@ glmnet_final_fit <- fit(glmnet_final_wf, final_train)
 glmnet_fitted <- extract_fit_engine(glmnet_final_fit)
 
 glmnet_final_pred <- predict(glmnet_final_fit, final_test, type = "class")
-glmnet_est_pred <- bind_cols(final_test, glmnet_final_pred)
-accuracy(data = glmnet_est_pred, truth = Transported, estimate = .pred_class)
-
-
-```
-
-```{r glmnet-without-int, warning=FALSE, message=FALSE, fig.cap="Residuals from the penalized Lasso/Ridge model fitted without interactions."}
-plot(glmnet_fitted)
-# sjPlot::plot_model(glmnet_fitted)
+confusionMatrix(data = glmnet_final_pred$.pred_class, reference = final_test$Transported)
 ```
 
 ## RandomForest
@@ -342,19 +333,51 @@ set.seed(8584)
 rf_final_fit <- fit(rf_final_wf, final_train)
 rf_fitted <- extract_fit_engine(rf_final_fit)
 
-rf_final_pred <- bind_cols(Actual = final_test$Transported, predict(rf_final_fit, final_test))
-rf_final_acc <- accuracy(data = rf_final_pred, truth = Actual, estimate = .pred_class)
-rf_final_acc
+rf_final_pred <- predict(rf_final_fit, final_test)
 
-# sjPlot::plot_model(rf_fitted)
+confusionMatrix(data = rf_final_pred$.pred_class, reference = final_test$Transported)
 ```
 
+```{r rf-pred-kaggl, warning=FALSE, include=FALSE}
+# test <- read_csv("test.csv", na = "", col_types = "cccccncnnnnnc")
+# 
+# # Create group variables, seperate CabinNumber, Deck and Side from Cabin
+# test2 <- useful_features(test)
+# 
+# # Replace structurally missing NA
+# test3 <- my_na_replace(test2)
+# test3 <- useful_features(test3)
+# 
+# # KNN impute remaining missing values
+# test3_for_knn <- test3 %>%
+#   mutate(across(.cols = where(is.factor), .fns = as.character))
+# 
+# set.seed(8584)
+# knn_impute_test <- bake(knn_impute_prep, new_data = test3_for_knn)
+# 
+# knn_impute_test_res <- knn_impute_test %>%
+#   mutate(across(.cols = c(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
+#                 .fns = ~ rev_normalization(.x, knn_impute_prep)))
+# 
+# # Fixed KNN imputation where structural missing rules were broken
+# fixed_test_knn <- fix_knn(knn_impute_test_res)
+# test4 <- useful_features2(fixed_test_knn)
+# 
+# # Add new features we've discovered from our visual exploration
+# test5 <- add_grp_features(test4)
+# test6 <- add_name_features(test5)
+# 
+# final_df_test <- test6 %>%
+#   select(-c(PassengerCount, HomePlanetsPerGroup, Cabin, Name, LastName)) %>%
+#   mutate(across(.cols = c(PassengerGroupSize, ends_with("PerGroup")), .fns = as.integer))
+# 
+# rf_kaggle_pred <- predict(rf_final_fit, final_df_test)
+# rf_submission <- bind_cols(PassengerId = final_df_test$PassengerId, Transported = rf_kaggle_pred$.pred_class)
+# 
+# write_csv(rf_submission, file = "RF submission 2024-01-30 21_50.csv")
+```
 
-
-
-
-
-
+Our score on Kaggle was 0.7898 which is very close to our tuned values. This indicates that our process gives us accurate estimations and now we must consider how we can improve it or select a better model.
 
 ```{r remove-07, include=FALSE}
 rm(train2, train3, train3_for_knn, vars_to_impute, vars_for_imputing, train3_noNA, knn_impute_rec, knn_impute_prep, knn_impute_bake,
