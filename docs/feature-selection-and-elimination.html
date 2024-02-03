@@ -74,10 +74,9 @@
 </h2>
 <p>Recursive feature elimination creates a model that includes all the features and through a systematized resampling process removes sets of variables to see whether it improves performance. The goal of the model is to converge on a set of predictor variables that produce the best results.</p>
 <p>We’ll use all of our original variables as well as the interaction effects we’ve identified in the previous chapter.</p>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_df</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">CryoSleep</span>, <span class="va">HomePlanet</span>, <span class="va">Destination</span>, <span class="va">VIP</span>, <span class="va">Deck</span>, <span class="va">Side</span>, <span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>,</span>
-<span>         <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span>, <span class="va">Transported</span><span class="op">)</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Cabin</span>, <span class="va">Name</span>, <span class="va">LastName</span>, <span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
 <span><span class="va">rfe_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">rfe_df</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
@@ -97,12 +96,11 @@
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/formula.html">as.formula</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rfe_rec</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span>x <span class="op">=</span> <span class="va">rfe_train</span>, vars <span class="op">=</span> <span class="va">rfe_vars</span><span class="op">$</span><span class="va">Variables</span>, roles <span class="op">=</span> <span class="va">rfe_vars</span><span class="op">$</span><span class="va">Roles</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">PassengerGroup</span>, <span class="va">CabinNumber</span>, <span class="va">TotalSpent</span>,</span>
+<span>                 <span class="va">TotalSpentPerGroup</span>, <span class="va">LastNameAsNumber</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_dummy</span><span class="op">(</span><span class="fu">all_nominal_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_interact</span><span class="op">(</span><span class="va">int_formula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_zv</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">rfe_bake</span> <span class="op">&lt;-</span> <span class="va">rfe_rec</span> <span class="op">%&gt;%</span> <span class="fu">prep</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">bake</span><span class="op">(</span>new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">many_stats</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">lev</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">obs</span><span class="op">)</span>, <span class="va">model</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu">twoClassSummary</span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, lev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">obs</span><span class="op">)</span>, <span class="va">model</span><span class="op">)</span>,</span>
@@ -114,10 +112,9 @@
 <span><span class="va">rfe_funcs</span><span class="op">$</span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="va">many_stats</span></span>
 <span><span class="va">rfe_funcs</span><span class="op">$</span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">first</span>, <span class="va">last</span>, <span class="va">...</span><span class="op">)</span> </span>
 <span>  <span class="fu">train</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, trControl <span class="op">=</span> <span class="fu">trainControl</span><span class="op">(</span>classProbs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
-<span><span class="va">rfe_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">10</span>, <span class="fl">15</span>, <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="va">rfe_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">350</span>, <span class="fl">50</span><span class="op">)</span></span>
 <span><span class="va">rfe_ctrl</span> <span class="op">&lt;-</span> <span class="fu">rfeControl</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"repeatedcv"</span>, repeats <span class="op">=</span> <span class="fl">5</span>, functions <span class="op">=</span> <span class="va">rfe_funcs</span>, returnResamp <span class="op">=</span> <span class="st">"all"</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">## This part takes a while to run, even in parallel, so save the results</span></span>
 <span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
 <span><span class="co"># registerDoSNOW(my_cluster)</span></span>
 <span><span class="co"># </span></span>
@@ -126,17 +123,17 @@
 <span><span class="co"># </span></span>
 <span><span class="co"># system.time({</span></span>
 <span><span class="co">#   set.seed(8584)</span></span>
-<span><span class="co">#   rfe_acc &lt;- rfe(rfe_rec, data = rfe_train, method = "glm", family = "binomial", metric = "Accuracy", sizes = rfe_sizes, </span></span>
+<span><span class="co">#   rfe_acc &lt;- rfe(rfe_rec, data = rfe_train, method = "glm", family = "binomial", metric = "Accuracy", sizes = rfe_sizes,</span></span>
 <span><span class="co">#                  rfeControl = rfe_ctrl)</span></span>
 <span><span class="co"># })</span></span>
 <span><span class="co"># </span></span>
-<span><span class="co"># save(rfe_acc, file = "Recursive feature elimination with interactions.RData")</span></span>
+<span><span class="co"># save(rfe_acc, file = "Extra/Recursive feature elimination with interactions.RData")</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Recursive feature elimination with interactions.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Recursive feature elimination with interactions.RData"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_acc</span><span class="op">$</span><span class="va">results</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">.</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Variables</span>, y <span class="op">=</span> <span class="va">Accuracy</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -148,9 +145,8 @@ Figure 7.1: Estimated performance with recursive feature elimination based on th
 </p>
 </div>
 <p>There is some strange behaviour that extends the number of variables beyond our specified sizes so we’ll just ignore those results. What the results from Figure <a href="feature-selection-and-elimination.html#fig:recurs-feat-no-corr2">7.1</a> indicate is that more variables seems to improve the model. However, some of the variables, including dummy variables and interactions, could be highly correlated which might skew the resulting feature set.</p>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rfe_bake</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">rfe_acc</span><span class="op">[[</span><span class="st">"optVariables"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rfe_acc</span><span class="op">[[</span><span class="st">"fit"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">"finalModel"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">"data"</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">DataExplorer</span><span class="fu">::</span><span class="fu"><a href="http://boxuancui.github.io/DataExplorer/reference/plot_correlation.html">plot_correlation</a></span><span class="op">(</span><span class="va">.</span>, type <span class="op">=</span> <span class="st">"continuous"</span>, theme_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:recurs-feat-no-corr3"></span>
@@ -159,7 +155,7 @@ Figure 7.2: Correlation between the first set of optimal variables from the RFE 
 </p>
 </div>
 <p>We see that there are clusters of high correlation between the variables so let’s add a step to remove them and see how it affects performance.</p>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">50</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rfe_rec_corr</span> <span class="op">&lt;-</span> <span class="va">rfe_rec</span> <span class="op">%&gt;%</span></span>
@@ -182,8 +178,8 @@ Figure 7.2: Correlation between the first set of optimal variables from the RFE 
 <span><span class="co"># stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Recursive feature elimination with interactions removed correlated.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Recursive feature elimination with interactions removed correlated.RData"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_acc_corr</span><span class="op">$</span><span class="va">results</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">.</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Variables</span>, y <span class="op">=</span> <span class="va">Accuracy</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -195,7 +191,7 @@ Figure 7.3: Estimated performance with recursive feature elimination based on in
 </p>
 </div>
 <p>The results from RFE process with correlations removed also indicate that the entire set of variables is best to use and provides similar accuracy.</p>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_acc_corr_res</span> <span class="op">&lt;-</span> <span class="va">rfe_acc_corr</span><span class="op">$</span><span class="va">resample</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">rename</span><span class="op">(</span><span class="va">Variables</span>, Iter <span class="op">=</span> <span class="va">Variables</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -218,65 +214,6 @@ Figure 7.3: Estimated performance with recursive feature elimination based on in
 Figure 7.4: Estimated performance with recursive feature elimination based on interactions identified from penalized regression. Correlated variables have been removed.
 </p>
 </div>
-<p>We can repeat the process above with interactions we identified from our tree model to see if they are able to improve performance.</p>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">int_formula</span> <span class="op">&lt;-</span> <span class="va">tree_int_vars</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">ForFormula</span>, <span class="va">RevFormula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/unname.html">unname</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">str_flatten</span><span class="op">(</span><span class="va">.</span>, collapse <span class="op">=</span> <span class="st">"+"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">str_c</span><span class="op">(</span><span class="st">"~"</span>, <span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/formula.html">as.formula</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">rfe_rec_tree</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span>x <span class="op">=</span> <span class="va">rfe_train</span>, vars <span class="op">=</span> <span class="va">rfe_vars</span><span class="op">$</span><span class="va">Variables</span>, roles <span class="op">=</span> <span class="va">rfe_vars</span><span class="op">$</span><span class="va">Roles</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">step_dummy</span><span class="op">(</span><span class="fu">all_nominal_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">step_interact</span><span class="op">(</span><span class="va">int_formula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">step_zv</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">step_corr</span><span class="op">(</span><span class="fu">all_numeric_predictors</span><span class="op">(</span><span class="op">)</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
-<span><span class="co"># registerDoSNOW(my_cluster)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># snow::clusterEvalQ(my_cluster, library(recipes))</span></span>
-<span><span class="co"># snow::clusterExport(my_cluster, "int_formula")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># system.time({</span></span>
-<span><span class="co">#   set.seed(8584)</span></span>
-<span><span class="co">#   rfe_acc_corr_tree &lt;- rfe(rfe_rec_tree, data = rfe_train, method = "glm", family = "binomial", metric = "Accuracy", </span></span>
-<span><span class="co">#                            sizes = rfe_sizes, rfeControl = rfe_ctrl)</span></span>
-<span><span class="co"># })</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># save(rfe_acc_corr_tree, file = "RFE with tree interactions corr.RData")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># stopCluster(my_cluster)</span></span>
-<span><span class="co"># unregister()</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"RFE with tree interactions corr.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rfe_acc_corr_tree_res</span> <span class="op">&lt;-</span> <span class="va">rfe_acc_corr_tree</span><span class="op">$</span><span class="va">resample</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">rename</span><span class="op">(</span><span class="va">Variables</span>, Iter <span class="op">=</span> <span class="va">Variables</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">summarise</span><span class="op">(</span>Accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">Accuracy</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">rfe_acc_corr_tree</span><span class="op">$</span><span class="va">resample</span><span class="op">$</span><span class="va">Resample</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>Resample <span class="op">=</span> <span class="st">"Averaged"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">bind_rows</span><span class="op">(</span><span class="va">rfe_acc_corr_tree</span><span class="op">$</span><span class="va">resample</span> <span class="op">%&gt;%</span> <span class="fu">rename</span><span class="op">(</span><span class="va">Variables</span>, Iter <span class="op">=</span> <span class="va">Variables</span><span class="op">)</span>, <span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>Resample <span class="op">=</span> <span class="fu">str_split_i</span><span class="op">(</span><span class="va">Resample</span>, <span class="st">"\\."</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>         colour_grp <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Resample</span> <span class="op">==</span> <span class="st">"Averaged"</span>, <span class="st">"yes"</span>, <span class="st">"no"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">rfe_acc_corr_tree_avg</span> <span class="op">&lt;-</span> <span class="va">rfe_acc_corr_tree_res</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Resample</span> <span class="op">==</span> <span class="st">"Averaged"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">Iter</span>, <span class="va">Accuracy</span><span class="op">)</span></span>
-<span>  </span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">rfe_acc_corr_tree_res</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">Accuracy</span>, colour <span class="op">=</span> <span class="va">colour_grp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">Resample</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<span style="display:block;" id="fig:rfe-tree-int2"></span>
-<img src="SpaceshipTitanicBook_files/figure-html/rfe-tree-int2-1.png" alt="Estimated performance with recursive feature elimination based on interactions identified from a tree model. Correlated variables have been removed." width="672"><p class="caption">
-Figure 7.5: Estimated performance with recursive feature elimination based on interactions identified from a tree model. Correlated variables have been removed.
-</p>
-</div>
-<p>The accuracy estimates are very similar from both sets of interactions. To reduce computation time, we’ll use the tree model based interactions for our other methods.</p>
 </div>
 <div id="simulated-annealing" class="section level2" number="7.2">
 <h2>
@@ -284,7 +221,7 @@ Figure 7.5: Estimated performance with recursive feature elimination based on in
 </h2>
 <p>Kuhn and Johnson describe the process of simulated annealing in detail in their book but the main purpose is to iterate over random subsets of predictor variables and calculate performance until an optimal set is found. The process uses randomness to avoid to converge on a subset of variables that has high performance in a particular resample (local optima).</p>
 <p>We’ll use our tree-based interactions together with the original variables and run them through this process.</p>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sa_df</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">CryoSleep</span>, <span class="va">HomePlanet</span>, <span class="va">Destination</span>, <span class="va">VIP</span>, <span class="va">Deck</span>, <span class="va">Side</span>, <span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>,</span>
 <span>         <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span>, <span class="va">Transported</span><span class="op">)</span></span>
@@ -298,7 +235,7 @@ Figure 7.5: Estimated performance with recursive feature elimination based on in
 <span>                           <span class="va">Variables</span> <span class="op">==</span> <span class="st">"Transported"</span> <span class="op">~</span> <span class="st">"outcome"</span>,</span>
 <span>                           .default <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">int_formula</span> <span class="op">&lt;-</span> <span class="va">tree_int_vars</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">int_formula</span> <span class="op">&lt;-</span> <span class="va">pen_int_vars</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">ForFormula</span>, <span class="va">RevFormula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/unname.html">unname</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -338,13 +275,13 @@ Figure 7.5: Estimated performance with recursive feature elimination based on in
 <span><span class="co">#                             trControl = sa_ctrl_inner, metric = "Accuracy")</span></span>
 <span><span class="co"># })</span></span>
 <span><span class="co"># </span></span>
-<span><span class="co"># save(sim_anneal_50_pct, file = "Simulated annealing with 50% inital.RData")</span></span>
+<span><span class="co"># save(sim_anneal_50_pct, file = "Extra/Simulated annealing with 50% inital.RData")</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Simulated annealing with 50% inital.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Simulated annealing with 50% inital.RData"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_ann_50_int</span> <span class="op">&lt;-</span> <span class="va">sim_anneal_50_pct</span><span class="op">$</span><span class="va">internal</span></span>
 <span><span class="va">sim_ann_50_int2</span> <span class="op">&lt;-</span> <span class="va">sim_ann_50_int</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -363,11 +300,11 @@ Figure 7.5: Estimated performance with recursive feature elimination based on in
 <div class="figure">
 <span style="display:block;" id="fig:simulated-annealing-internal"></span>
 <img src="SpaceshipTitanicBook_files/figure-html/simulated-annealing-internal-1.png" alt="Estimated performance of internal resamples from simulated annealing." width="672"><p class="caption">
-Figure 7.6: Estimated performance of internal resamples from simulated annealing.
+Figure 7.5: Estimated performance of internal resamples from simulated annealing.
 </p>
 </div>
 <p>The results from the internal simulated annealing process suggest that the process works, based on how the average accuracy increases with iterations, but that a plateau is reached perhaps around 0.73 accuracy. This is lower than the accuracy from RFE but remember that we used a <code>glm</code> model for this process instead of random forest.</p>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_ann_50_ext</span> <span class="op">&lt;-</span> <span class="va">sim_anneal_50_pct</span><span class="op">$</span><span class="va">external</span></span>
 <span><span class="va">sim_ann_50_ext_avg</span> <span class="op">&lt;-</span> <span class="va">sim_ann_50_ext</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -390,11 +327,11 @@ Figure 7.6: Estimated performance of internal resamples from simulated annealing
 <div class="figure">
 <span style="display:block;" id="fig:simulated-annealing-external"></span>
 <img src="SpaceshipTitanicBook_files/figure-html/simulated-annealing-external-1.png" alt="Estimated performance of external resamples from simulated annealing." width="672"><p class="caption">
-Figure 7.7: Estimated performance of external resamples from simulated annealing.
+Figure 7.6: Estimated performance of external resamples from simulated annealing.
 </p>
 </div>
 <p>The correlation between the average internal and external resample is very high which suggests that the internal resampling folds didn’t overfit.</p>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_ann_50_final</span> <span class="op">&lt;-</span> <span class="va">sim_anneal_50_pct</span><span class="op">$</span><span class="va">sa</span></span>
 <span><span class="va">sim_ann_50_final2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Iter <span class="op">=</span> <span class="va">sim_ann_50_final</span><span class="op">[[</span><span class="st">"internal"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Iter</span>, Accuracy <span class="op">=</span> <span class="va">sim_ann_50_final</span><span class="op">[[</span><span class="st">"internal"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Accuracy</span>,</span>
 <span>                                Subset_Size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">sim_ann_50_final</span><span class="op">[[</span><span class="st">"subsets"</span><span class="op">]</span><span class="op">]</span>, <span class="va">length</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -406,7 +343,7 @@ Figure 7.7: Estimated performance of external resamples from simulated annealing
 <div class="figure">
 <span style="display:block;" id="fig:simulated-annealing-best"></span>
 <img src="SpaceshipTitanicBook_files/figure-html/simulated-annealing-best-1.png" alt="Estimated performance of best resample from simulated annealing." width="672"><p class="caption">
-Figure 7.8: Estimated performance of best resample from simulated annealing.
+Figure 7.7: Estimated performance of best resample from simulated annealing.
 </p>
 </div>
 <p>The results from the external simulated annealing process seems to indicate that there is very little improvement in accuracy between a subset of one (!) variable and a subset of 50, although there is some improvement towards the latter. The best subset is 41 variables with an accuracy of 0.7714 but a very close second is one with 24 variables with an accuracy of 0.7709. The latter one is similar to the results we saw from the RFE process.</p>
@@ -417,7 +354,7 @@ Figure 7.8: Estimated performance of best resample from simulated annealing.
 </h2>
 <p>The final process for feature selection that we’ll use is a genetic algorithm. It groups subsets of variables into groups whose performance is evaluated and a selection of them are selected for ‘mating’ to create the next generation. The process also involves steps to avoid local optima.</p>
 <p>Again, I will use the same set of variables (with tree based interactions) to evaluate the features.</p>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ga_df</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">CryoSleep</span>, <span class="va">HomePlanet</span>, <span class="va">Destination</span>, <span class="va">VIP</span>, <span class="va">Deck</span>, <span class="va">Side</span>, <span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>,</span>
 <span>         <span class="va">CabinNumber</span>, <span class="va">LastNameAsNumber</span>, <span class="va">PassengerGroup</span>, <span class="va">Transported</span><span class="op">)</span></span>
@@ -431,7 +368,7 @@ Figure 7.8: Estimated performance of best resample from simulated annealing.
 <span>                           <span class="va">Variables</span> <span class="op">==</span> <span class="st">"Transported"</span> <span class="op">~</span> <span class="st">"outcome"</span>,</span>
 <span>                           .default <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">int_formula</span> <span class="op">&lt;-</span> <span class="va">tree_int_vars</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">int_formula</span> <span class="op">&lt;-</span> <span class="va">pen_int_vars</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">ForFormula</span>, <span class="va">RevFormula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/unname.html">unname</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -447,22 +384,6 @@ Figure 7.8: Estimated performance of best resample from simulated annealing.
 <span></span>
 <span><span class="va">ga_funcs</span> <span class="op">&lt;-</span> <span class="va">caretGA</span></span>
 <span><span class="va">ga_funcs</span><span class="op">$</span><span class="va">fitness_extern</span> <span class="op">&lt;-</span> <span class="va">many_stats</span></span>
-<span><span class="co"># ga_funcs$initial &lt;- function(vars, popSize, ...)  {</span></span>
-<span><span class="co">#   x &lt;- matrix(NA, nrow = popSize, ncol = vars)</span></span>
-<span><span class="co">#   probs &lt;- seq(0.1, 0.90, length = popSize)</span></span>
-<span><span class="co">#   for (i in 1:popSize) {</span></span>
-<span><span class="co">#     x[i, ] &lt;-</span></span>
-<span><span class="co">#       sample(0:1, replace = TRUE, size = vars, prob = c(probs[i], 1 - probs[i]))</span></span>
-<span><span class="co">#   }</span></span>
-<span><span class="co">#   var_count &lt;- apply(x, 1, sum)</span></span>
-<span><span class="co">#   if (any(var_count == 0)) {</span></span>
-<span><span class="co">#     for (i in which(var_count == 0)) {</span></span>
-<span><span class="co">#       p &lt;- sample(1:length(vars), size = 2)</span></span>
-<span><span class="co">#       x[i, p] &lt;- 1</span></span>
-<span><span class="co">#     }</span></span>
-<span><span class="co">#   }</span></span>
-<span><span class="co">#   return(x)</span></span>
-<span><span class="co"># }</span></span>
 <span></span>
 <span><span class="co"># Inner control</span></span>
 <span><span class="va">ga_ctrl_inner</span> <span class="op">&lt;-</span> <span class="fu">trainControl</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"boot"</span>, p <span class="op">=</span> <span class="fl">0.90</span>, number <span class="op">=</span> <span class="fl">1</span>, summaryFunction <span class="op">=</span> <span class="va">many_stats</span>, classProbs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -479,17 +400,17 @@ Figure 7.8: Estimated performance of best resample from simulated annealing.
 <span><span class="co"># </span></span>
 <span><span class="co"># system.time({</span></span>
 <span><span class="co">#   set.seed(8584)</span></span>
-<span><span class="co">#   ga_acc &lt;- gafs(ga_rec, data = ga_train, iters = 50, gafsControl = ga_ctrl_outer, method = "glm", </span></span>
+<span><span class="co">#   ga_acc &lt;- gafs(ga_rec, data = ga_train, iters = 50, gafsControl = ga_ctrl_outer, method = "glm",</span></span>
 <span><span class="co">#                  trControl = ga_ctrl_inner, metric = "Accuracy")</span></span>
 <span><span class="co"># })</span></span>
 <span><span class="co"># </span></span>
-<span><span class="co"># save(ga_acc, file = "Genetic algorithm feature selection.RData")</span></span>
+<span><span class="co"># save(ga_acc, file = "Extra/Genetic algorithm feature selection.RData")</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Genetic algorithm feature selection.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Genetic algorithm feature selection.RData"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ga_internal</span> <span class="op">&lt;-</span> <span class="va">ga_acc</span><span class="op">$</span><span class="va">internal</span></span>
 <span><span class="va">ga_internal2</span> <span class="op">&lt;-</span> <span class="va">ga_internal</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -508,11 +429,11 @@ Figure 7.8: Estimated performance of best resample from simulated annealing.
 <div class="figure">
 <span style="display:block;" id="fig:genetic-internal"></span>
 <img src="SpaceshipTitanicBook_files/figure-html/genetic-internal-1.png" alt="Estimated performance of internal resamples from the genetic algorithm." width="672"><p class="caption">
-Figure 7.9: Estimated performance of internal resamples from the genetic algorithm.
+Figure 7.8: Estimated performance of internal resamples from the genetic algorithm.
 </p>
 </div>
 <p>The inner resamples of the genetic algorithm suggest a plateau after around twenty iterations.</p>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ga_external</span> <span class="op">&lt;-</span> <span class="va">ga_acc</span><span class="op">$</span><span class="va">external</span></span>
 <span><span class="va">ga_external2</span> <span class="op">&lt;-</span> <span class="va">ga_external</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -535,7 +456,7 @@ Figure 7.9: Estimated performance of internal resamples from the genetic algorit
 <div class="figure">
 <span style="display:block;" id="fig:genetic-external"></span>
 <img src="SpaceshipTitanicBook_files/figure-html/genetic-external-1.png" alt="Estimated performance of external resamples from the genetic algorithm." width="672"><p class="caption">
-Figure 7.10: Estimated performance of external resamples from the genetic algorithm.
+Figure 7.9: Estimated performance of external resamples from the genetic algorithm.
 </p>
 </div>
 <p>For the genetic algorithm, we see that the internal folds got better results which could indicate that the selections of subsets of variables (the populations) overfit to the data while the external validations (number of generations) found a more general population mix that hopefully better describes the unseen data.</p>
@@ -545,20 +466,20 @@ Figure 7.10: Estimated performance of external resamples from the genetic algori
 <span class="header-section-number">7.4</span> Check performance with random subsets<a class="anchor" aria-label="anchor" href="#check-performance-with-random-subsets"><i class="fas fa-link"></i></a>
 </h2>
 <p>To get a sense of how well these processes have selected subsets of variables, we can run an iteration that takes random subsets and evaluates performance. This will tell us if the processes are better than random chance. In this case, we don’t use interactions.</p>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">my_subset_size</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">sim_anneal_50_pct</span><span class="op">$</span><span class="va">optVariables</span><span class="op">)</span></span>
-<span><span class="va">sa_bake</span> <span class="op">&lt;-</span> <span class="va">sa_rec</span> <span class="op">%&gt;%</span> </span>
-<span>  <span class="fu">prep</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
-<span>  <span class="fu">bake</span><span class="op">(</span>new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">PassengerId</span><span class="op">)</span></span>
-<span><span class="va">full_vars</span> <span class="op">&lt;-</span> <span class="va">sa_bake</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
-<span><span class="va">map_seq</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">full_vars</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span> <span class="co"># Number of iterations half of total number of variables to ensure sufficient combinations</span></span>
-<span></span>
-<span><span class="va">rand_subset</span> <span class="op">&lt;-</span> <span class="fu">map</span><span class="op">(</span><span class="va">map_seq</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">full_vars</span>, <span class="va">my_subset_size</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">rand_data</span> <span class="op">&lt;-</span> <span class="fu">map</span><span class="op">(</span><span class="va">rand_subset</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">sa_bake</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">Transported</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">rand_rec</span> <span class="op">&lt;-</span> <span class="fu">map</span><span class="op">(</span><span class="va">rand_data</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">recipe</span><span class="op">(</span><span class="va">Transported</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">subset_ctrl</span> <span class="op">&lt;-</span> <span class="fu">trainControl</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"cv"</span>, classProbs <span class="op">=</span> <span class="cn">TRUE</span>, summaryFunction <span class="op">=</span> <span class="va">many_stats</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># my_subset_size &lt;- length(sim_anneal_50_pct$optVariables)</span></span>
+<span><span class="co"># sa_bake &lt;- sa_rec %&gt;% </span></span>
+<span><span class="co">#   prep() %&gt;% </span></span>
+<span><span class="co">#   bake(new_data = NULL) %&gt;%</span></span>
+<span><span class="co">#   select(-PassengerId)</span></span>
+<span><span class="co"># full_vars &lt;- sa_bake %&gt;% names(.)</span></span>
+<span><span class="co"># map_seq &lt;- 1:(length(full_vars)/2) # Number of iterations half of total number of variables to ensure sufficient combinations</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># rand_subset &lt;- map(map_seq, .f = \(x) sample(full_vars, my_subset_size))</span></span>
+<span><span class="co"># rand_data &lt;- map(rand_subset, .f = \(x) sa_bake %&gt;% dplyr::select(Transported, x))</span></span>
+<span><span class="co"># rand_rec &lt;- map(rand_data, .f = \(x) recipe(Transported ~ ., data = x))</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># subset_ctrl &lt;- trainControl(method = "cv", classProbs = TRUE, summaryFunction = many_stats)</span></span>
 <span></span>
 <span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
 <span><span class="co"># registerDoSNOW(my_cluster)</span></span>
@@ -570,19 +491,18 @@ Figure 7.10: Estimated performance of external resamples from the genetic algori
 <span><span class="co"># </span></span>
 <span><span class="co"># subset_perf &lt;- map(subset_model, .f = \(m) getTrainPerf(m))</span></span>
 <span><span class="co"># </span></span>
-<span><span class="co"># save(subset_perf, file = "Random subsets performance.RData")</span></span>
+<span><span class="co"># save(subset_perf, file = "Extra/Random subsets performance.RData")</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Random subsets performance.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Random subsets performance.RData"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rf_random_avg</span> <span class="op">&lt;-</span> <span class="fu">map_dbl</span><span class="op">(</span><span class="va">subset_perf</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">TrainAccuracy</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">enframe</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">rfe_acc_corr_avg</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">Accuracy</span>, colour <span class="op">=</span> <span class="st">"RFE Pen"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">rfe_acc_corr_tree_avg</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">Accuracy</span>, colour <span class="op">=</span> <span class="st">"RFE Tree"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_ann_50_ext_avg</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">Accuracy</span>, colour <span class="op">=</span> <span class="st">"SA"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">ga_external_avg</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">Accuracy</span>, colour <span class="op">=</span> <span class="st">"GA"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">rf_random_avg</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">name</span>, y <span class="op">=</span> <span class="va">value</span>, colour <span class="op">=</span> <span class="st">"Random"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -592,19 +512,14 @@ Figure 7.10: Estimated performance of external resamples from the genetic algori
 <div class="figure">
 <span style="display:block;" id="fig:feature-selection-comparison"></span>
 <img src="SpaceshipTitanicBook_files/figure-html/feature-selection-comparison-1.png" alt="Comparison of different feature selection results against a random subset result." width="672"><p class="caption">
-Figure 7.11: Comparison of different feature selection results against a random subset result.
+Figure 7.10: Comparison of different feature selection results against a random subset result.
 </p>
 </div>
 <p>We can see that both the recursive feature elimination process and the genetic algorithm outperforms the random variable subset but that the simulated annealing process doesn’t. A test of significance shows us that the differences are relevant.</p>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_wilcoc_rfe_pen</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/wilcox.test.html">wilcox.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">rfe_acc_corr_avg</span><span class="op">$</span><span class="va">Accuracy</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span><span class="op">)</span><span class="op">]</span>, </span>
 <span>            <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, paired <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span></span>
 <span><span class="va">p_ttest_rfe_pen</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/t.test.html">t.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">rfe_acc_corr_avg</span><span class="op">$</span><span class="va">Accuracy</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span><span class="op">)</span><span class="op">]</span>, </span>
-<span>            <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, paired <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span></span>
-<span></span>
-<span><span class="va">p_wilcoc_rfe_tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/wilcox.test.html">wilcox.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">rfe_acc_corr_tree_avg</span><span class="op">$</span><span class="va">Accuracy</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span><span class="op">)</span><span class="op">]</span>, </span>
-<span>            <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, paired <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span></span>
-<span><span class="va">p_ttest_rfe_tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/t.test.html">t.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">rfe_acc_corr_tree_avg</span><span class="op">$</span><span class="va">Accuracy</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span><span class="op">)</span><span class="op">]</span>, </span>
 <span>            <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, paired <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span></span>
 <span></span>
 <span><span class="va">p_wilcoc_sa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/wilcox.test.html">wilcox.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">sim_ann_50_ext_avg</span><span class="op">$</span><span class="va">Accuracy</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span><span class="op">)</span><span class="op">]</span>, </span>
@@ -617,25 +532,25 @@ Figure 7.11: Comparison of different feature selection results against a random 
 <span><span class="va">p_ttest_ga</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/t.test.html">t.test</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">ga_external_avg</span><span class="op">$</span><span class="va">Accuracy</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span><span class="op">)</span><span class="op">]</span>,</span>
 <span>            <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,  paired <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span></span>
 <span></span>
-<span><span class="va">p_tests</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>test <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Wilcoxon paired"</span>, <span class="st">"t.test paired"</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>,</span>
-<span>                      colour_grp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RFE Pen"</span>, <span class="st">"RFE Tree"</span>, <span class="st">"SA"</span>, <span class="st">"GA"</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>                      value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">p_wilcoc_rfe_pen</span>, <span class="va">p_wilcoc_rfe_tree</span>, <span class="va">p_wilcoc_sa</span>, <span class="va">p_wilcoc_ga</span>, </span>
-<span>                                <span class="va">p_ttest_rfe_pen</span>, <span class="va">p_ttest_rfe_tree</span>, <span class="va">p_ttest_sa</span>, <span class="va">p_ttest_ga</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p_tests</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>test <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Wilcoxon paired"</span>, <span class="st">"t.test paired"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>                      colour_grp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RFE Pen"</span>, <span class="st">"SA"</span>, <span class="st">"GA"</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>                      value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">p_wilcoc_rfe_pen</span>, <span class="va">p_wilcoc_sa</span>, <span class="va">p_wilcoc_ga</span>, </span>
+<span>                                <span class="va">p_ttest_rfe_pen</span>, <span class="va">p_ttest_sa</span>, <span class="va">p_ttest_ga</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="va">p_tests</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">test</span>, y <span class="op">=</span> <span class="va">value</span>, colour <span class="op">=</span> <span class="va">colour_grp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.05</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"red"</span>, show.legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_colour_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RFE Pen"</span> <span class="op">=</span> <span class="st">"green"</span>, <span class="st">"RFE Tree"</span> <span class="op">=</span> <span class="st">"blue"</span>, <span class="st">"SA"</span> <span class="op">=</span> <span class="st">"orange"</span>, <span class="st">"GA"</span> <span class="op">=</span> <span class="st">"red"</span>, <span class="st">"size"</span> <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_colour_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RFE Pen"</span> <span class="op">=</span> <span class="st">"green"</span>, <span class="st">"SA"</span> <span class="op">=</span> <span class="st">"orange"</span>, <span class="st">"GA"</span> <span class="op">=</span> <span class="st">"red"</span>, <span class="st">"size"</span> <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Tests of difference"</span>, y <span class="op">=</span> <span class="st">"P value"</span>, colour <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:rf-random-comparison-sign"></span>
 <img src="SpaceshipTitanicBook_files/figure-html/rf-random-comparison-sign-1.png" alt="Tests if significance between a random sample selection and different feature selection methods. Values below the red line (p.value &lt; 0.05) indicate that there is a difference in performance." width="672"><p class="caption">
-Figure 7.12: Tests if significance between a random sample selection and different feature selection methods. Values below the red line (p.value &lt; 0.05) indicate that there is a difference in performance.
+Figure 7.11: Tests if significance between a random sample selection and different feature selection methods. Values below the red line (p.value &lt; 0.05) indicate that there is a difference in performance.
 </p>
 </div>
-<p>The Wilcoxon test checks whether the median of the difference in accuracy between a processed sample and a random sample are significant and it doesn’t require the distribution of the differences between the paired samples to be normal. The t.test compares the means and does require the sample differences to be relatively normal. The null hypothesis in both cases is that the accuracies from the processed samples are smaller or equal to accuracies from random samples (and so low p-values mean that the processed samples have significantly greater accuracies that random samples). We see that all of the methods have significant improvement over the random sample and from Figure <a href="feature-selection-and-elimination.html#fig:feature-selection-comparison">7.11</a>, we can conclude that the RFE process that used the variables identified from the penalized model produces the best results.</p>
+<p>The Wilcoxon test checks whether the median of the difference in accuracy between a processed sample and a random sample are significant and it doesn’t require the distribution of the differences between the paired samples to be normal. The t.test compares the means and does require the sample differences to be relatively normal. The null hypothesis in both cases is that the accuracies from the processed samples are smaller or equal to accuracies from random samples (and so low p-values mean that the processed samples have significantly greater accuracies that random samples). We see that all of the methods have significant improvement over the random sample and from Figure <a href="feature-selection-and-elimination.html#fig:feature-selection-comparison">7.10</a>, we can conclude that the RFE process that used the variables identified from the penalized model produces the best results.</p>
 <p>Lets save this set of best features so that we can use it for our modelling stage.</p>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">best_features</span> <span class="op">&lt;-</span> <span class="va">rfe_acc_corr</span><span class="op">$</span><span class="va">optVariables</span></span>
 <span></span>
 <span><span class="va">best_interactions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>features <span class="op">=</span> <span class="va">best_features</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -659,8 +574,8 @@ Figure 7.12: Tests if significance between a random sample selection and differe
 <span>  <span class="fu">mutate</span><span class="op">(</span>features <span class="op">=</span> <span class="fu">str_split_i</span><span class="op">(</span><span class="va">features</span>, <span class="st">"_"</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">deframe</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">best_interactions</span>, file <span class="op">=</span> <span class="st">"Best interactions.RData"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">best_vars</span>, file <span class="op">=</span> <span class="st">"Best variables.RData"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">best_interactions</span>, file <span class="op">=</span> <span class="st">"Extra/Best interactions.RData"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">best_vars</span>, file <span class="op">=</span> <span class="st">"Extra/Best variables.RData"</span><span class="op">)</span></span></code></pre></div>
 
 </div>
 </div>
@@ -692,7 +607,7 @@ Figure 7.12: Tests if significance between a random sample selection and differe
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-30.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-03.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

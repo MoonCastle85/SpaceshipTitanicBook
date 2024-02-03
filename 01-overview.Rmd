@@ -30,11 +30,13 @@ The response in the training set is balanced which is good and means we don't ne
 
 ```{r frequencies2, message = FALSE, cache=TRUE, fig.cap = "Distribution of the predictor variables"}
 my_frq <- sjPlot::plot_frq(train, type = "histogram")
+
 save_plot <- function(p, i) {
-  ggsave(filename = paste0("Variable", i, ".png"), plot = p)
+  ggsave(filename = paste0("Variable", i, ".png"), plot = p, path = "Extra/")
 }
-plotsToSVG <- walk2(.x = my_frq, .y = seq_along(my_frq), .f = save_plot)
-plotsToSVG <- map(1:length(my_frq), .f = \(i) paste0("Variable", i, ".png"))
+
+# plotsToSVG <- walk2(.x = my_frq, .y = seq_along(my_frq), .f = save_plot)
+plotsToSVG <- map(1:length(my_frq), .f = \(i) paste0("Extra/Variable", i, ".png"))
 slickR::slickR(plotsToSVG, height = "480px", width = "672px") +
   slickR::settings(slidesToShow = 1, dots = TRUE)
 ```

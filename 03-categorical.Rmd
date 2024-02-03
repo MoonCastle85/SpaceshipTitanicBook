@@ -46,7 +46,7 @@ signif_chi
 Here I use a custom function from Kuhn's and Johnsson's code to improve the default mosaic plot and plot the categorical variables against each other with the help of contigency tables for each pair. I've left out LastName since it has too many levels.
 ```{r mosaic, message = FALSE, cache=TRUE, fig.cap = "Mosaic plots to visualize the relationships between categorical variables"}
 my_mosaic <- function(dtab, i) {
-  png(filename = paste0("Mosaic", i, ".png"))
+  png(filename = paste0("Extra/Mosaic", i, ".png"))
   vcd::mosaic(dtab, pop = FALSE, highlighting = TRUE, highlighting_fill = colorspace::rainbow_hcl,
             margins = unit(c(6, 1, 1, 8), "lines"),
             labeling = vcd::labeling_border(rot_labels = c(90, 0, 0, 0), just_labels = c("left", "right", "center", "right"),
@@ -77,15 +77,13 @@ my_tables <- list(
 )
 
 # mosaic_plots <- map2(.x = my_tables, .y = 1:length(my_tables), .f = \(t, it) my_mosaic(dtab = t, i = it))
-# mosaic_slick <- map(1:length(mosaic_plots), .f = \(i) paste0("Mosaic", i, ".png"))
-# save(mosaic_slick, file = "Mosaic slick plots.RData")
+# mosaic_slick <- map(1:length(mosaic_plots), .f = \(i) paste0("Extra/Mosaic", i, ".png"))
+# save(mosaic_slick, file = "Extra/Mosaic slick plots.RData")
 
-load("Mosaic slick plots.RData")
+load("Extra/Mosaic slick plots.RData")
 slickR::slickR(mosaic_slick, height = "480px", width = "672px") +
   slickR::settings(slidesToShow = 1, dots = TRUE)
 ```
-  
-  
   
 The mosaic plot can be read from horisontally where we can see how the height of the bars changes with different (vertical) values of the other variable. For example, we see how the share of passengers that are in cryosleep changes with the deck and we know from the Chi\^2 test that the change is significant. 
 
@@ -151,7 +149,7 @@ my_binom_plot <- function(df, v, t) { # Applies the proportion test to different
 
 ```{r all-binom-plots, message=FALSE, warning=FALSE, cache=TRUE, fig.cap="All categorical variables plotted as a binomial plots with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
 save_plot <- function(p, i) {
-  ggsave(filename = paste0("Binomial", i, ".png"), plot = p)
+  ggsave(filename = paste0("Extra/Binomial", i, ".png"), plot = p)
 }
 
 binom_plots <- train4 %>%
@@ -160,10 +158,10 @@ binom_plots <- train4 %>%
   imap(.f = ~my_binom_plot(train4, .y, "Transported"))
 
 # binom_plots2 <- walk2(.x = binom_plots, .y = seq_along(binom_plots), .f = save_plot)
-# binom_slick <- map(1:length(binom_plots), .f = \(i) paste0("Binomial", i, ".png"))
-# save(binom_slick, file = "Biomial slick plots.RData")
+# binom_slick <- map(1:length(binom_plots), .f = \(i) paste0("Extra/Binomial", i, ".png"))
+# save(binom_slick, file = "Extra/Biomial slick plots.RData")
 
-load("Biomial slick plots.RData")
+load("Extra/Biomial slick plots.RData")
 slickR::slickR(binom_slick, height = "480px", width = "672px") +
   slickR::settings(slidesToShow = 1, dots = TRUE)
 ```

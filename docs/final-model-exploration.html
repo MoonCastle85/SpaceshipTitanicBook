@@ -78,7 +78,7 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <h2>
 <span class="header-section-number">8.1</span> Complete preprocess<a class="anchor" aria-label="anchor" href="#complete-preprocess"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">"train.csv"</span>, na <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create group variables, seperate CabinNumber, Deck and Side from Cabin</span></span>
@@ -133,8 +133,8 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <span>  <span class="fu">mutate</span><span class="op">(</span>Roles <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Variables</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PassengerId"</span><span class="op">)</span>, <span class="st">"id"</span>, <span class="st">"predictor"</span><span class="op">)</span>,</span>
 <span>         Roles <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="st">"Transported"</span>, <span class="st">"outcome"</span>, <span class="va">Roles</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Best variables.RData"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Final interactions.RData"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Best variables.RData"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Final interactions.RData"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
 <span><span class="va">final_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">final_df</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
@@ -154,7 +154,7 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <h2>
 <span class="header-section-number">8.2</span> GLM<a class="anchor" aria-label="anchor" href="#glm"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glm_final_bake</span> <span class="op">&lt;-</span> <span class="va">final_rec</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">prep</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">bake</span><span class="op">(</span>new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
@@ -180,28 +180,28 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;           Reference</span></span>
 <span><span class="co">#&gt; Prediction FALSE TRUE</span></span>
-<span><span class="co">#&gt;      FALSE   699  165</span></span>
-<span><span class="co">#&gt;      TRUE    183  692</span></span>
-<span><span class="co">#&gt;                                           </span></span>
-<span><span class="co">#&gt;                Accuracy : 0.7999          </span></span>
-<span><span class="co">#&gt;                  95% CI : (0.7803, 0.8185)</span></span>
-<span><span class="co">#&gt;     No Information Rate : 0.5072          </span></span>
-<span><span class="co">#&gt;     P-Value [Acc &gt; NIR] : &lt;2e-16          </span></span>
-<span><span class="co">#&gt;                                           </span></span>
-<span><span class="co">#&gt;                   Kappa : 0.5998          </span></span>
-<span><span class="co">#&gt;                                           </span></span>
-<span><span class="co">#&gt;  Mcnemar's Test P-Value : 0.3621          </span></span>
-<span><span class="co">#&gt;                                           </span></span>
-<span><span class="co">#&gt;             Sensitivity : 0.7925          </span></span>
-<span><span class="co">#&gt;             Specificity : 0.8075          </span></span>
-<span><span class="co">#&gt;          Pos Pred Value : 0.8090          </span></span>
-<span><span class="co">#&gt;          Neg Pred Value : 0.7909          </span></span>
-<span><span class="co">#&gt;              Prevalence : 0.5072          </span></span>
-<span><span class="co">#&gt;          Detection Rate : 0.4020          </span></span>
-<span><span class="co">#&gt;    Detection Prevalence : 0.4968          </span></span>
-<span><span class="co">#&gt;       Balanced Accuracy : 0.8000          </span></span>
-<span><span class="co">#&gt;                                           </span></span>
-<span><span class="co">#&gt;        'Positive' Class : FALSE           </span></span>
+<span><span class="co">#&gt;      FALSE   709  162</span></span>
+<span><span class="co">#&gt;      TRUE    173  695</span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;                Accuracy : 0.8074         </span></span>
+<span><span class="co">#&gt;                  95% CI : (0.788, 0.8257)</span></span>
+<span><span class="co">#&gt;     No Information Rate : 0.5072         </span></span>
+<span><span class="co">#&gt;     P-Value [Acc &gt; NIR] : &lt;2e-16         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;                   Kappa : 0.6147         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;  Mcnemar's Test P-Value : 0.5848         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;             Sensitivity : 0.8039         </span></span>
+<span><span class="co">#&gt;             Specificity : 0.8110         </span></span>
+<span><span class="co">#&gt;          Pos Pred Value : 0.8140         </span></span>
+<span><span class="co">#&gt;          Neg Pred Value : 0.8007         </span></span>
+<span><span class="co">#&gt;              Prevalence : 0.5072         </span></span>
+<span><span class="co">#&gt;          Detection Rate : 0.4077         </span></span>
+<span><span class="co">#&gt;    Detection Prevalence : 0.5009         </span></span>
+<span><span class="co">#&gt;       Balanced Accuracy : 0.8074         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;        'Positive' Class : FALSE          </span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 <p>We can see from the results of residuals in Figure <a href="#fig:glm-without-int"><strong>??</strong></a> that the GLM model (red lines) does pretty well against the categorical variables but does poorly against the numerical ones. This is because these variables don’t have a linear relationship to the response, as we’ve seen in our exploratory chapter of numerical variables. The accuracy is very low, 0.64.</p>
 </div>
@@ -209,8 +209,8 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <h2>
 <span class="header-section-number">8.3</span> GLMNET Lasso/Ridge<a class="anchor" aria-label="anchor" href="#glmnet-lassoridge"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Penalized regression with interactions.RData"</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Penalized regression with interactions.RData"</span><span class="op">)</span></span>
 <span><span class="va">best_glm_params</span> <span class="op">&lt;-</span> <span class="fu">select_best</span><span class="op">(</span><span class="va">pen_int_tune</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">glmnet_final_mod</span> <span class="op">&lt;-</span> <span class="fu">logistic_reg</span><span class="op">(</span>penalty <span class="op">=</span> <span class="fu">pluck</span><span class="op">(</span><span class="va">best_glm_params</span><span class="op">$</span><span class="va">penalty</span><span class="op">)</span>, mixture <span class="op">=</span> <span class="fu">pluck</span><span class="op">(</span><span class="va">best_glm_params</span><span class="op">$</span><span class="va">mixture</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -229,35 +229,35 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;           Reference</span></span>
 <span><span class="co">#&gt; Prediction FALSE TRUE</span></span>
-<span><span class="co">#&gt;      FALSE   702  192</span></span>
-<span><span class="co">#&gt;      TRUE    180  665</span></span>
-<span><span class="co">#&gt;                                          </span></span>
-<span><span class="co">#&gt;                Accuracy : 0.7861         </span></span>
-<span><span class="co">#&gt;                  95% CI : (0.766, 0.8051)</span></span>
-<span><span class="co">#&gt;     No Information Rate : 0.5072         </span></span>
-<span><span class="co">#&gt;     P-Value [Acc &gt; NIR] : &lt;2e-16         </span></span>
-<span><span class="co">#&gt;                                          </span></span>
-<span><span class="co">#&gt;                   Kappa : 0.572          </span></span>
-<span><span class="co">#&gt;                                          </span></span>
-<span><span class="co">#&gt;  Mcnemar's Test P-Value : 0.5685         </span></span>
-<span><span class="co">#&gt;                                          </span></span>
-<span><span class="co">#&gt;             Sensitivity : 0.7959         </span></span>
-<span><span class="co">#&gt;             Specificity : 0.7760         </span></span>
-<span><span class="co">#&gt;          Pos Pred Value : 0.7852         </span></span>
-<span><span class="co">#&gt;          Neg Pred Value : 0.7870         </span></span>
-<span><span class="co">#&gt;              Prevalence : 0.5072         </span></span>
-<span><span class="co">#&gt;          Detection Rate : 0.4037         </span></span>
-<span><span class="co">#&gt;    Detection Prevalence : 0.5141         </span></span>
-<span><span class="co">#&gt;       Balanced Accuracy : 0.7859         </span></span>
-<span><span class="co">#&gt;                                          </span></span>
-<span><span class="co">#&gt;        'Positive' Class : FALSE          </span></span>
+<span><span class="co">#&gt;      FALSE   710  192</span></span>
+<span><span class="co">#&gt;      TRUE    172  665</span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;                Accuracy : 0.7907          </span></span>
+<span><span class="co">#&gt;                  95% CI : (0.7708, 0.8096)</span></span>
+<span><span class="co">#&gt;     No Information Rate : 0.5072          </span></span>
+<span><span class="co">#&gt;     P-Value [Acc &gt; NIR] : &lt;2e-16          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;                   Kappa : 0.5811          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;  Mcnemar's Test P-Value : 0.3193          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;             Sensitivity : 0.8050          </span></span>
+<span><span class="co">#&gt;             Specificity : 0.7760          </span></span>
+<span><span class="co">#&gt;          Pos Pred Value : 0.7871          </span></span>
+<span><span class="co">#&gt;          Neg Pred Value : 0.7945          </span></span>
+<span><span class="co">#&gt;              Prevalence : 0.5072          </span></span>
+<span><span class="co">#&gt;          Detection Rate : 0.4083          </span></span>
+<span><span class="co">#&gt;    Detection Prevalence : 0.5187          </span></span>
+<span><span class="co">#&gt;       Balanced Accuracy : 0.7905          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;        'Positive' Class : FALSE           </span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 </div>
 <div id="randomforest" class="section level2" number="8.4">
 <h2>
 <span class="header-section-number">8.4</span> RandomForest<a class="anchor" aria-label="anchor" href="#randomforest"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
 <span><span class="va">rf_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span>, save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">rf_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>trees <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">2000</span>, <span class="fl">10000</span><span class="op">)</span>, min_n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
@@ -281,7 +281,7 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <span><span class="co"># stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Final randomForest tune.RData"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Final randomForest tune.RData"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">show_best</span><span class="op">(</span><span class="va">rf_final_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">trees</span>, y <span class="op">=</span> <span class="va">mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -292,8 +292,9 @@ Before we get to the models, let’s first summarise all the preprocessing of th
 <div class="inline-figure">
 <img src="SpaceshipTitanicBook_files/figure-html/randomForest-tune-1.png" width="672">
 The results from the model tuning indicate that the improvement is very limited with more trees than somewhere around 2000 so I will assume this as the optimal. With tree based models, too much trees can overfit the data so it’s a good idea not to</div>
-<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rf_best_tune</span> <span class="op">&lt;-</span> <span class="fu">select_best</span><span class="op">(</span><span class="va">rf_final_tune</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">rf_final_mod</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span>trees <span class="op">=</span> <span class="va">rf_best_tune</span><span class="op">$</span><span class="va">trees</span>, min_n <span class="op">=</span> <span class="va">rf_best_tune</span><span class="op">$</span><span class="va">min_n</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span>
@@ -312,25 +313,25 @@ The results from the model tuning indicate that the improvement is very limited 
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;           Reference</span></span>
 <span><span class="co">#&gt; Prediction FALSE TRUE</span></span>
-<span><span class="co">#&gt;      FALSE   724  199</span></span>
-<span><span class="co">#&gt;      TRUE    158  658</span></span>
+<span><span class="co">#&gt;      FALSE   725  200</span></span>
+<span><span class="co">#&gt;      TRUE    157  657</span></span>
 <span><span class="co">#&gt;                                           </span></span>
 <span><span class="co">#&gt;                Accuracy : 0.7947          </span></span>
 <span><span class="co">#&gt;                  95% CI : (0.7749, 0.8135)</span></span>
 <span><span class="co">#&gt;     No Information Rate : 0.5072          </span></span>
 <span><span class="co">#&gt;     P-Value [Acc &gt; NIR] : &lt; 2e-16         </span></span>
 <span><span class="co">#&gt;                                           </span></span>
-<span><span class="co">#&gt;                   Kappa : 0.5891          </span></span>
+<span><span class="co">#&gt;                   Kappa : 0.589           </span></span>
 <span><span class="co">#&gt;                                           </span></span>
-<span><span class="co">#&gt;  Mcnemar's Test P-Value : 0.03426         </span></span>
+<span><span class="co">#&gt;  Mcnemar's Test P-Value : 0.02622         </span></span>
 <span><span class="co">#&gt;                                           </span></span>
-<span><span class="co">#&gt;             Sensitivity : 0.8209          </span></span>
-<span><span class="co">#&gt;             Specificity : 0.7678          </span></span>
-<span><span class="co">#&gt;          Pos Pred Value : 0.7844          </span></span>
-<span><span class="co">#&gt;          Neg Pred Value : 0.8064          </span></span>
+<span><span class="co">#&gt;             Sensitivity : 0.8220          </span></span>
+<span><span class="co">#&gt;             Specificity : 0.7666          </span></span>
+<span><span class="co">#&gt;          Pos Pred Value : 0.7838          </span></span>
+<span><span class="co">#&gt;          Neg Pred Value : 0.8071          </span></span>
 <span><span class="co">#&gt;              Prevalence : 0.5072          </span></span>
-<span><span class="co">#&gt;          Detection Rate : 0.4163          </span></span>
-<span><span class="co">#&gt;    Detection Prevalence : 0.5308          </span></span>
+<span><span class="co">#&gt;          Detection Rate : 0.4169          </span></span>
+<span><span class="co">#&gt;    Detection Prevalence : 0.5319          </span></span>
 <span><span class="co">#&gt;       Balanced Accuracy : 0.7943          </span></span>
 <span><span class="co">#&gt;                                           </span></span>
 <span><span class="co">#&gt;        'Positive' Class : FALSE           </span></span>
@@ -367,7 +368,7 @@ The results from the model tuning indicate that the improvement is very limited 
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-01-30.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-03.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

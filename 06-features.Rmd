@@ -7,8 +7,7 @@ Recursive feature elimination creates a model that includes all the features and
 We'll use all of our original variables as well as the interaction effects we've identified in the previous chapter. 
 ```{r recurs-feat-no-corr, warning = FALSE, results='hide', message=FALSE, cache=TRUE}
 rfe_df <- train6 %>%
-  select(PassengerId, CryoSleep, HomePlanet, Destination, VIP, Deck, Side, Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck,
-         CabinNumber, LastNameAsNumber, PassengerGroup, Transported)
+  select(-c(Cabin, Name, LastName, PassengerCount, HomePlanetsPerGroup))
 
 set.seed(8584)
 rfe_split <- initial_split(rfe_df, prop = 0.8)
@@ -28,12 +27,11 @@ int_formula <- pen_int_vars %>%
   as.formula(.)
 
 rfe_rec <- recipe(x = rfe_train, vars = rfe_vars$Variables, roles = rfe_vars$Roles) %>%
-  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, CabinNumber, LastNameAsNumber, PassengerGroup) %>%
+  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, PassengerGroup, CabinNumber, TotalSpent,
+                 TotalSpentPerGroup, LastNameAsNumber) %>%
   step_dummy(all_nominal_predictors()) %>%
   step_interact(int_formula) %>%
   step_zv(all_predictors())
-
-rfe_bake <- rfe_rec %>% prep() %>% bake(new_data = NULL)
 
 many_stats <- function(data, lev = levels(data$obs), model = NULL) {
     c(twoClassSummary(data = data, lev = levels(data$obs), model),
@@ -45,10 +43,9 @@ rfe_funcs <- caret::caretFuncs
 rfe_funcs$summary <- many_stats
 rfe_funcs$fit <- function (x, y, first, last, ...) 
   train(x, y, trControl = trainControl(classProbs = TRUE), ...)
-rfe_sizes <- c(5, 10, 15, 20)
+rfe_sizes <- seq(50, 350, 50)
 rfe_ctrl <- rfeControl(method = "repeatedcv", repeats = 5, functions = rfe_funcs, returnResamp = "all", verbose = FALSE)
 
-## This part takes a while to run, even in parallel, so save the results
 # my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
 # 
@@ -57,16 +54,16 @@ rfe_ctrl <- rfeControl(method = "repeatedcv", repeats = 5, functions = rfe_funcs
 # 
 # system.time({
 #   set.seed(8584)
-#   rfe_acc <- rfe(rfe_rec, data = rfe_train, method = "glm", family = "binomial", metric = "Accuracy", sizes = rfe_sizes, 
+#   rfe_acc <- rfe(rfe_rec, data = rfe_train, method = "glm", family = "binomial", metric = "Accuracy", sizes = rfe_sizes,
 #                  rfeControl = rfe_ctrl)
 # })
 # 
-# save(rfe_acc, file = "Recursive feature elimination with interactions.RData")
+# save(rfe_acc, file = "Extra/Recursive feature elimination with interactions.RData")
 # 
 # stopCluster(my_cluster)
 # unregister()
 
-load("Recursive feature elimination with interactions.RData")
+load("Extra/Recursive feature elimination with interactions.RData")
 ```
 
 ```{r recurs-feat-no-corr2, warning = FALSE, message=FALSE, fig.cap="Estimated performance with recursive feature elimination based on the number of variables that are included."}
@@ -78,8 +75,7 @@ rfe_acc$results %>%
 There is some strange behaviour that extends the number of variables beyond our specified sizes so we'll just ignore those results. What the results from Figure \@ref(fig:recurs-feat-no-corr2) indicate is that more variables seems to improve the model. However, some of the variables, including dummy variables and interactions, could be highly correlated which might skew the resulting feature set. 
 
 ```{r recurs-feat-no-corr3, fig.cap="Correlation between the first set of optimal variables from the RFE model."}
-rfe_bake %>%
-  select(rfe_acc[["optVariables"]]) %>%
+rfe_acc[["fit"]][["finalModel"]][["data"]] %>%
   DataExplorer::plot_correlation(., type = "continuous", theme_config = list(axis.text.x = element_text(angle = 90)))
 ```
 
@@ -108,7 +104,7 @@ rfe_rec_corr <- rfe_rec %>%
 # stopCluster(my_cluster)
 # unregister()
 
-load("Recursive feature elimination with interactions removed correlated.RData")
+load("Extra/Recursive feature elimination with interactions removed correlated.RData")
 ```
 
 ```{r recurs-feat-corr2, warning = FALSE, message=FALSE, fig.cap="Estimated performance with recursive feature elimination based on interactions identified through penalized regression. Correlated variables have been removed."}
@@ -139,65 +135,6 @@ ggplot(rfe_acc_corr_res, aes(x = Iter, y = Accuracy, colour = colour_grp)) +
   theme(legend.position = "none")
 ```
 
-We can repeat the process above with interactions we identified from our tree model to see if they are able to improve performance.
-
-```{r rfe-tree-int, warning = FALSE, results='hide', message=FALSE, cache=TRUE}
-int_formula <- tree_int_vars %>%
-  select(ForFormula, RevFormula) %>%
-  unlist() %>%
-  unname() %>%
-  str_flatten(., collapse = "+") %>%
-  str_c("~", .) %>%
-  as.formula(.)
-
-rfe_rec_tree <- recipe(x = rfe_train, vars = rfe_vars$Variables, roles = rfe_vars$Roles) %>%
-  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, CabinNumber, LastNameAsNumber, PassengerGroup) %>%
-  step_dummy(all_nominal_predictors()) %>%
-  step_interact(int_formula) %>%
-  step_zv(all_predictors()) %>%
-  step_corr(all_numeric_predictors(), threshold = 0.5)
-
-# my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
-# registerDoSNOW(my_cluster)
-# 
-# snow::clusterEvalQ(my_cluster, library(recipes))
-# snow::clusterExport(my_cluster, "int_formula")
-# 
-# system.time({
-#   set.seed(8584)
-#   rfe_acc_corr_tree <- rfe(rfe_rec_tree, data = rfe_train, method = "glm", family = "binomial", metric = "Accuracy", 
-#                            sizes = rfe_sizes, rfeControl = rfe_ctrl)
-# })
-# 
-# save(rfe_acc_corr_tree, file = "RFE with tree interactions corr.RData")
-# 
-# stopCluster(my_cluster)
-# unregister()
-
-load("RFE with tree interactions corr.RData")
-```
-
-```{r rfe-tree-int2, warning = FALSE, message=FALSE, fig.cap="Estimated performance with recursive feature elimination based on interactions identified from a tree model. Correlated variables have been removed."}
-rfe_acc_corr_tree_res <- rfe_acc_corr_tree$resample %>%
-  rename(Variables, Iter = Variables) %>%
-  group_by(Iter) %>%
-  summarise(Accuracy = sum(Accuracy) / length(unique(rfe_acc_corr_tree$resample$Resample))) %>%
-  ungroup() %>%
-  mutate(Resample = "Averaged") %>%
-  bind_rows(rfe_acc_corr_tree$resample %>% rename(Variables, Iter = Variables), .) %>%
-  mutate(Resample = str_split_i(Resample, "\\.", 1),
-         colour_grp = if_else(Resample == "Averaged", "yes", "no"))
-
-rfe_acc_corr_tree_avg <- rfe_acc_corr_tree_res %>% filter(Resample == "Averaged") %>% select(Iter, Accuracy)
-  
-ggplot(rfe_acc_corr_tree_res, aes(x = Iter, y = Accuracy, colour = colour_grp)) +
-  geom_point() +
-  facet_wrap(~Resample, scales = "free") +
-  theme(legend.position = "none")
-```
-
-The accuracy estimates are very similar from both sets of interactions. To reduce computation time, we'll use the tree model based interactions for our other methods.
-
 ## Simulated annealing
 Kuhn and Johnson describe the process of simulated annealing in detail in their book but the main purpose is to iterate over random subsets of predictor variables and calculate performance until an optimal set is found. The process uses randomness to avoid to converge on a subset of variables that has high performance in a particular resample (local optima).
 
@@ -217,7 +154,7 @@ sa_vars <- data.frame(Variables = names(sa_df)) %>%
                            Variables == "Transported" ~ "outcome",
                            .default = "predictor"))
 
-int_formula <- tree_int_vars %>%
+int_formula <- pen_int_vars %>%
   select(ForFormula, RevFormula) %>%
   unlist() %>%
   unname() %>%
@@ -257,12 +194,12 @@ sa_ctrl_outer <- safsControl(method = "cv", metric = c(internal = "Accuracy", ex
 #                             trControl = sa_ctrl_inner, metric = "Accuracy")
 # })
 # 
-# save(sim_anneal_50_pct, file = "Simulated annealing with 50% inital.RData")
+# save(sim_anneal_50_pct, file = "Extra/Simulated annealing with 50% inital.RData")
 # 
 # stopCluster(my_cluster)
 # unregister()
 
-load("Simulated annealing with 50% inital.RData")
+load("Extra/Simulated annealing with 50% inital.RData")
 ```
 
 ```{r simulated-annealing-internal, warning = FALSE, results='hide', message=FALSE, fig.cap="Estimated performance of internal resamples from simulated annealing."}
@@ -341,7 +278,7 @@ ga_vars <- data.frame(Variables = names(ga_df)) %>%
                            Variables == "Transported" ~ "outcome",
                            .default = "predictor"))
 
-int_formula <- tree_int_vars %>%
+int_formula <- pen_int_vars %>%
   select(ForFormula, RevFormula) %>%
   unlist() %>%
   unname() %>%
@@ -357,22 +294,6 @@ ga_rec <- recipe(x = ga_train, vars = ga_vars$Variables, roles = ga_vars$Roles) 
 
 ga_funcs <- caretGA
 ga_funcs$fitness_extern <- many_stats
-# ga_funcs$initial <- function(vars, popSize, ...)  {
-#   x <- matrix(NA, nrow = popSize, ncol = vars)
-#   probs <- seq(0.1, 0.90, length = popSize)
-#   for (i in 1:popSize) {
-#     x[i, ] <-
-#       sample(0:1, replace = TRUE, size = vars, prob = c(probs[i], 1 - probs[i]))
-#   }
-#   var_count <- apply(x, 1, sum)
-#   if (any(var_count == 0)) {
-#     for (i in which(var_count == 0)) {
-#       p <- sample(1:length(vars), size = 2)
-#       x[i, p] <- 1
-#     }
-#   }
-#   return(x)
-# }
 
 # Inner control
 ga_ctrl_inner <- trainControl(method = "boot", p = 0.90, number = 1, summaryFunction = many_stats, classProbs = TRUE,
@@ -389,16 +310,16 @@ ga_ctrl_outer <- gafsControl(method = "cv", metric = c(internal = "Accuracy", ex
 # 
 # system.time({
 #   set.seed(8584)
-#   ga_acc <- gafs(ga_rec, data = ga_train, iters = 50, gafsControl = ga_ctrl_outer, method = "glm", 
+#   ga_acc <- gafs(ga_rec, data = ga_train, iters = 50, gafsControl = ga_ctrl_outer, method = "glm",
 #                  trControl = ga_ctrl_inner, metric = "Accuracy")
 # })
 # 
-# save(ga_acc, file = "Genetic algorithm feature selection.RData")
+# save(ga_acc, file = "Extra/Genetic algorithm feature selection.RData")
 # 
 # stopCluster(my_cluster)
 # unregister()
 
-load("Genetic algorithm feature selection.RData")
+load("Extra/Genetic algorithm feature selection.RData")
 ```
 
 ```{r genetic-internal, warning = FALSE, message=FALSE, fig.cap="Estimated performance of internal resamples from the genetic algorithm."}
@@ -448,19 +369,19 @@ For the genetic algorithm, we see that the internal folds got better results whi
 ## Check performance with random subsets
 To get a sense of how well these processes have selected subsets of variables, we can run an iteration that takes random subsets and evaluates performance. This will tell us if the processes are better than random chance. In this case, we don't use interactions.
 ```{r rf-random, warning = FALSE, results='hide', message=FALSE, cache=TRUE}
-my_subset_size <- length(sim_anneal_50_pct$optVariables)
-sa_bake <- sa_rec %>% 
-  prep() %>% 
-  bake(new_data = NULL) %>%
-  select(-PassengerId)
-full_vars <- sa_bake %>% names(.)
-map_seq <- 1:(length(full_vars)/2) # Number of iterations half of total number of variables to ensure sufficient combinations
-
-rand_subset <- map(map_seq, .f = \(x) sample(full_vars, my_subset_size))
-rand_data <- map(rand_subset, .f = \(x) sa_bake %>% dplyr::select(Transported, x))
-rand_rec <- map(rand_data, .f = \(x) recipe(Transported ~ ., data = x))
-
-subset_ctrl <- trainControl(method = "cv", classProbs = TRUE, summaryFunction = many_stats)
+# my_subset_size <- length(sim_anneal_50_pct$optVariables)
+# sa_bake <- sa_rec %>% 
+#   prep() %>% 
+#   bake(new_data = NULL) %>%
+#   select(-PassengerId)
+# full_vars <- sa_bake %>% names(.)
+# map_seq <- 1:(length(full_vars)/2) # Number of iterations half of total number of variables to ensure sufficient combinations
+# 
+# rand_subset <- map(map_seq, .f = \(x) sample(full_vars, my_subset_size))
+# rand_data <- map(rand_subset, .f = \(x) sa_bake %>% dplyr::select(Transported, x))
+# rand_rec <- map(rand_data, .f = \(x) recipe(Transported ~ ., data = x))
+# 
+# subset_ctrl <- trainControl(method = "cv", classProbs = TRUE, summaryFunction = many_stats)
 
 # my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
@@ -472,12 +393,12 @@ subset_ctrl <- trainControl(method = "cv", classProbs = TRUE, summaryFunction = 
 # 
 # subset_perf <- map(subset_model, .f = \(m) getTrainPerf(m))
 # 
-# save(subset_perf, file = "Random subsets performance.RData")
+# save(subset_perf, file = "Extra/Random subsets performance.RData")
 # 
 # stopCluster(my_cluster)
 # unregister()
 
-load("Random subsets performance.RData")
+load("Extra/Random subsets performance.RData")
 ```
 
 ```{r feature-selection-comparison, warning=FALSE, fig.cap="Comparison of different feature selection results against a random subset result."}
@@ -486,7 +407,6 @@ rf_random_avg <- map_dbl(subset_perf, .f = \(x) x$TrainAccuracy) %>%
 
 ggplot() +
   geom_point(data = rfe_acc_corr_avg, aes(x = Iter, y = Accuracy, colour = "RFE Pen")) +
-  geom_point(data = rfe_acc_corr_tree_avg, aes(x = Iter, y = Accuracy, colour = "RFE Tree")) +
   geom_point(data = sim_ann_50_ext_avg, aes(x = Iter, y = Accuracy, colour = "SA")) +
   geom_point(data = ga_external_avg, aes(x = Iter, y = Accuracy, colour = "GA")) +
   geom_point(data = rf_random_avg, aes(x = name, y = value, colour = "Random")) +
@@ -503,11 +423,6 @@ p_wilcoc_rfe_pen <- wilcox.test(sort(rfe_acc_corr_avg$Accuracy, decreasing = TRU
 p_ttest_rfe_pen <- t.test(sort(rfe_acc_corr_avg$Accuracy, decreasing = TRUE)[1:length(rf_random_avg$value)], 
             sort(rf_random_avg$value, decreasing = TRUE), paired = TRUE, alternative = "greater")$p.value
 
-p_wilcoc_rfe_tree <- wilcox.test(sort(rfe_acc_corr_tree_avg$Accuracy, decreasing = TRUE)[1:length(rf_random_avg$value)], 
-            sort(rf_random_avg$value, decreasing = TRUE), paired = TRUE, alternative = "greater")$p.value
-p_ttest_rfe_tree <- t.test(sort(rfe_acc_corr_tree_avg$Accuracy, decreasing = TRUE)[1:length(rf_random_avg$value)], 
-            sort(rf_random_avg$value, decreasing = TRUE), paired = TRUE, alternative = "greater")$p.value
-
 p_wilcoc_sa <- wilcox.test(sort(sim_ann_50_ext_avg$Accuracy, decreasing = TRUE)[1:length(rf_random_avg$value)], 
             sort(rf_random_avg$value, decreasing = TRUE), paired = TRUE, alternative = "greater")$p.value
 p_ttest_sa <- t.test(sort(sim_ann_50_ext_avg$Accuracy, decreasing = TRUE)[1:length(rf_random_avg$value)], 
@@ -518,15 +433,15 @@ p_wilcoc_ga <- wilcox.test(sort(ga_external_avg$Accuracy, decreasing = TRUE)[1:l
 p_ttest_ga <- t.test(sort(ga_external_avg$Accuracy, decreasing = TRUE)[1:length(rf_random_avg$value)],
             sort(rf_random_avg$value, decreasing = TRUE),  paired = TRUE, alternative = "greater")$p.value
 
-p_tests <- data.frame(test = rep(c("Wilcoxon paired", "t.test paired"), 4),
-                      colour_grp = rep(c("RFE Pen", "RFE Tree", "SA", "GA"), 2),
-                      value = c(p_wilcoc_rfe_pen, p_wilcoc_rfe_tree, p_wilcoc_sa, p_wilcoc_ga, 
-                                p_ttest_rfe_pen, p_ttest_rfe_tree, p_ttest_sa, p_ttest_ga))
+p_tests <- data.frame(test = rep(c("Wilcoxon paired", "t.test paired"), 3),
+                      colour_grp = rep(c("RFE Pen", "SA", "GA"), 2),
+                      value = c(p_wilcoc_rfe_pen, p_wilcoc_sa, p_wilcoc_ga, 
+                                p_ttest_rfe_pen, p_ttest_sa, p_ttest_ga))
 
 ggplot(p_tests, aes(x = test, y = value, colour = colour_grp)) +
   geom_point(size = 5) + 
   geom_hline(yintercept = 0.05, linetype = "dashed", colour = "red", show.legend = FALSE) +
-  scale_colour_manual(values = c("RFE Pen" = "green", "RFE Tree" = "blue", "SA" = "orange", "GA" = "red", "size" = "none")) +
+  scale_colour_manual(values = c("RFE Pen" = "green", "SA" = "orange", "GA" = "red", "size" = "none")) +
   labs(x = "Tests of difference", y = "P value", colour = "Method")
 ```
 
@@ -557,8 +472,8 @@ best_vars <- data.frame(features = best_features) %>%
   mutate(features = str_split_i(features, "_", 1)) %>%
   deframe()
 
-save(best_interactions, file = "Best interactions.RData")
-save(best_vars, file = "Best variables.RData")
+save(best_interactions, file = "Extra/Best interactions.RData")
+save(best_vars, file = "Extra/Best variables.RData")
 ```
 
 

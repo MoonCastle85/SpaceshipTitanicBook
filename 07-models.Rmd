@@ -220,8 +220,8 @@ my_vars <- data.frame(Variables = names(final_df)) %>%
   mutate(Roles = if_else(Variables %in% c("PassengerId"), "id", "predictor"),
          Roles = if_else(Variables == "Transported", "outcome", Roles))
 
-load("Best variables.RData")
-load("Final interactions.RData")
+load("Extra/Best variables.RData")
+load("Extra/Final interactions.RData")
 
 set.seed(8584)
 final_split <- initial_split(final_df, prop = 0.8)
@@ -267,7 +267,7 @@ We can see from the results of residuals in Figure \@ref(fig:glm-without-int) th
 
 ## GLMNET Lasso/Ridge
 ```{r glmnet}
-load("Penalized regression with interactions.RData")
+load("Extra/Penalized regression with interactions.RData")
 best_glm_params <- select_best(pen_int_tune)
 
 glmnet_final_mod <- logistic_reg(penalty = pluck(best_glm_params$penalty), mixture = pluck(best_glm_params$mixture)) %>%
@@ -309,7 +309,7 @@ rf_final_mod_tune <- rand_forest(trees = tune(), min_n = tune()) %>%
 # stopCluster(my_cluster)
 # unregister()
 
-load("Final randomForest tune.RData")
+load("Extra/Final randomForest tune.RData")
 
 show_best(rf_final_tune, metric = "accuracy", n = 20) %>%
   ggplot(aes(x = trees, y = mean)) +
@@ -322,6 +322,7 @@ The results from the model tuning indicate that the improvement is very limited 
 
 ```{r randomForest}
 rf_best_tune <- select_best(rf_final_tune)
+
 rf_final_mod <- rand_forest(trees = rf_best_tune$trees, min_n = rf_best_tune$min_n) %>%
   set_mode("classification") %>%
   set_engine("randomForest")

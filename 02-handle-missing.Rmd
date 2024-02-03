@@ -27,9 +27,9 @@ useful_features <- function(x) {
     ungroup() %>%
     mutate(across(.cols = c(HomePlanet, CryoSleep, Destination, VIP, Transported, Deck, Side, HomePlanetsPerGroup,
                             PassengerGroupSize, DestinationsPerGroup, CabinsPerGroup, CryoSleepsPerGroup, VIPsPerGroup,
-                            LastNamesPerGroup, PassengerGroup, PassengerId),
+                            LastNamesPerGroup, PassengerId),
                   .fns = as.factor)) %>%
-    mutate(across(.cols = c(CabinNumber, Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
+    mutate(across(.cols = c(CabinNumber, Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, PassengerGroup),
                   .fns = as.integer))
   return(x2)
 }
@@ -64,6 +64,17 @@ train2 %>%
 ```
 
 When we look at the new feature Deck, we can see that some decks seem dedicated to passengers from a specific home planet, see Figure \@ref(fig:missing-deck). This helps us replace even more missing values for HomePlanet.
+
+```{r missing-cabin-group, warning = FALSE, fig.cap = "Relationsship between Cabin and passenger group."}
+train2 %>%
+  ggplot(., mapping = aes(x = CabinNumber, y = as.integer(PassengerGroup), colour = Deck)) +
+  geom_point() +
+  labs(title = "CabinNumber against PassengerGroup", x = "Cabin number", y = "PassengerGroup") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+We see that the relationship between CabinNumber and PassengerGroup is linear so we can use this to replace CabinNumber where Deck is known.
+
 ```{r missing-deck, fig.cap = "Missing values for Deck"}
 train2 %>%
   group_by(Deck) %>%
@@ -103,6 +114,17 @@ train2 %>%
 I've summed up all of these replacement rules in the function below.
 ```{r manual-imputation, fig.cap="Missing values after manual replacement."}
 my_na_replace <- function(d) {
+  cabin_coef <- d %>%
+  nest(.by = Deck) %>%
+  filter(!is.na(Deck)) %>%
+  mutate(cabin_lm = map(.x = data, .f = \(df) lm(CabinNumber ~ PassengerGroup, data = df, na.action = na.exclude)),
+         my_tidy = map(.x = cabin_lm, .f = \(m) tidy(m))) %>%
+  select(Deck, my_tidy) %>%
+  unnest(my_tidy) %>%
+  select(Deck, term, estimate) %>%
+  pivot_wider(names_from = term, values_from = estimate) %>%
+  rename(Intercept = `(Intercept)`, Slope = PassengerGroup)
+  
   d2 <- d %>%
     # Replace HomePlanet for passengers in groups where the homeplanet is known from the other passengers
     group_by(PassengerGroup) %>% 
@@ -114,9 +136,14 @@ my_na_replace <- function(d) {
     ungroup() %>%
     mutate(Cabin = if_else(is.na(Cabin) & PassengerGroupSize != 1, Cabin2, Cabin),
            Deck = str_split_i(Cabin, "/", 1),
-           CabinNumber = str_split_i(Cabin, "/", 2),
+           CabinNumber = as.integer(str_split_i(Cabin, "/", 2)),
            Side = str_split_i(Cabin, "/", 3)) %>%
     select(-Cabin2) %>%
+    
+    # Replace remaining CabinNumber with linear relationship with group
+    left_join(., cabin_coef, by = "Deck") %>%
+    mutate(CabinNumber = if_else(is.na(CabinNumber), Intercept + Slope * PassengerGroup, CabinNumber)) %>%
+    select(-Intercept, -Slope) %>%
     
     # Replace HomePlanet if the passenger is housed on a dedicated Deck
     mutate(HomePlanet = if_else(is.na(HomePlanet) & Deck == "G", "Earth", HomePlanet),
@@ -173,8 +200,8 @@ rev_normalization <- function(v, rec) { # Custom function that will "unnormalise
 #   select(PassengerId, Cabin, Name, LastName, PassengerCount) %>%
 #   left_join(ranger_unnorm, ., by = "PassengerId")
 # 
-# save(ranger2, file = "MissRanger.RData")
-load("MissRanger.RData")
+# save(ranger2, file = "Extra/MissRanger.RData")
+load("Extra/MissRanger.RData")
 ```
 
 The missRanger algorithm can impute all of the variables at the same time and there is an option to select an id variable that will be included in the data but not used for imputation. Note that I have excluded the Name variables to improve computation time.

@@ -26,16 +26,16 @@ c25 <- c("dodgerblue2", "#E31A1C", "green4", "#6A3D9A", "#FF7F00", "black", "gol
   "yellow3", "darkorange4", "brown") # Had to add extra colours because I couldn't get `cat_plot` to work with defaults
 
 save_plot <- function(p, i) {
-  ggsave(filename = paste0("PairInt", i, ".png"), plot = p)
+  ggsave(filename = paste0("Extra/PairInt", i, ".png"), plot = p)
 }
 
 # cat_pair_int_plots <- pairs_cat %>%
 #   map(.x = ., .f = \(vp) plot_simple_int(train6, vp[1], vp[2]))
 # 
 # cat_plots <- walk2(.x = cat_pair_int_plots, .y = seq_along(cat_pair_int_plots), .f = save_plot)
-# cat_slick <- map(1:length(cat_pair_int_plots), .f = \(i) paste0("PairInt", i, ".png"))
-# save(cat_slick, file = "Plots cat.RData")
-load("Plots cat.RData")
+# cat_slick <- map(1:length(cat_pair_int_plots), .f = \(i) paste0("Extra/PairInt", i, ".png"))
+# save(cat_slick, file = "Extra/Plots cat.RData")
+load("Extra/Plots cat.RData")
 
 slickR::slickR(cat_slick, height = "480px", width = "672px") +
   slickR::settings(slidesToShow = 1, dots = TRUE)
@@ -56,7 +56,7 @@ plot_simple_int(train6, "Deck", "Side")
 
 The interaction between Deck and Side, however, seems to show only a minor effect, if any. 
 
-Figures \@ref(fig:interactions-all) and \@ref(fig:interactions-all2) below show all the interaction affects between both numerical and categoriacal variables.
+Figures \@ref(fig:interactions-all) and \@ref(fig:interactions-all2) below show all the interaction affects between both numerical and categorical variables.
 
 ```{r interactions-all, warning = FALSE, message=FALSE, cache=TRUE, fig.cap="Interaction effects for pairs of variables against the response. Part 1."}
 plot_simple_int2 <- function(df, v1, v2) {
@@ -75,16 +75,16 @@ pairs_num <- combn(preds_num, 2, simplify = FALSE)
 pairs_num <- pairs_num[1:90]
 
 save_plot2 <- function(p, i) {
-  ggsave(filename = paste0("PairIntNum", i, ".png"), plot = p)
+  ggsave(filename = paste0("Extra/PairIntNum", i, ".png"), plot = p)
 }
 
 # num_pair_int_plots <- pairs_num %>%
 #   map(.x = ., .f = \(vp) plot_simple_int2(train6, vp[1], vp[2]))
 # 
 # int_plots_slick <- walk2(.x = num_pair_int_plots, .y = seq_along(num_pair_int_plots), .f = save_plot2)
-# int_plots_slick <- map(1:length(num_pair_int_plots), .f = \(i) paste0("PairIntNum", i, ".png"))
-# save(int_plots_slick, file = "Plots num.RData")
-load("Plots num.RData")
+# int_plots_slick <- map(1:length(num_pair_int_plots), .f = \(i) paste0("Extra/PairIntNum", i, ".png"))
+# save(int_plots_slick, file = "Extra/Plots num.RData")
+load("Extra/Plots num.RData")
 
 slickR::slickR(int_plots_slick[1:45], height = "480px", width = "672px") +
   slickR::settings(slidesToShow = 1, dots = TRUE)
@@ -95,7 +95,7 @@ slickR::slickR(int_plots_slick[46:90], height = "480px", width = "672px") +
   slickR::settings(slidesToShow = 1, dots = TRUE)
 ```
 
-Based on what we see in the figures above, there seem to be large interaction effects between the numerical variables, especially between the amenities. We'll keep this in mind as we explore further.
+Based on what we see in the figures, there seem to be large interaction effects between the numerical variables, especially between some of the amenities. We'll keep this in mind as we explore further.
 
 ## Interaction significance with only variable pairs and their interactions
 One problem with the above visual approach is that we don't know if these interaction effects are real - in the sense they represent some true relationship with the outcome - or if they're so called false positives - that is, random effects that happened to be present in the training data. For example, does the fact that passengers from Earth seem less likely to be transported even when in cryo sleep reflect some true aspect of the spacetime anomaly that caused the transportation to another dimension or is this pattern just something that happened this time on pure chance? Another way to think of this is: if the Spaceship Titanic were to pass through this spacetime anomaly a thousand times, would the pattern persist?
@@ -114,14 +114,14 @@ compare_models_1way <- function(a, b, metric = a$metric[1], ...) { # A customize
 pair_model <- function(df, v1, v2) { # Model without interactions with only two variables
   tmp_vars <- c("Transported", v1, v2)
   set.seed(8584)
-  m <- train(Transported ~ ., data = df[, tmp_vars], preProc = NULL, method = "glm", metric = "accuracy", trControl = ctrl)
+  m <- train(Transported ~ ., data = df[, tmp_vars], preProc = NULL, method = "glm", metric = "Accuracy", trControl = ctrl)
   return(m)
 }
 
 pair_int_model <- function(df, v1, v2) { # Model with interactions with only two variables
   tmp_vars <- c("Transported", v1, v2)
   set.seed(8584)
-  m <- train(Transported ~ (.)^2, data = df[, tmp_vars], preProc = NULL, method = "glm", metric = "accuracy", trControl = ctrl)
+  m <- train(Transported ~ (.)^2, data = df[, tmp_vars], preProc = NULL, method = "glm", metric = "Accuracy", trControl = ctrl)
   return(m)
 }
 
@@ -132,7 +132,7 @@ pairs_cols <- combn(preds_cat, 2, simplify = TRUE) %>%
   t() %>%
   as.data.frame()
 
-ctrl <- trainControl(method = "repeatedcv", repeats = 5, classProbs = TRUE, summaryFunction = prSummary, allowParallel = TRUE)
+ctrl <- trainControl(method = "repeatedcv", repeats = 5, classProbs = TRUE, summaryFunction = multiClassSummary)
 
 # my_cluster <- makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
@@ -143,43 +143,51 @@ ctrl <- trainControl(method = "repeatedcv", repeats = 5, classProbs = TRUE, summ
 # int_mods <- pairs %>%
 #   map(.x = ., .f = \(vp) pair_int_model(train6, vp[1], vp[2]))
 # 
-# stopCluster(my_cluster)
-# 
+# diff_res <- map2(.x = int_mods, .y = no_int_mods, .f = \(m1, m2) compare_models_1way(m1, m2, metric = "Accuracy", 
+#                                                                                      alternative = "greater"))
 # no_int_acc <- no_int_mods %>%
-#   list_flatten(.) %>%
-#   map(.x = ., .f = \(m) getTrainPerf(m)[1, "TrainPrecision"]) %>%
+#   map(.x = ., .f = \(m) getTrainPerf(m)[1, "TrainAccuracy"]) %>%
 #   list_c(.)
 # 
-# diff_res <- map2(.x = no_int_mods, .y = int_mods, .f = \(m1, m2) compare_models_1way(m1, m2, alternative = "greater"))
+# int_acc <- int_mods %>%
+#   map(.x = ., .f = \(m) getTrainPerf(m)[1, "TrainAccuracy"]) %>%
+#   list_c(.)
 # 
-# save(no_int_acc, file = "No int acc.RData")
-# save(diff_res, file = "Diff results pairs.RData")
+# save(no_int_acc, file = "Extra/No int acc.RData")
+# save(int_acc, file = "Extra/Int acc.RData")
+# save(diff_res, file = "Extra/Diff results pairs.RData")
+# 
+# stopCluster(my_cluster)
+# unregister()
 
-load("No int acc.RData")
-load("Diff results pairs.RData")
+load("Extra/No int acc.RData")
+load("Extra/Int acc.RData")
+load("Extra/Diff results pairs.RData")
 
 diff_res2 <-
   data.frame(Improvement = map_dbl(.x = diff_res, .f = \(est) est$estimate),
              Pvalue = map_dbl(.x = diff_res, .f = \(p) p$p.value)) %>%
-  bind_cols(., Accuracy = no_int_acc) %>%
-  bind_cols(pairs_cols, .)
+  bind_cols(., No_Int_Accuracy = no_int_acc) %>%
+  bind_cols(., Int_Accuracy = int_acc) %>%
+  bind_cols(., pairs_cols)
 ```
 
-```{r int-pairwise-results}
+```{r int-pairwise-results, cache=TRUE, fig.cap="Accuracy of GLM-models using only pairs of variables and their interactions."}
 diff_res2 %>% 
   filter(Pvalue <= 0.05) %>%
-  arrange(desc(Improvement)) %>%
-  slice(1:5)
-
-diff_res2 %>% 
-  filter(Pvalue <= 0.05) %>%
-  arrange(desc(Accuracy)) %>%
-  slice(1:5)
+  pivot_longer(cols = c(No_Int_Accuracy, Int_Accuracy)) %>%
+  mutate(Pairs = str_c(V1, " and ", V2)) %>%
+  ggplot(., aes(x = reorder(Pairs, X = value), y = value, fill = name)) +
+  geom_col(position = position_dodge2()) +
+  coord_flip() +
+  labs(title = "Significant pairwise interactions", x = "Variable pairs", y = "Accuracy") +
+  scale_fill_discrete(name = "Models", labels = c("With interactions", "Without interactions")) +
+  theme(legend.position = "top")
 ```
 
-The p-value test here tells us whether the effects of the interaction terms were large enough to be considered non-random. We've used a cutoff of 5% but without any adjustment. This can be problematic since the more tests we run with a 5% cutoff, the higher the chance of finding interactions that have an effect purely by chance (in fact, for our 105 pairs with a 5% cutoff, the chances of getting a false positive is practically guaranteed). We will look at some adjustment methods for p-values to take this into account later.
+We see that many variable pairs show significant improvement (based on p-value < 5%), although the improvements are in many cases relatively marginal. Furthermore, we've used a cutoff of 5% but without any adjustment which can be problematic since the more tests we run with a 5% cutoff, the higher the chance of finding interactions that have an effect purely by chance (in fact, for our 105 pairs with a 5% cutoff, the chances of getting a false positive is practically guaranteed). We will look at some adjustment methods for p-values to take this into account later.
 
-For now, we can conclude that there are 36 variable pairs that seem to improve model performance compared to a model without interaction effects. The two pairs that seem to add a significant improvement are Spa & VRDeck as well as CryoSleep & Destination. Notice also that the accuracy is impressively high for a model that only used RoomService and VRDeck (without interactions) as well as Spa and VRDeck. This suggests that the amenity variables will be very important.
+For now, we can conclude that variables such as CryoSleep & Deck, Deck & Spa, Deck & VRDeck have both high accuracy scores without interactions but seem to be further improved with interactions. Let's see if these effects persist as we expand the exploration of interactions.
 
 ## Interaction significance with entire model and pairwise interactions
 One weakness with the above approach is that we've looked at variable pairs and their interactions in absence of the other variables so we don't know how these pairwise interactions contribute to a model with all the other variables. Do the improvements still persist or do some of them become correlated existing variables so that their effects lessen or even introduce noise to the data? 
@@ -187,26 +195,27 @@ One weakness with the above approach is that we've looked at variable pairs and 
 Let's explore that.
 
 ```{r int-full-unadjusted, warning = FALSE, cache = TRUE}
+set.seed(8584)
 my_split <- initial_split(train6, prop = 0.8)
 int_train <- training(my_split) %>%
   mutate(across(.cols = c(PassengerGroup), .fns = as.integer)) %>%
   select(CryoSleep, HomePlanet, Destination, VIP, Deck, Side, Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, CabinNumber,
          LastNameAsNumber, PassengerGroup, Transported)
 
-norm_ctrl <- trainControl(method = "repeatedcv", repeats = 5, classProbs = TRUE, summaryFunction = prSummary)
+norm_ctrl <- trainControl(method = "repeatedcv", repeats = 5, classProbs = TRUE, summaryFunction = multiClassSummary)
 
 norm_rec <- recipe(Transported ~ ., data = int_train) %>%
-  step_dummy(CryoSleep, HomePlanet, Destination, VIP, Deck, Side)
+  step_dummy(all_nominal_predictors())
 
 # my_cluster <- makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
 # 
 # set.seed(8584)
-# norm_m <- train(norm_rec, data = int_train, method = "glm", metric = "accuracy", trControl = norm_ctrl)
+# norm_m <- train(norm_rec, data = int_train, method = "glm", metric = "Accuracy", trControl = norm_ctrl)
 # 
-# norm_m_acc <- getTrainPerf(norm_m)[1, "TrainPrecision"]
+# norm_m_acc <- getTrainPerf(norm_m)[1, "TrainAccuracy"]
 # 
-# int_ctrl <- trainControl(method = "repeatedcv", repeats = 5, classProbs = TRUE, summaryFunction = prSummary)
+# int_ctrl <- trainControl(method = "repeatedcv", repeats = 5, classProbs = TRUE, summaryFunction = multiClassSummary)
 # 
 # int_function <- function(rec, f) {
 #   ir <- step_interact(recipe = rec, terms = !!f)
@@ -216,80 +225,111 @@ norm_rec <- recipe(Transported ~ ., data = int_train) %>%
 # int_form <- map(.x = pairs, .f = \(vp) formula(paste0("~starts_with('", vp[1], "'):starts_with('", vp[2], "')")))
 # int_rec <- map(.x = int_form, .f = \(form) int_function(norm_rec, f = form))
 # 
-# train(int_rec[[65]], data = int_train, method = "glm", metric = "accuracy", trControl = int_ctrl)
-# 
 # set.seed(8584)
-# int_m <- map(.x = int_rec, .f = \(r) train(r, data = int_train, method = "glm", metric = "accuracy", trControl = int_ctrl))
+# int_m <- map(.x = int_rec, .f = \(r) train(r, data = int_train, method = "glm", metric = "Accuracy", trControl = int_ctrl))
 # 
-# int_m_acc <- map_dbl(.x = int_m, .f = \(m) getTrainPerf(m)[1, "TrainPrecision"])
+# int_m_acc <- map_dbl(.x = int_m, .f = \(m) getTrainPerf(m)[1, "TrainAccuracy"])
 # 
-# anova_res <- map2(.x = list(norm_m), .y = int_m, .f = \(m1, m2) anova(m1$finalModel, m2$finalModel, test = "Chisq")[2, 'Pr(>Chi)'])
+# anova_res <- map2(.x = int_m, .y =list(norm_m), .f = \(m1, m2) anova(m1$finalModel, m2$finalModel, test = "Chisq"))
 # 
-# diff_all_res <- map2(.x = int_m, .y = list(norm_m), .f = \(m1, m2) compare_models_1way(m1, m2, alternative = "greater"))
+# diff_all_res <- map2(.x = int_m, .y = list(norm_m), .f = \(m1, m2) compare_models_1way(m1, m2, metric = "Accuracy",
+#                                                                                        alternative = "greater"))
 # 
 # stopCluster(my_cluster)
 # unregister()
 # 
 # diff_all_res2 <-
 #   data.frame(Improvement = map_dbl(.x = diff_all_res, .f = \(est) est$estimate),
-#              Resampled_Pvalue = map_dbl(.x = diff_all_res, .f = \(p) p$p.value),
-#              Traditional_Pvalue = map_dbl(.x = anova_res, .f = \(p) p)) %>%
+#              Resampled_Pvalue = map_dbl(.x = diff_all_res, .f = \(p) p$p.value)) %>%
 #   bind_cols(., No_Int_Accuracy = norm_m_acc) %>%
-#   bind_cols(., With_Int_Accuracy = int_m_acc) %>%
+#   bind_cols(., Int_Accuracy = int_m_acc) %>%
 #   bind_cols(pairs_cols, .)
 # 
-# save(diff_all_res2, file = "Results pairwise interactions with all other variables.RData")
-load("Results pairwise interactions with all other variables.RData")
+# diff_all_res2_anova <- 
+#   data.frame(Deviance_improvement = map_dbl(.x = anova_res, .f = \(x) x[["Deviance"]][2]),
+#              Traditional_pvalue = map_dbl(.x = anova_res, .f = \(x) x[["Pr(>Chi)"]][2])) %>%
+#   bind_cols(., No_Int_Accuracy = norm_m_acc) %>%
+#   bind_cols(., Int_Accuracy = int_m_acc) %>%
+#   bind_cols(pairs_cols, .)
+# 
+# save(diff_all_res2_anova, file = "Extra/Anova pairwise interactions with all other variables.RData")
+# save(diff_all_res2, file = "Extra/Results pairwise interactions with all other variables.RData")
+
+load("Extra/Anova pairwise interactions with all other variables.RData")
+load("Extra/Results pairwise interactions with all other variables.RData")
 
 diff_all_res2_adj <- diff_all_res2 %>%
-  mutate(Resampled_pvalue_FDR = p.adjust(Resampled_Pvalue, method = "fdr"),
-         Traditional_pvalue_FDR = p.adjust(Traditional_Pvalue, method = "fdr"),
-         Resampled_pvalue_Bon = p.adjust(Resampled_Pvalue, method = "bonferroni"),
-         Traditional_pvalue_Bon = p.adjust(Traditional_Pvalue, method = "bonferroni"))
+  mutate(Resampled_pvalue_bh = p.adjust(Resampled_Pvalue, method = "BH"),
+         Resampled_pvalue_bon = p.adjust(Resampled_Pvalue, method = "bonferroni"))
 ```
 
-```{r int-full-unadjusted-results}
+If we first look at the results from the ANOVA model comparison, we see that no significant improvements between a model with interactions pairs and one without exist.
+
+```{r anova-res}
+diff_all_res2_anova %>%
+  filter(Deviance_improvement > 0)
+```
+
+Next, if we focus on our resampled performances, we can see that only three interaction effects are statistically significant without any p-value adjustment.
+
+```{r int-full-unadjusted-results, fig.cap="Accuracy of GLM-models using pair-interactions together with all other variables for significant interaction effects without any p-value adjustment."}
 diff_all_res2_adj %>% 
   filter(Resampled_Pvalue <= 0.05) %>%
-  select(V1, V2, Improvement, Resampled_Pvalue, With_Int_Accuracy) %>%
-  arrange(desc(Improvement))
+  pivot_longer(cols = c(Int_Accuracy, No_Int_Accuracy)) %>%
+  mutate(Pairs = str_c(V1, " and ", V2)) %>%
+  ggplot(., aes(x = reorder(Pairs, X = value), y = value, fill = name)) +
+  geom_col(position = position_dodge2()) +
+  coord_flip() +
+  labs(title = "Unadjusted pairwise interactions", x = "Variable pairs", y = "Accuracy") +
+  scale_fill_discrete(name = "Models", labels = c("With interactions", "Without interactions")) +
+  theme(legend.position = "top")
 ```
 
-Now that we've added all variables to our models, we see that only two interaction effects are statistically significant without any p-value adjustment (column Resampled_Pvalue). Kuhn and Johnson write: 
-> When the interactions that were discovered were included in a broader model that contains other (perhaps correlated) predictors, their importance to the model may be diminished. (...) This might reduce the number of predictors considered important (since the residual degrees of freedom are smaller) but the discovered interactions are likely to be more reliably important to a larger model.
+Kuhn and Johnson write: 
 
-```{r int-full-adjusted}
-diff_all_res2_adj %>% 
-  filter(Resampled_pvalue_FDR <= 0.2) %>%
-  select(V1, V2, Improvement, Resampled_pvalue_FDR, With_Int_Accuracy) %>%
-  arrange(desc(Improvement))
+> When the interactions that were discovered were included in a broader model that contains other (perhaps correlated) predictors, their importance to the model may be diminished. (...) This might reduce the number of predictors considered important (since the residual degrees of freedom are smaller) but the discovered interactions are likely to be more reliably important to a larger model.'
 
-diff_all_res2_adj %>% 
-  filter(Resampled_pvalue_Bon <= 0.2) %>%
-  select(V1, V2, Improvement, Resampled_pvalue_Bon, With_Int_Accuracy) %>%
-  arrange(desc(Improvement))
+Let us therefore apply some adjustments.
+
+```{r int-full-adjusted, fig.cap="Accuracy of GLM-models using pair-interactions together with all other variables for significant interaction effects with Bonferroni and p-value adjustment."}
+p_bh <- diff_all_res2_adj %>% 
+  filter(Resampled_pvalue_bh <= 0.2) %>%
+  pivot_longer(cols = c(Int_Accuracy, No_Int_Accuracy)) %>%
+  mutate(Pairs = str_c(V1, " and ", V2)) %>%
+  ggplot(., aes(x = reorder(Pairs, X = value), y = value, fill = name)) +
+  geom_col(position = position_dodge2()) +
+  coord_flip() +
+  labs(title = "Benjamini&Hochberg adjusted interactions", x = "Variable pairs", y = "Accuracy") +
+  scale_fill_discrete(name = "Models", labels = c("With interactions", "Without interactions"))
+
+p_bon <- diff_all_res2_adj %>% 
+  filter(Resampled_pvalue_bon <= 0.2) %>%
+  pivot_longer(cols = c(Int_Accuracy, No_Int_Accuracy)) %>%
+  mutate(Pairs = str_c(V1, " and ", V2)) %>%
+  ggplot(., aes(x = reorder(Pairs, X = value), y = value, fill = name)) +
+  geom_col(position = position_dodge2()) +
+  coord_flip() +
+  labs(title = "Bonferroni adjusted interactions", x = "Variable pairs", y = "Accuracy") +
+  scale_fill_discrete(name = "Models", labels = c("With interactions", "Without interactions"))
+
+p_bh / p_bon + plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = "top")
 ```
 
-If we were to adjust our values, only a single interaction effect remains that is CryoSleep and HomePlanet. The stricter adjustment is the Boneferroni which multiplies all the p-values with the number of tests (105 in our case) while a less strict adjustment is the FDR that sorts the p-values in ascending order and multiplies each one with the total number of tests divided by the p-value's position (so that the lowest value gets multiplied by 105/1 in our case, the second lowest by 105/2 and so on). In the case of our interaction, it holds even with the stricter Bonferroni adjustment which implies that the effect is relatively strong.
+When we adjust our values, only a single interaction effect remains: CryoSleep & HomePlanet. The stricter adjustment is the Bonferroni which multiplies all the p-values with the number of tests (105 in our case) while a less strict adjustment is the Benjamini & Hochberg that sorts the p-values in ascending order and multiplies each one with the total number of tests divided by the p-value's position (so that the lowest value gets multiplied by 105/1 in our case, the second lowest by 105/2 and so on). 
 
-Does this mean that we shouldn't include the other interaction effects in our model? No. We can still try to add the ones we've discovered so far to a later stage where we will evaluate which features to select.
+What does this tell us? It suggests that only a few interaction effects seem significant when evaluated together with the entire dataset and that only a single interaction (CryoSleep & HomePlanet) is likely to be truly relevant and not caused by a false positive effect of many tests. We have already seen in Figure \@ref(fig:int-cryo-home) that the interaction CryoSleep & HomePlanet makes sense and if we look for the other two interactions without p-value adjustment in Figure \@ref(fig:interactions-cat) (Deck & HomePlanet as well as Deck & Destination), we see that both of them seem to have large interaction effects.
 
+Let's add the interaction effects we have so far in a variable that we can use later.
 ```{r int-full-store}
 int_vars_very_imp <- diff_all_res2_adj %>% 
-  filter(Resampled_pvalue_Bon <= 0.2) %>% 
-  select(V1, V2) %>%
-  mutate(ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')")) %>%
-  mutate(RevFormula = str_c("starts_with('", V2, "'):starts_with('", V1, "')"))
-
-int_vars_maybe_imp <- diff_all_res2_adj %>% 
   filter(Resampled_Pvalue <= 0.05) %>% 
   select(V1, V2) %>%
   mutate(ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')")) %>%
   mutate(RevFormula = str_c("starts_with('", V2, "'):starts_with('", V1, "')"))
 ```
 
-## All interaction effects
-Let's turn to a more comprehensive interaction analysis where we'll use penalized regression to see whether any interactions prove beneficial to the model. Here we use the `glmnet`-function to first fit a model without interactions and then a model with interactions that we tune with different parameters. 
+## Penalized regression for interaction exploration
+Let's turn to a different interaction analysis where we'll use penalized regression to see whether any interactions prove beneficial to the model. Here we use the `glmnet`-function to first fit a model without interactions and then a model with interactions that we tune with different parameters. 
 
 The $\lambda$ parameter controls the penalty that is applied to different variables to maximize accuracy while the $\alpha$ controls the weight applied to each penalty function so that $\alpha = 1$ signifies a Lasso penalty where the penalty is applied to the absolute of the regression coefficient while $\alpha = 0$ signifies a Ridge penalty where the penalty is applied to the squared coefficient. In our case, the glmnet model allows us to tune for the mix of these factors that gives the best accuracy.
 
@@ -308,14 +348,12 @@ my_vars <- data.frame(Variables = names(pen_train)) %>%
          Roles = if_else(Variables == "Transported", "outcome", Roles))
 
 pen_rec <- recipe(x = pen_train, vars = my_vars$Variables, roles = my_vars$Roles) %>%
-  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent, CabinNumber, LastNameAsNumber, PassengerGroup,
-                 TotalSpentPerGroup) %>%
   step_dummy(all_nominal_predictors()) %>%
   step_zv(all_predictors())
 
 my_acc <- metric_set(accuracy)
 pen_ctrl <- control_grid(verbose = TRUE, save_pred = TRUE, save_workflow = TRUE)
-pen_grid <- expand.grid(mixture = c(0.2, 0.6, 1), penalty = c(1e-04, 2e-04, 3e-04, 4e-04, 5e-04))
+pen_grid <- expand.grid(mixture = c(0.2, 0.6, 1), penalty = seq(1e-05, 1e-03, 5e-05))
 
 glmnet_mod <- logistic_reg(penalty = tune(), mixture = tune()) %>%
   set_engine("glmnet")
@@ -329,12 +367,12 @@ glmnet_mod <- logistic_reg(penalty = tune(), mixture = tune()) %>%
 #     tune_grid(pen_rec, resamples = my_pen_folds, metrics = my_acc, control = pen_ctrl, grid = pen_grid)
 # })
 # 
-# save(pen_tune, file = "Penalized regression without interactions.RData")
+# save(pen_tune, file = "Extra/Penalized regression without interactions.RData")
 # 
 # stopCluster(my_cluster)
 # unregister()
 
-load("Penalized regression without interactions.RData")
+load("Extra/Penalized regression without interactions.RData")
 ```
 
 ```{r pen-reg-without-int2, warning = FALSE, message = FALSE, fig.cap = "Tuning results for a Lasso/Ridge regression without interaction effects."}
@@ -353,9 +391,9 @@ show_best(pen_tune, metric = "accuracy", n = 20) %>%
   labs(title = "Tune results without interactions", x = "Lambda penalty", y = "Resample accuracy", colour = "Alpha")
 ```
 
-Without any interaction effects, the regression model favoured the pure Lasso regression ($\alpha = 1$) with the penalty $\lambda = 0.0002$. The most important variables (with the highest coefficients) were in this case VRDeck, Spa, Cryosleep, HomePlanet and Deck. The final model used 32 out of 36 variables and the resampled accuracy without any interactions was close to 0.79.
+Without any interaction effects, the regression model favoured the pure Lasso regression ($\alpha = 1$) with the penalty $\lambda = 0.0001$. The most important variables (with the highest coefficients) were in this case HomePlanet, CryoSleep, Deck. The final model used 33 out of 36 variables and the resampled accuracy without any interactions was slightly above 0.79.
 
-Now if we repeat the process but we include interaction effects between the variables that were chosen in the previous section:
+If we repeat this process but include interaction effects between the variables that were chosen in the previous section:
 
 ```{r pen-reg-with-int, warning = FALSE, message = FALSE, cache = TRUE}
 int_vars <- pen_coef %>%
@@ -370,28 +408,28 @@ int_formula <- map_chr(.x = int_vars, .f = \(vp) paste0("starts_with('", vp[1], 
   as.formula(.)
 
 pen_int_rec <- recipe(x = pen_train, vars = my_vars$Variables, roles = my_vars$Roles) %>%
-  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent, CabinNumber, LastNameAsNumber, PassengerGroup,
-                 TotalSpentPerGroup) %>%
   step_dummy(all_nominal_predictors()) %>%
   step_interact(int_formula) %>%
   step_zv(all_predictors())
 
-pen_grid <- expand.grid(mixture = c(0.2, 0.6, 1), penalty = c(1e-04, 5e-04, 1e-03, 5e-03))
+pen_grid <- expand.grid(mixture = c(0.2, 0.6, 1), penalty = seq(1e-04, 1e-02, 5e-04))
   
 # my_cluster <- makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
 # clusterExport(cl = my_cluster, "int_formula")
 # 
-# set.seed(8584)
-# pen_int_tune <- glmnet_mod %>%
-#   tune_grid(pen_int_rec, resamples = my_pen_folds, metrics = my_acc, control = pen_ctrl, grid = pen_grid)
+# system.time({
+#   set.seed(8584)
+#   pen_int_tune <- glmnet_mod %>%
+#     tune_grid(pen_int_rec, resamples = my_pen_folds, metrics = my_acc, control = pen_ctrl, grid = pen_grid)
+# })
 # 
-# save(pen_int_tune, file = "Penalized regression with interactions.RData")
+# save(pen_int_tune, file = "Extra/Penalized regression with interactions.RData")
 # 
 # stopCluster(my_cluster)
 # unregister()
 
-load("Penalized regression with interactions.RData")
+load("Extra/Penalized regression with interactions.RData")
 ```
 
 We see the results from the penalized regression model with interactions below.
@@ -405,12 +443,14 @@ show_best(pen_int_tune, metric = "accuracy", n = 40) %>%
   labs(title = "Tune results with interactions", x = "Lambda penalty", y = "Resample accuracy", colour = "Alpha")
 ```
 
-The regression model now favours the a mixed Lasso/Ridge ($\alpha = 0.6$) but with a higher penalty $\lambda = 0.005$. Out of 490 total variables including interaction effects, it selected 170 for the best accuracy which was somewhat above 0.80. Compared to the model without interactions effects (accuracy = 0.79), it's a small improvement. 
+The regression model still favours the Lasso ($\alpha = 1$) but with a higher penalty $\lambda = 0.005$. Out of 516 total variables including interaction effects, it selected 91 for the best accuracy which was somewhat above 0.80. Compared to the model without interactions effects (accuracy = 0.79), it's a small improvement. 
 
-The top ten variables from the penalized regression are below.
+We can see the top twenty variables from the penalized regression below.
 
-```{r pen-reg-int-top, cache=TRUE, warning = FALSE, message = FALSE, fig.cap = "Top variables from the Lasso/Ridge regression with interaction effects."}
-pen_int_best <- fit_best(pen_int_tune)
+```{r pen-reg-int-top, cache=TRUE, warning = FALSE, message = FALSE, fig.cap = "Top variables from the Lasso/Ridge regression with interaction effects. The red and blue lines indicate possible (arbitrary) cut-off points for importance."}
+# pen_int_best <- fit_best(pen_int_tune)
+# save(pen_int_best, file = "Extra/Best penalized regression with interactions.RData")
+load("Extra/Best penalized regression with interactions.RData")
 pen_int_coef <- pen_int_best %>%
   tidy()
 
@@ -421,31 +461,36 @@ pen_int_coef %>%
   slice(1:20) %>%
   ggplot(., aes(x = abs(estimate), y = reorder(term, abs(estimate)))) +
   geom_col() +
-  geom_vline(aes(xintercept = 0.55, colour = "red", linetype = "dashed")) +
+  geom_vline(aes(xintercept = 0.50), colour = "red", linetype = "dashed") +
+  geom_vline(aes(xintercept = 0.25), colour = "blue", linetype = "dashed") +
   labs(x = "Regression coefficient (abs)", y = "Variable") +
   theme(legend.position = "none")
 ```
 
-It's surprising to see that the strongest effect was between Deck & Side, which we visually inspected in Figure \@ref(fig:int-deck-side) where it looked as if the effect of the interaction wasn't very large. It also didn't show up in our pairwise exploration which perhaps indicates that this interaction is overfitted. 
+It's surprising to see that the strongest effect was between Deck & Side, which we visually inspected in Figure \@ref(fig:int-deck-side) where it looked as if the effect of the interaction wasn't very large. The visual interaction might look deceiving or the effect could be due to overfitting.
 
-The other variables amont the 20 most important were all interaction effects where we see returning contenders like CryoSleep & HomePlanet, CryoSleep & Deck, HomePlanet & Deck and so on. Although the reduction is gradual, the last "big" drop is just above a coefficient of 0.5 (absolute value), indicated by the red line. Let's add these interactions to a data frame we can use later.
+The other variables among the 20 most important were almost all interaction effects except CryoSleep and we see returning contenders like CryoSleep & HomePlanet at the top as well as CryoSleep & Deck, Destination & Deck and so on. Although the reduction is gradual, there is a big drop in importance after the first three. 
+
+However, since the goal of the competition is to maximise accuracy, there is an argument to be made that all interaction effects could be used to see if they improve model performance. 
 
 ```{r int-pen-reg-store}
 pen_int_vars <- pen_int_coef %>%
   select(-penalty) %>%
-  filter(abs(estimate) > 0.55 & term != "(Intercept)") %>%
+  filter(abs(estimate) != 0 & term != "(Intercept)") %>%
   filter(str_detect(term, "_x_")) %>%
-  mutate(V1 = str_split_i(term, "_", 1),
-         V2 = str_split_i(term, "_", -2),
+  mutate(V1 = str_split_i(term, "_x_", 1),
+         V1 = str_split_i(term, "_", 1),
+         V2 = str_split_i(term, "_x_", 2),
+         V2 = str_split_i(V2, "_", 1),
          ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')"),
          RevFormula = str_c("starts_with('", V2, "'):starts_with('", V1, "')")) %>%
   select(V1, V2, ForFormula, RevFormula)
 ```
 
 ## Tree model interactions
-Another method for indirectly discovering interaction effects is by the use of a tree-based model like randomForest. Kuhn and Johnson explain it better in their book but in essence, tree models are by their nature interaction models since they look at thresholds for different variables to split the tree into branches and the splits often involve another variable at the next (or previous) junction. 
+A third we can use to indirectly discover interaction effects is by the use of a tree-based model like randomForest. Kuhn and Johnson explain it better in their book but in essence, tree models are by their nature interaction models since they look at thresholds for different variables to split the tree into branches and the splits often involve another variable at the next (or previous) junction. 
 
-The results from a randomForest model doesn't provide interactions themselves but ranks the original variables based on their importance which can be used to model interaction effects in a second stage.
+The results from a randomForest model doesn't provide interactions themselves but ranks the original variables based on their importance and this can be used to model interaction effects in a second stage.
 ```{r tree-based-var-imp, cache = TRUE}
 df_tree <- train6 %>%
   mutate(across(.cols = c(PassengerGroupSize, Solo, LargeGroup, TravelTogether, tidyselect::ends_with("PerGroup")),
@@ -461,21 +506,28 @@ my_vars <- data.frame(Variables = names(tree_train)) %>%
          Roles = if_else(Variables == "Transported", "outcome", Roles))
 
 tree_rec <- recipe(x = tree_train, vars = my_vars$Variables, roles = my_vars$Roles) %>%
-  step_zv(all_predictors()) %>%
-  step_normalize(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, TotalSpent, CabinNumber, LastNameAsNumber, PassengerGroup,
-                 TotalSpentPerGroup) %>%
-  step_dummy(all_nominal_predictors())
+  step_dummy(all_nominal_predictors()) %>%
+  step_zv(all_predictors())
 
 tree_baked <- tree_rec %>%
   prep() %>%
   bake(new_data = NULL) %>%
   select(-c(Cabin, Name, LastName, PassengerCount, HomePlanetsPerGroup))
 
-# rf_mod <- ranger::ranger(Transported ~ . -PassengerId, data = tree_baked, num.trees = 1000, importance = "impurity", 
-#                  num.threads = detectCores() - 1, seed = 8584)
+# my_cluster <- makeCluster(detectCores() - 1, type = 'SOCK')
+# registerDoSNOW(my_cluster)
 # 
-# save(rf_mod, file = "Ranger tree model variable importance.RData")
-load("Ranger tree model variable importance.RData")
+# system.time({
+#   rf_mod <- ranger::ranger(Transported ~ . -PassengerId, data = tree_baked, num.trees = 1000, importance = "impurity",
+#                    num.threads = detectCores() - 1, seed = 8584)
+# })
+# 
+# save(rf_mod, file = "Extra/Ranger tree model variable importance.RData")
+# 
+# stopCluster(my_cluster)
+# unregister()
+
+load("Extra/Ranger tree model variable importance.RData")
 
 rf_imp <- tibble(Predictor = names(rf_mod$variable.importance),
                  Importance = unname(rf_mod$variable.importance))
@@ -488,47 +540,7 @@ ggplot(rf_imp, aes(x = reorder(Predictor, Importance), y = Importance)) +
   xlab("")
 ```
 
-The tree model heavily favours the amenity variables as well as a few other variables that our penalized model didn't consider important enough. Based on the ranking in Figure \@ref(fig:tree-based-var-imp2), there is a clear cutoff after the LastNameCount feature. 
-
-If we return to our plotted interactions from from the earlier figures, we can visually inspect some combinations before we select a final set to test. Some interactions that seem large are:
-
-- Age & RoomService
-- Age & Spa
-- Age & VRDeck
-- Age & CabinNumber
-- Age & PassengerGroup
-
-- RoomService & Spa
-- RoomService & VRDeck
-
-- FoodCourt & ShoppingMall
-- FoodCourt & Spa
-- FoodCourt & VRDeck
-- FoodCourt & LastNameAsNumber
-- FoodCourt & PassengerGroup
-
-- ShoppingMall & Spa
-- ShoppingMall & VRDeck
-- ShoppingMall & CabinNumber
-- ShoppingMall & LastNameAsNumber
-- ShoppingMall & PassengerGroup
-
-- CabinNumber & LastNameAsNumber
-- CabinNumber & PassengerGroup
-
-Let's add them to another set of possible interactions!
-
-```{r tree-int-important}
-tree_int_vars <- data.frame(
-  V1 = c(rep("Age", 5), rep("RoomService", 2), rep("FoodCourt", 5), rep("ShoppingMall", 5), rep("CabinNumber", 2)),
-  V2 = c("RoomService", "Spa", "VRDeck", "CabinNumber", "PassengerGroup", "Spa", "VRDeck", "ShoppingMall", "Spa", "VRDeck",
-         "LastNameAsNumber", "PassengerGroup", "Spa", "VRDeck", "CabinNumber", "LastNameAsNumber", "PassengerGroup",
-         "LastNameAsNumber", "PassengerGroup")
-  ) %>%
-  mutate(ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')"),
-         RevFormula = str_c("starts_with('", V2, "'):starts_with('", V1, "')"))
-```
-
+The tree model heavily favours the amenity variables, especially the TotalSpent feature that we've created. However, this feature was penalized to zero in our penalized regression, most likely because it correlates to the other amenity variables. All other amenities are, however, represented among the variables from our best penalized results so we'll stick with them going forward.
 
 ```{r remove-05, include=FALSE}
 rm(pairs, pair_int_plots, plotsToSVG, pairs_cols, int_mods, no_int_mods, no_int_acc, diff_res, diff_res2, my_split, int_train,

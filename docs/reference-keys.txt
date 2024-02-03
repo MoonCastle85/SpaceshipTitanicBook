@@ -4,6 +4,7 @@ fig:correlation
 fig:missing
 fig:missing-homeplanet
 fig:missing-cabin
+fig:missing-cabin-group
 fig:missing-deck
 fig:missing-vip
 fig:missing-age
@@ -34,6 +35,9 @@ fig:int-cryo-home
 fig:int-deck-side
 fig:interactions-all
 fig:interactions-all2
+fig:int-pairwise-results
+fig:int-full-unadjusted-results
+fig:int-full-adjusted
 fig:pen-reg-without-int2
 fig:pen-reg-with-int2
 fig:pen-reg-int-top
@@ -42,7 +46,6 @@ fig:recurs-feat-no-corr2
 fig:recurs-feat-no-corr3
 fig:recurs-feat-corr2
 fig:recurs-feat-corr3
-fig:rfe-tree-int2
 fig:simulated-annealing-internal
 fig:simulated-annealing-external
 fig:simulated-annealing-best
@@ -80,7 +83,7 @@ interactions
 visual-exploration-of-interactions
 interaction-significance-with-only-variable-pairs-and-their-interactions
 interaction-significance-with-entire-model-and-pairwise-interactions
-all-interaction-effects
+penalized-regression-for-interaction-exploration
 tree-model-interactions
 feature-selection-and-elimination
 recursive-feature-elimination
