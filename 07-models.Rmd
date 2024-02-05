@@ -221,7 +221,6 @@ my_vars <- data.frame(Variables = names(final_df)) %>%
          Roles = if_else(Variables == "Transported", "outcome", Roles))
 
 load("Extra/Best variables.RData")
-load("Extra/Final interactions.RData")
 
 set.seed(8584)
 final_split <- initial_split(final_df, prop = 0.8)
@@ -233,9 +232,9 @@ final_rec <- recipe(x = final_train, vars = my_vars$Variables, roles = my_vars$R
   step_scale(Age, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck, PassengerGroup, CabinNumber, TotalSpent, TotalSpentPerGroup,
              LastNameAsNumber) %>%
   step_dummy(all_nominal_predictors()) %>%
-  step_interact(final_interactions) %>%
+  step_interact(int_formula) %>%
   step_zv(all_predictors()) %>%
-  step_select(all_outcomes(), contains("_x_"), all_of(matches(str_c(best_vars, collapse = "|"))), skip = TRUE)
+  step_select(all_outcomes(), contains("_x_"), all_of(matches(str_c(rfe_best_vars, collapse = "|"))), skip = TRUE)
 ```
 
 ## GLM
@@ -245,8 +244,6 @@ glm_final_bake <- final_rec %>%
   bake(new_data = NULL)
 
 my_acc <- metric_set(accuracy)
-pen_ctrl <- control_grid(verbose = TRUE, save_pred = TRUE, save_workflow = TRUE)
-pen_grid <- expand.grid(mixture = seq(.2, 1, by = .2), penalty = 10^seq(-4, -1, by = 0.1))
 
 glm_final_mod <- logistic_reg() %>%
   set_engine("glm", family = "binomial")
@@ -320,10 +317,10 @@ show_best(rf_final_tune, metric = "accuracy", n = 20) %>%
 ```
 The results from the model tuning indicate that the improvement is very limited with more trees than somewhere around 2000 so I will assume this as the optimal. With tree based models, too much trees can overfit the data so it's a good idea not to
 
-```{r randomForest}
+```{r randomForest-final}
 rf_best_tune <- select_best(rf_final_tune)
 
-rf_final_mod <- rand_forest(trees = rf_best_tune$trees, min_n = rf_best_tune$min_n) %>%
+rf_final_mod <- rand_forest(trees = 2000, min_n = 5) %>%
   set_mode("classification") %>%
   set_engine("randomForest")
 
@@ -337,6 +334,122 @@ rf_fitted <- extract_fit_engine(rf_final_fit)
 rf_final_pred <- predict(rf_final_fit, final_test)
 
 confusionMatrix(data = rf_final_pred$.pred_class, reference = final_test$Transported)
+```
+
+# KNN
+
+Rectangular: This is also known as the uniform kernel. It gives equal weight to all neighbors within the window, effectively creating a binary situation where points are either in the neighborhood (and given equal weight) or not.
+
+Triangular: This kernel assigns weights linearly decreasing from the center. It gives the maximum weight to the nearest neighbor and the minimum weight to the farthest neighbor within the window.
+
+Epanechnikov: This kernel is parabolic with a maximum at the center, decreasing to zero at the window’s edge. It is often used because it minimizes the mean integrated square error.
+
+Biweight: This is a smooth, bell-shaped kernel that gives more weight to the nearer neighbors.
+
+Triweight: This is similar to the biweight but gives even more weight to the nearer neighbors.
+
+Cos: This kernel uses the cosine of the distance to weight the neighbors.
+
+Inv: This kernel gives weights as the inverse of the distance.
+
+Gaussian: This kernel uses the Gaussian function to assign weights. It has a bell shape and does not compactly support, meaning it gives some weight to all points in the dataset, but the weight decreases rapidly as the distance increases.
+
+Rank: This kernel uses the ranks of the distances rather than the distances themselves.
+
+Optimal: This kernel attempts to choose the best weighting function based on the data.
+
+```{r knn-final}
+knn_final_mod <- nearest_neighbor(neighbors = 5, weight_func = "optimal") %>%
+  set_mode("classification") %>%
+  set_engine("kknn")
+
+knn_final_wf <- glm_final_wf %>%
+  update_model(knn_final_mod)
+
+set.seed(8584)
+knn_final_fit <- fit(knn_final_wf, final_train)
+knn_fitted <- extract_fit_engine(knn_final_fit)
+
+knn_final_pred <- predict(knn_final_fit, final_test)
+
+confusionMatrix(data = knn_final_pred$.pred_class, reference = final_test$Transported)
+```
+
+# SVM
+svm_linear: This method defines a SVM model that uses a linear class boundary12. For classification, the model tries to maximize the width of the margin between classes using a linear class boundary. For regression, the model optimizes a robust loss function that is only affected by very large model residuals and uses a linear fit12.
+
+svm_poly: This method defines a SVM model that uses a polynomial class boundary345. For classification, the model tries to maximize the width of the margin between classes using a polynomial class boundary. For regression, the model optimizes a robust loss function that is only affected by very large model residuals and uses polynomial functions of the predictors345.
+
+svm_rbf: This method defines a SVM model that uses a nonlinear class boundary67. For classification, the model tries to maximize the width of the margin between classes using a nonlinear class boundary. For regression, the model optimizes a robust loss function that is only affected by very large model residuals and uses nonlinear functions of the predictors67.
+
+```{r svm-final}
+svm_final_mod <- svm_rbf(cost = 1, margin = 0.1) %>%
+  set_mode("classification") %>%
+  set_engine("kernlab")
+
+svm_final_wf <- glm_final_wf %>%
+  update_model(svm_final_mod)
+
+set.seed(8584)
+svm_final_fit <- fit(svm_final_wf, final_train)
+svm_fitted <- extract_fit_engine(svm_final_fit)
+
+svm_final_pred <- predict(svm_final_fit, final_test)
+
+confusionMatrix(data = svm_final_pred$.pred_class, reference = final_test$Transported)
+```
+
+# XGBoost
+```{r xgboost-final}
+xgb_final_mod <- boost_tree(trees = 15) %>%
+  set_mode("classification") %>%
+  set_engine("xgboost")
+
+xgb_final_wf <- glm_final_wf %>%
+  update_model(xgb_final_mod)
+
+set.seed(8584)
+xgb_final_fit <- fit(xgb_final_wf, final_train)
+xgb_fitted <- extract_fit_engine(xgb_final_fit)
+
+xgb_final_pred <- predict(xgb_final_fit, final_test)
+
+confusionMatrix(data = xgb_final_pred$.pred_class, reference = final_test$Transported)
+```
+
+# C5.0
+```{r c5-0-final}
+c50_final_mod <- boost_tree(trees = 15) %>%
+  set_mode("classification") %>%
+  set_engine("C5.0")
+
+c50_final_wf <- glm_final_wf %>%
+  update_model(c50_final_mod)
+
+set.seed(8584)
+c50_final_fit <- fit(c50_final_wf, final_train)
+c50_fitted <- extract_fit_engine(c50_final_fit)
+
+c50_final_pred <- predict(c50_final_fit, final_test)
+
+confusionMatrix(data = c50_final_pred$.pred_class, reference = final_test$Transported)
+```
+
+# Naive Bayes
+```{r naive-bayes-final}
+nb_final_mod <- naive_Bayes() %>%
+  set_engine("klaR")
+
+nb_final_wf <- glm_final_wf %>%
+  update_model(nb_final_mod)
+
+set.seed(8584)
+nb_final_fit <- fit(nb_final_wf, final_train)
+nb_fitted <- extract_fit_engine(nb_final_fit)
+
+nb_final_pred <- predict(nb_final_fit, final_test)
+
+confusionMatrix(data = nb_final_pred$.pred_class, reference = final_test$Transported)
 ```
 
 ```{r rf-pred-kaggl, warning=FALSE, include=FALSE}

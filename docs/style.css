@@ -1,4 +1,4 @@
-p.caption {
+.caption {
   color: #777;
   margin-top: 30px;
 }
@@ -11,4 +11,12 @@ pre {
 }
 pre code {
   white-space: inherit;
+}
+
+.warningbox {
+  padding: 1em;
+  background: #ce9165;
+  color: white;
+  border: 2px solid orange;
+  border-radius: 10px;
 }

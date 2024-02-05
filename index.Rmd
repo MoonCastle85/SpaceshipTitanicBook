@@ -38,6 +38,7 @@ library(missRanger)
 library(ggstats)
 library(htmltools)
 library(sjPlot)
+library(discrim)
 
 theme_set(ggthemes::theme_clean(base_size = 24))
 
