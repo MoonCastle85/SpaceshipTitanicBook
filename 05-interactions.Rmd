@@ -285,9 +285,7 @@ diff_all_res2_adj %>%
   theme(legend.position = "top")
 ```
 
-Kuhn and Johnson write: 
-
-> When the interactions that were discovered were included in a broader model that contains other (perhaps correlated) predictors, their importance to the model may be diminished. (...) This might reduce the number of predictors considered important (since the residual degrees of freedom are smaller) but the discovered interactions are likely to be more reliably important to a larger model.'
+Kuhn and Johnson write that 'When the interactions that were discovered were included in a broader model that contains other (perhaps correlated) predictors, their importance to the model may be diminished. (...) This might reduce the number of predictors considered important (since the residual degrees of freedom are smaller) but the discovered interactions are likely to be more reliably important to a larger model.'
 
 Let us therefore apply some adjustments.
 
@@ -479,7 +477,7 @@ pen_int_vars <- pen_int_coef %>%
   filter(abs(estimate) != 0 & term != "(Intercept)") %>%
   filter(str_detect(term, "_x_")) %>%
   mutate(V1 = str_split_i(term, "_x_", 1),
-         V1 = str_split_i(term, "_", 1),
+         V1 = str_split_i(term, "_x_", 1),
          V2 = str_split_i(term, "_x_", 2),
          V2 = str_split_i(V2, "_", 1),
          ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')"),

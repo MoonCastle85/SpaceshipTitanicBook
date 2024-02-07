@@ -1,12 +1,21 @@
-# Final model exploration
-Let's summarise what we have so far:
+# Final model tuning
+The exploration of the data has so far yielded a set of features, including second level interactions, that we think offers the accuracy. We've tested them through several feature selection processes using a `glm`-model and we have gotten some insight on this models performance through resampling evaluations.
 
-1. A variable set with second level interactions that we think offer the best accuracy that I can handle with my computational power
+Now we must decide which models, or assembly of models, we want to use for our final prediction. There are many different model engines that can handle classification problems, with different pros and cons. Here is a list of the ones we will be testing here:
 
-2. A set of tuning parameters for several models that we think are likely to be optimal
+> Naive Bayes 
+The Exact Bayes model would, for each row of the data, find all other rows that have the exact same set of predictor values and then predict the outcome for that row based on the most probable outcome out of that group. For most datasets, this is impractical since, with enough variables, there wouldn't be any observations (rows) of data that were exactly the same.
+The Naive Bayes model assumes instead that the probabilities of each predictor can be calculated independent of the other predictors and then multiplied to get the overall probability of a certain outcome. For example, using CryoSleep and VIP from our dataset, the Naive Bayes model would calculate the probability of CryoSleep = TRUE given Transported = TRUE, which would simply be the proportion of all transported passengers that were also in cryosleep against the number of transported passengers. It would then do the same for VIP = TRUE and multiply these two probabilities with each other was well as the proportion of Transported = TRUE against the total amount of passengers. The resulting probability would then be compared to the its reverse proportions, that is, CryoSleep = TRUE and VIP = TRUE given that Transported = FALSE. The result would be that the higher probability determines how the outcome for that observation (CryoSleep = TRUE and VIP = TRUE) is predicted.
 
-Now we must decide which model to use. There are many options but I will limit myself to three: GLM, RandomForest and Lasso/Ridge.
-Before we get to the models, let's first summarise all the preprocessing of the training data that we've done.
+> Logistic Regression
+The logistic regression model is a form of linear model that uses the logit-function to transform a linear equation like 
+
+$y = \beta_0 + \beta_1x_1 + \beta_2x_2$
+
+> into a logistic equation that would ensure that the probability of the outcome would stay between 0 and 1. The logit function is then used to transform the coefficients fitted to a linear model into a response that can be assigned to descrete values. To assign correct probabilities to different classes, the model uses maximul likelihood estimation.
+
+
+
 
 ## Complete preprocess
 ```{r functions, include=FALSE}
@@ -166,7 +175,7 @@ rev_normalization <- function(v, rec) { # Custom function that will "unnormalise
 
 
 ```{r summarise-preprocess, warning=FALSE, message=FALSE}
-train <- read_csv("train.csv", na = "")
+train <- read_csv("train.csv", na = "", col_types = "ccfccnfnnnnncf")
 
 # Create group variables, seperate CabinNumber, Deck and Side from Cabin
 train2 <- useful_features(train)
@@ -222,6 +231,14 @@ my_vars <- data.frame(Variables = names(final_df)) %>%
 
 load("Extra/Best variables.RData")
 
+int_formula <- pen_int_vars %>%
+  select(ForFormula, RevFormula) %>%
+  unlist() %>%
+  unname() %>%
+  str_flatten(., collapse = "+") %>%
+  str_c("~", .) %>%
+  as.formula(.)
+
 set.seed(8584)
 final_split <- initial_split(final_df, prop = 0.8)
 final_train <- training(final_split)
@@ -238,7 +255,7 @@ final_rec <- recipe(x = final_train, vars = my_vars$Variables, roles = my_vars$R
 ```
 
 ## GLM
-```{r glm, warning=FALSE}
+```{r glm, warning=FALSE, cache=TRUE}
 glm_final_bake <- final_rec %>%
   prep() %>%
   bake(new_data = NULL)
@@ -257,13 +274,22 @@ glm_final_fit <- fit(glm_final_wf, final_train)
 glm_fitted <- extract_fit_engine(glm_final_fit)
 
 glm_final_pred <- predict(glm_final_fit, final_test)
+
+partial_resid <- resid(glm_fitted)
+glm_df <- data.frame(Age = final_train$Age,
+                     PartialResid = partial_resid)
+
+ggplot(glm_df, aes(x = Age, y = PartialResid, solid = FALSE)) +
+  geom_point(shape = 46, alpha = 0.4) +
+  labs(y = "Partial Residual")
+
 confusionMatrix(data = glm_final_pred$.pred_class, reference = final_test$Transported)
 ```
 
-We can see from the results of residuals in Figure \@ref(fig:glm-without-int) that the GLM model (red lines) does pretty well against the categorical variables but does poorly against the numerical ones. This is because these variables don't have a linear relationship to the response, as we've seen in our exploratory chapter of numerical variables. The accuracy is very low, 0.64.
+We can see from the results of residuals in Figure \@ref(fig:glm) that the GLM model (red lines) does pretty well against the categorical variables but does poorly against the numerical ones. This is because these variables don't have a linear relationship to the response, as we've seen in our exploratory chapter of numerical variables. The accuracy is very low, 0.64.
 
 ## GLMNET Lasso/Ridge
-```{r glmnet}
+```{r glmnet, cache=TRUE}
 load("Extra/Penalized regression with interactions.RData")
 best_glm_params <- select_best(pen_int_tune)
 
@@ -282,7 +308,7 @@ confusionMatrix(data = glmnet_final_pred$.pred_class, reference = final_test$Tra
 ```
 
 ## RandomForest
-```{r randomForest-tune}
+```{r randomForest-tune, cache=TRUE}
 my_acc <- metric_set(accuracy)
 rf_ctrl <- control_grid(verbose = TRUE, save_pred = TRUE, save_workflow = TRUE)
 rf_grid <- expand.grid(trees = c(500, 2000, 10000), min_n = 5)
@@ -317,7 +343,7 @@ show_best(rf_final_tune, metric = "accuracy", n = 20) %>%
 ```
 The results from the model tuning indicate that the improvement is very limited with more trees than somewhere around 2000 so I will assume this as the optimal. With tree based models, too much trees can overfit the data so it's a good idea not to
 
-```{r randomForest-final}
+```{r randomForest-final, cache=TRUE}
 rf_best_tune <- select_best(rf_final_tune)
 
 rf_final_mod <- rand_forest(trees = 2000, min_n = 5) %>%
@@ -358,7 +384,7 @@ Rank: This kernel uses the ranks of the distances rather than the distances them
 
 Optimal: This kernel attempts to choose the best weighting function based on the data.
 
-```{r knn-final}
+```{r knn-final, cache=TRUE}
 knn_final_mod <- nearest_neighbor(neighbors = 5, weight_func = "optimal") %>%
   set_mode("classification") %>%
   set_engine("kknn")
@@ -382,7 +408,7 @@ svm_poly: This method defines a SVM model that uses a polynomial class boundary3
 
 svm_rbf: This method defines a SVM model that uses a nonlinear class boundary67. For classification, the model tries to maximize the width of the margin between classes using a nonlinear class boundary. For regression, the model optimizes a robust loss function that is only affected by very large model residuals and uses nonlinear functions of the predictors67.
 
-```{r svm-final}
+```{r svm-final, cache=TRUE}
 svm_final_mod <- svm_rbf(cost = 1, margin = 0.1) %>%
   set_mode("classification") %>%
   set_engine("kernlab")
@@ -400,7 +426,7 @@ confusionMatrix(data = svm_final_pred$.pred_class, reference = final_test$Transp
 ```
 
 # XGBoost
-```{r xgboost-final}
+```{r xgboost-final, cache=TRUE}
 xgb_final_mod <- boost_tree(trees = 15) %>%
   set_mode("classification") %>%
   set_engine("xgboost")
@@ -417,8 +443,8 @@ xgb_final_pred <- predict(xgb_final_fit, final_test)
 confusionMatrix(data = xgb_final_pred$.pred_class, reference = final_test$Transported)
 ```
 
-# C5.0
-```{r c5-0-final}
+# C5
+```{r c5-final, cache=TRUE}
 c50_final_mod <- boost_tree(trees = 15) %>%
   set_mode("classification") %>%
   set_engine("C5.0")
@@ -436,7 +462,7 @@ confusionMatrix(data = c50_final_pred$.pred_class, reference = final_test$Transp
 ```
 
 # Naive Bayes
-```{r naive-bayes-final}
+```{r naive-bayes-final, cache=TRUE}
 nb_final_mod <- naive_Bayes() %>%
   set_engine("klaR")
 

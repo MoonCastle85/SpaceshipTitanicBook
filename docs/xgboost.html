@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Chapter 11 XGBoost | Spaceship Titanic - A comprehensive guide</title>
+<meta name="author" content="Vanja Manborg">
+<meta name="description" content='xgb_final_mod &lt;- boost_tree(trees = 15) %&gt;%  set_mode("classification") %&gt;%  set_engine("xgboost") xgb_final_wf &lt;- glm_final_wf %&gt;%  update_model(xgb_final_mod) set.seed(8584) xgb_final_fit &lt;-...'>
+<meta name="generator" content="bookdown 0.37 with bs4_book()">
+<meta property="og:title" content="Chapter 11 XGBoost | Spaceship Titanic - A comprehensive guide">
+<meta property="og:type" content="book">
+<meta property="og:url" content="https://spaceshiptitanic.manborgconsulting.com/xgboost.html">
+<meta property="og:description" content='xgb_final_mod &lt;- boost_tree(trees = 15) %&gt;%  set_mode("classification") %&gt;%  set_engine("xgboost") xgb_final_wf &lt;- glm_final_wf %&gt;%  update_model(xgb_final_mod) set.seed(8584) xgb_final_fit &lt;-...'>
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chapter 11 XGBoost | Spaceship Titanic - A comprehensive guide">
+<meta name="twitter:description" content='xgb_final_mod &lt;- boost_tree(trees = 15) %&gt;%  set_mode("classification") %&gt;%  set_engine("xgboost") xgb_final_wf &lt;- glm_final_wf %&gt;%  update_model(xgb_final_mod) set.seed(8584) xgb_final_fit &lt;-...'>
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script><script src="libs/jquery-migrate-3.1.0/jquery-migrate-3.1.0.min.js"></script><link href="libs/slick-1.8.1/slick/slick.css" rel="stylesheet">
+<link href="libs/slick-1.8.1/slick/slick-theme.css" rel="stylesheet">
+<script src="libs/slick-1.8.1/slick/slick.min.js"></script><script src="libs/css-resize-1.2.1/ResizeSensor.js"></script><script src="libs/css-resize-1.2.1/ElementQueries.js"></script><link href="libs/slickR-0.0.2/slick.css" rel="stylesheet">
+<link href="libs/slickR-0.0.2/slick-theme.css" rel="stylesheet">
+<script src="libs/slickR-0.0.2/slickR.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Spaceship Titanic - A comprehensive guide</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> Introduction</a></li>
+<li><a class="" href="early-data-exploration.html"><span class="header-section-number">2</span> Early data exploration</a></li>
+<li><a class="" href="handle-missing-data.html"><span class="header-section-number">3</span> Handle missing data</a></li>
+<li><a class="" href="exploration-of-categorical-variables.html"><span class="header-section-number">4</span> Exploration of categorical variables</a></li>
+<li><a class="" href="exploration-of-numerical-variables.html"><span class="header-section-number">5</span> Exploration of numerical variables</a></li>
+<li><a class="" href="interactions.html"><span class="header-section-number">6</span> Interactions</a></li>
+<li><a class="" href="feature-selection-and-elimination.html"><span class="header-section-number">7</span> Feature selection and elimination</a></li>
+<li><a class="" href="final-model-tuning.html"><span class="header-section-number">8</span> Final model tuning</a></li>
+<li><a class="" href="knn.html"><span class="header-section-number">9</span> KNN</a></li>
+<li><a class="" href="svm.html"><span class="header-section-number">10</span> SVM</a></li>
+<li><a class="active" href="xgboost.html"><span class="header-section-number">11</span> XGBoost</a></li>
+<li><a class="" href="c5.html"><span class="header-section-number">12</span> C5</a></li>
+<li><a class="" href="naive-bayes.html"><span class="header-section-number">13</span> Naive Bayes</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/MoonCastle85/SpaceshipTitanicBook">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="xgboost" class="section level1" number="11">
+<h1>
+<span class="header-section-number">11</span> XGBoost<a class="anchor" aria-label="anchor" href="#xgboost"><i class="fas fa-link"></i></a>
+</h1>
+<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">xgb_final_mod</span> <span class="op">&lt;-</span> <span class="fu">boost_tree</span><span class="op">(</span>trees <span class="op">=</span> <span class="fl">15</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"xgboost"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">xgb_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">xgb_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">xgb_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">xgb_final_wf</span>, <span class="va">final_train</span><span class="op">)</span></span>
+<span><span class="va">xgb_fitted</span> <span class="op">&lt;-</span> <span class="fu">extract_fit_engine</span><span class="op">(</span><span class="va">xgb_final_fit</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">xgb_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">xgb_final_fit</span>, <span class="va">final_test</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">confusionMatrix</span><span class="op">(</span>data <span class="op">=</span> <span class="va">xgb_final_pred</span><span class="op">$</span><span class="va">.pred_class</span>, reference <span class="op">=</span> <span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Confusion Matrix and Statistics</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;           Reference</span></span>
+<span><span class="co">#&gt; Prediction False True</span></span>
+<span><span class="co">#&gt;      False   714  187</span></span>
+<span><span class="co">#&gt;      True    168  670</span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;                Accuracy : 0.7959          </span></span>
+<span><span class="co">#&gt;                  95% CI : (0.7761, 0.8146)</span></span>
+<span><span class="co">#&gt;     No Information Rate : 0.5072          </span></span>
+<span><span class="co">#&gt;     P-Value [Acc &gt; NIR] : &lt;2e-16          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;                   Kappa : 0.5915          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;  Mcnemar's Test P-Value : 0.3394          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;             Sensitivity : 0.8095          </span></span>
+<span><span class="co">#&gt;             Specificity : 0.7818          </span></span>
+<span><span class="co">#&gt;          Pos Pred Value : 0.7925          </span></span>
+<span><span class="co">#&gt;          Neg Pred Value : 0.7995          </span></span>
+<span><span class="co">#&gt;              Prevalence : 0.5072          </span></span>
+<span><span class="co">#&gt;          Detection Rate : 0.4106          </span></span>
+<span><span class="co">#&gt;    Detection Prevalence : 0.5181          </span></span>
+<span><span class="co">#&gt;       Balanced Accuracy : 0.7957          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;        'Positive' Class : False           </span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="svm.html"><span class="header-section-number">10</span> SVM</a></div>
+<div class="next"><a href="c5.html"><span class="header-section-number">12</span> C5</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav"><li><a class="nav-link" href="#xgboost"><span class="header-section-number">11</span> XGBoost</a></li></ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/blob/master/07-models.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/edit/master/07-models.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-07.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>

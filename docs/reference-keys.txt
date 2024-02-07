@@ -42,10 +42,7 @@ fig:pen-reg-without-int2
 fig:pen-reg-with-int2
 fig:pen-reg-int-top
 fig:tree-based-var-imp2
-fig:recurs-feat-no-corr2
-fig:recurs-feat-no-corr3
-fig:recurs-feat-corr2
-fig:recurs-feat-corr3
+fig:rfe-process-result
 fig:simulated-annealing-internal
 fig:simulated-annealing-external
 fig:simulated-annealing-best
@@ -90,8 +87,13 @@ recursive-feature-elimination
 simulated-annealing
 genetic-algorithm
 check-performance-with-random-subsets
-final-model-exploration
+final-model-tuning
 complete-preprocess
 glm
 glmnet-lassoridge
 randomforest
+knn
+svm
+xgboost
+c5
+naive-bayes

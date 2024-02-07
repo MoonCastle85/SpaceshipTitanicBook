@@ -39,6 +39,10 @@ library(ggstats)
 library(htmltools)
 library(sjPlot)
 library(discrim)
+library(conflicted)
+
+conflict_prefer("select", "dplyr")
+conflict_prefer("filter", "dplyr")
 
 theme_set(ggthemes::theme_clean(base_size = 24))
 
