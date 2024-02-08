@@ -56,11 +56,6 @@
 <li><a class="" href="interactions.html"><span class="header-section-number">6</span> Interactions</a></li>
 <li><a class="active" href="feature-selection-and-elimination.html"><span class="header-section-number">7</span> Feature selection and elimination</a></li>
 <li><a class="" href="final-model-tuning.html"><span class="header-section-number">8</span> Final model tuning</a></li>
-<li><a class="" href="knn.html"><span class="header-section-number">9</span> KNN</a></li>
-<li><a class="" href="svm.html"><span class="header-section-number">10</span> SVM</a></li>
-<li><a class="" href="xgboost.html"><span class="header-section-number">11</span> XGBoost</a></li>
-<li><a class="" href="c5.html"><span class="header-section-number">12</span> C5</a></li>
-<li><a class="" href="naive-bayes.html"><span class="header-section-number">13</span> Naive Bayes</a></li>
 </ul>
 
         <div class="book-extra">
@@ -240,9 +235,7 @@ Figure 7.1: Estimated performance with recursive feature elimination based on th
 <span><span class="co"># snow::stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Simulated annealing with 50% inital.RData"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">sa_30pct_init</span> <span class="op">&lt;-</span> <span class="va">sim_anneal_50_pct</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Simulated annealing.RData"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sa_acc_int</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">$</span><span class="va">internal</span></span>
 <span><span class="va">sa_acc_int2</span> <span class="op">&lt;-</span> <span class="va">sa_acc_int</span> <span class="op">%&gt;%</span></span>
@@ -265,7 +258,7 @@ Figure 7.1: Estimated performance with recursive feature elimination based on th
 Figure 7.2: Estimated performance of internal resamples from simulated annealing.
 </p>
 </div>
-<p>The results from the internal simulated annealing process suggest that our initial random set of half of the variables (174) has relatively high accuracy and that addition or replacement of a few variables doesn’t generally reduce the accuracy. This further confirms what we saw in the RFE-process which suggests that our data is fairly well understood using a total set of variables (including dummy variables and interactions) of around 110-174.</p>
+<p>The results from the internal simulated annealing process suggest that our initial random set of 30% of the variables has relatively high accuracy but that some improvement is made through the iterations, based on how the average accuracy increasesfor the first 100 iterations.</p>
 <div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sa_acc_ext</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">$</span><span class="va">external</span></span>
 <span><span class="va">sa_acc_ext2</span> <span class="op">&lt;-</span> <span class="va">sa_acc_ext</span> <span class="op">%&gt;%</span></span>
@@ -292,7 +285,7 @@ Figure 7.2: Estimated performance of internal resamples from simulated annealing
 Figure 7.3: Estimated performance of external resamples from simulated annealing.
 </p>
 </div>
-<p>The external resampling is used to check performance for different iterations. As long as the internal accuracy isn’t higher than the external one, it means that no specific</p>
+<p>The external resampling is used to check performance for different iterations and since it correlates relatively well with the internal resamples, we can conclude that the internal resamples haven’t overfitted to the data.</p>
 <div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sa_final</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">$</span><span class="va">sa</span></span>
 <span><span class="va">sa_final2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Iter <span class="op">=</span> <span class="va">sa_final</span><span class="op">[[</span><span class="st">"internal"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Iter</span>, Accuracy <span class="op">=</span> <span class="va">sa_final</span><span class="op">[[</span><span class="st">"internal"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Accuracy</span>,</span>
@@ -301,7 +294,7 @@ Figure 7.3: Estimated performance of external resamples from simulated annealing
 <span></span>
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="va">sa_final2</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">11</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"blue"</span>, size <span class="op">=</span> <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">488</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"blue"</span>, size <span class="op">=</span> <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, nrow <span class="op">=</span> <span class="fl">2</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:simulated-annealing-best"></span>
@@ -309,10 +302,10 @@ Figure 7.3: Estimated performance of external resamples from simulated annealing
 Figure 7.4: Estimated performance of best resample from simulated annealing.
 </p>
 </div>
-<p>The final results from the simulated annealing process indicate that a subset of 174 variables produces the best accuracy and this was determined on the 11th iteration. Iterations beyond that show a plateau in accuracy which means that no other addition or removal of variables can improve performance.</p>
-<p>Let us therefore save the best variables from the process for possible later use.</p>
+<p>The final results from the simulated annealing process indicate that a subset of 142 variables produces the best accuracy, which is close to 0.81. It is possible that more iterations would’ve revealed further improvements but since this subset is close to the one produced from the RFE-model (110), we’ll assume that the number of iterations were enough.</p>
+<p>Let us save the best variables from the process for possible later use.</p>
 <div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sa_best_vars</span> <span class="op">&lt;-</span> <span class="va">sim_anneal_50_pct</span><span class="op">[[</span><span class="st">"optVariables"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">sa_best_vars</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">[[</span><span class="st">"optVariables"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div id="genetic-algorithm" class="section level2" number="7.3">
 <h2>
@@ -396,7 +389,7 @@ Figure 7.4: Estimated performance of best resample from simulated annealing.
 Figure 7.5: Estimated performance of internal resamples from the genetic algorithm.
 </p>
 </div>
-<p>The inner resamples of the genetic algorithm suggest a plateau after around twenty iterations.</p>
+<p>The inner resamples of the genetic algorithm suggest a plateau after around twenty generations (iterations).</p>
 <div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ga_acc_ext</span> <span class="op">&lt;-</span> <span class="va">ga_acc</span><span class="op">$</span><span class="va">external</span></span>
 <span><span class="va">ga_acc_ext2</span> <span class="op">&lt;-</span> <span class="va">ga_acc_ext</span> <span class="op">%&gt;%</span></span>
@@ -521,9 +514,9 @@ Figure 7.8: Tests if significance between different feature selection methods an
 </p>
 </div>
 <p>The Wilcoxon test checks whether the median of the difference in accuracy between a processed sample and a random sample are significant and it doesn’t require the distribution of the differences between the paired samples to be normal. The t.test compares the means and does require the sample differences to be relatively normal. The null hypothesis in both cases is that the accuracies from the processed samples are smaller or equal to accuracies from random samples and so low p-values mean that the processed samples have significantly greater accuracies that random samples.</p>
-<p>We see that all of the methods have significant improvement over the random sample and if we look back at Figure <a href="feature-selection-and-elimination.html#fig:feature-selection-comparison">7.7</a>, we can see that the accuracy results seem to be comparable between the methods. Let’s therefore save the variables from the RFE process as the best ones since they offer similar performance as the larger subsets but due to their smaller size will reduce computation time in our final model tuning and fitting process.</p>
+<p>We see that all of the methods have significant improvement over the random sample and if we look back at Figure <a href="feature-selection-and-elimination.html#fig:feature-selection-comparison">7.7</a>, we can see that the accuracy results seem to be comparable between the methods. Let’s therefore save the variables from the SA process since they offered the best results.</p>
 <div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">best_vars</span> <span class="op">&lt;-</span> <span class="va">rfe_best_vars</span></span>
+<code class="sourceCode R"><span><span class="va">best_vars</span> <span class="op">&lt;-</span> <span class="va">sa_best_vars</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">best_vars</span>, file <span class="op">=</span> <span class="st">"Extra/Best variables.RData"</span><span class="op">)</span></span></code></pre></div>
 
 </div>
@@ -556,7 +549,7 @@ Figure 7.8: Tests if significance between different feature selection methods an
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-07.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-08.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

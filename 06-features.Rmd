@@ -167,9 +167,7 @@ sa_ctrl_outer <- safsControl(method = "cv", metric = c(internal = "Accuracy", ex
 # snow::stopCluster(my_cluster)
 # unregister()
 
-load("Extra/Simulated annealing with 50% inital.RData")
-
-sa_30pct_init <- sim_anneal_50_pct
+load("Extra/Simulated annealing.RData")
 ```
 
 ```{r simulated-annealing-internal, warning = FALSE, results='hide', message=FALSE, fig.cap="Estimated performance of internal resamples from simulated annealing."}
@@ -190,7 +188,7 @@ ggplot(sa_acc_int2, aes(x = Iter, y = Accuracy, colour = colour_grp)) +
   theme(legend.position = "none")
 ```
 
-The results from the internal simulated annealing process suggest that our initial random set of half of the variables (174) has relatively high accuracy and that addition or replacement of a few variables doesn't generally reduce the accuracy. This further confirms what we saw in the RFE-process which suggests that our data is fairly well understood using a total set of variables (including dummy variables and interactions) of around 110-174. 
+The results from the internal simulated annealing process suggest that our initial random set of 30% of the variables has relatively high accuracy but that some improvement is made through the iterations, based on how the average accuracy increasesfor the first 100 iterations. 
 
 ```{r simulated-annealing-external, warning = FALSE, message=FALSE, fig.cap="Estimated performance of external resamples from simulated annealing."}
 sa_acc_ext <- sa_30pct_init$external
@@ -214,7 +212,7 @@ ggplot(mapping = aes(x = Iter, y = Accuracy)) +
   scale_colour_manual(values = c("Internal" = "red", "External" = "green"))
 ```
 
-The external resampling is used to check performance for different iterations. As long as the internal accuracy isn't higher than the external one, it means that no specific 
+The external resampling is used to check performance for different iterations and since it correlates relatively well with the internal resamples, we can conclude that the internal resamples haven't overfitted to the data.
 
 ```{r simulated-annealing-best, warning = FALSE, message=FALSE, fig.cap="Estimated performance of best resample from simulated annealing."}
 sa_final <- sa_30pct_init$sa
@@ -224,16 +222,16 @@ sa_final2 <- data.frame(Iter = sa_final[["internal"]]$Iter, Accuracy = sa_final[
 
 ggplot(sa_final2, aes(x = Iter, y = value)) +
   geom_point() +
-  geom_vline(xintercept = 11, linetype = "dashed", colour = "blue", size = 1, alpha = 0.6) +
+  geom_vline(xintercept = 488, linetype = "dashed", colour = "blue", size = 1, alpha = 0.6) +
   facet_wrap(~name, nrow = 2, ncol = 1, scales = "free_y")
 ```
 
-The final results from the simulated annealing process indicate that a subset of 174 variables produces the best accuracy and this was determined on the 11th iteration. Iterations beyond that show a plateau in accuracy which means that no other addition or removal of variables can improve performance. 
+The final results from the simulated annealing process indicate that a subset of 142 variables produces the best accuracy, which is close to 0.81. It is possible that more iterations would've revealed further improvements but since this subset is close to the one produced from the RFE-model (110), we'll assume that the number of iterations were enough.
 
-Let us therefore save the best variables from the process for possible later use.
+Let us save the best variables from the process for possible later use.
 
 ```{r sa-vars}
-sa_best_vars <- sim_anneal_50_pct[["optVariables"]]
+sa_best_vars <- sa_30pct_init[["optVariables"]]
 ```
 
 ## Genetic algorithm
@@ -314,7 +312,7 @@ ggplot(ga_acc_int2, aes(x = Iter, y = Accuracy, colour = colour_grp)) +
   theme(legend.position = "none")
 ```
 
-The inner resamples of the genetic algorithm suggest a plateau after around twenty iterations.
+The inner resamples of the genetic algorithm suggest a plateau after around twenty generations (iterations).
 
 ```{r genetic-external, warning = FALSE, message=FALSE, fig.cap="Estimated performance of external resamples from the genetic algorithm."}
 ga_acc_ext <- ga_acc$external
@@ -434,10 +432,10 @@ ggplot(p_tests, aes(x = test, y = value, colour = colour_grp)) +
 
 The Wilcoxon test checks whether the median of the difference in accuracy between a processed sample and a random sample are significant and it doesn't require the distribution of the differences between the paired samples to be normal. The t.test compares the means and does require the sample differences to be relatively normal. The null hypothesis in both cases is that the accuracies from the processed samples are smaller or equal to accuracies from random samples and so low p-values mean that the processed samples have significantly greater accuracies that random samples. 
 
-We see that all of the methods have significant improvement over the random sample and if we look back at Figure \@ref(fig:feature-selection-comparison), we can see that the accuracy results seem to be comparable between the methods. Let's therefore save the variables from the RFE process as the best ones since they offer similar performance as the larger subsets but due to their smaller size will reduce computation time in our final model tuning and fitting process.
+We see that all of the methods have significant improvement over the random sample and if we look back at Figure \@ref(fig:feature-selection-comparison), we can see that the accuracy results seem to be comparable between the methods. Let's therefore save the variables from the SA process since they offered the best results.
 
 ```{r final-features}
-best_vars <- rfe_best_vars
+best_vars <- sa_best_vars
 save(best_vars, file = "Extra/Best variables.RData")
 ```
 

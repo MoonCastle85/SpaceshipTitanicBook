@@ -6,15 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Chapter 8 Final model tuning | Spaceship Titanic - A comprehensive guide</title>
 <meta name="author" content="Vanja Manborg">
-<meta name="description" content="The exploration of the data has so far yielded a set of features, including second level interactions, that we think offers the accuracy. We’ve tested them through several feature selection...">
+<meta name="description" content="The exploration of the data has so far yielded a set of features, including second level interactions, that we think offers the best accuracy. We’ve tested them through several feature selection...">
 <meta name="generator" content="bookdown 0.37 with bs4_book()">
 <meta property="og:title" content="Chapter 8 Final model tuning | Spaceship Titanic - A comprehensive guide">
 <meta property="og:type" content="book">
 <meta property="og:url" content="https://spaceshiptitanic.manborgconsulting.com/final-model-tuning.html">
-<meta property="og:description" content="The exploration of the data has so far yielded a set of features, including second level interactions, that we think offers the accuracy. We’ve tested them through several feature selection...">
+<meta property="og:description" content="The exploration of the data has so far yielded a set of features, including second level interactions, that we think offers the best accuracy. We’ve tested them through several feature selection...">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Chapter 8 Final model tuning | Spaceship Titanic - A comprehensive guide">
-<meta name="twitter:description" content="The exploration of the data has so far yielded a set of features, including second level interactions, that we think offers the accuracy. We’ve tested them through several feature selection...">
+<meta name="twitter:description" content="The exploration of the data has so far yielded a set of features, including second level interactions, that we think offers the best accuracy. We’ve tested them through several feature selection...">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
 <script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
@@ -56,11 +56,6 @@
 <li><a class="" href="interactions.html"><span class="header-section-number">6</span> Interactions</a></li>
 <li><a class="" href="feature-selection-and-elimination.html"><span class="header-section-number">7</span> Feature selection and elimination</a></li>
 <li><a class="active" href="final-model-tuning.html"><span class="header-section-number">8</span> Final model tuning</a></li>
-<li><a class="" href="knn.html"><span class="header-section-number">9</span> KNN</a></li>
-<li><a class="" href="svm.html"><span class="header-section-number">10</span> SVM</a></li>
-<li><a class="" href="xgboost.html"><span class="header-section-number">11</span> XGBoost</a></li>
-<li><a class="" href="c5.html"><span class="header-section-number">12</span> C5</a></li>
-<li><a class="" href="naive-bayes.html"><span class="header-section-number">13</span> Naive Bayes</a></li>
 </ul>
 
         <div class="book-extra">
@@ -72,20 +67,59 @@
 <h1>
 <span class="header-section-number">8</span> Final model tuning<a class="anchor" aria-label="anchor" href="#final-model-tuning"><i class="fas fa-link"></i></a>
 </h1>
-<p>The exploration of the data has so far yielded a set of features, including second level interactions, that we think offers the accuracy. We’ve tested them through several feature selection processes using a <code>glm</code>-model and we have gotten some insight on this models performance through resampling evaluations.</p>
-<p>Now we must decide which models, or assembly of models, we want to use for our final prediction. There are many different model engines that can handle classification problems, with different pros and cons. Here is a list of the ones we will be testing here:</p>
+<p>The exploration of the data has so far yielded a set of features, including second level interactions, that we think offers the best accuracy. We’ve tested them through several feature selection processes using a <code>glm</code>-model and we have gotten some insight on this models performance through resampling evaluations.</p>
+<p>Now we must decide which models, or assembly of models, we want to use for our final prediction. There are many different model engines that can handle classification problems, with different pros and cons. Here is a list of the ones we will be using:</p>
 <blockquote>
-<p>Naive Bayes
-The Exact Bayes model would, for each row of the data, find all other rows that have the exact same set of predictor values and then predict the outcome for that row based on the most probable outcome out of that group. For most datasets, this is impractical since, with enough variables, there wouldn’t be any observations (rows) of data that were exactly the same.
+<p><strong>Logistic Regression</strong></p>
+</blockquote>
+<blockquote>
+<p>This is the glm-model that we’ve already used. The logistic regression model is a form of linear model that uses the logit-function to transform a linear equation like</p>
+</blockquote>
+<blockquote>
+<p><span class="math inline">\(y = \beta_0 + \beta_1x_1 + \beta_2x_2\)</span></p>
+</blockquote>
+<blockquote>
+<p>into a logistic equation that would ensure that the probability of the outcome would stay between 0 and 1. The logit function is then used to transform the coefficients fitted to a linear model into a response that can be assigned to descrete values. To assign correct probabilities to different classes, the model uses maximul likelihood estimation.</p>
+</blockquote>
+<blockquote>
+<p><strong>Penalized logistic regression (Lasso/Ridge)</strong></p>
+</blockquote>
+<blockquote>
+<p>These models are based on linear regression (or logistic, in our case) but have a penalty term that is applied to the regression coefficients in order to maximise the desired metric. When the penalty is the square of the coefficients, it’s called a Rigde regression and when it’s the absolute value, it’s called the Lasso regression (least absolute shrinkage and selection operator). We have used this model in Chapter 6 to find a set of best interaction effects.</p>
+</blockquote>
+<blockquote>
+<p><strong>Generalized Additive Models (GAM)</strong></p>
+</blockquote>
+<blockquote>
+<p>General additive models or GAM are used to model non-linear relationships using splines which is a way to smoothly interpolate between fixed points. Instead of a polynomial function that must fit to the entire range of values of a predictor against an outcome, there are a series of polynomials between each spline that are connected and that better describe the relationship. We have used this type of model in Chapter 5 to show the relationships between numerical variables and the outcome.</p>
+</blockquote>
+<blockquote>
+<p><strong>Naive Bayes</strong></p>
+</blockquote>
+<blockquote>
+<p>The Exact Bayes model would, for each row of the data, find all other rows that have the exact same set of predictor values and then predict the outcome for that row based on the most probable outcome out of that group. For most datasets, this is impractical since, with enough variables, there wouldn’t be any observations (rows) of data that were exactly the same.
 The Naive Bayes model assumes instead that the probabilities of each predictor can be calculated independent of the other predictors and then multiplied to get the overall probability of a certain outcome. For example, using CryoSleep and VIP from our dataset, the Naive Bayes model would calculate the probability of CryoSleep = TRUE given Transported = TRUE, which would simply be the proportion of all transported passengers that were also in cryosleep against the number of transported passengers. It would then do the same for VIP = TRUE and multiply these two probabilities with each other was well as the proportion of Transported = TRUE against the total amount of passengers. The resulting probability would then be compared to the its reverse proportions, that is, CryoSleep = TRUE and VIP = TRUE given that Transported = FALSE. The result would be that the higher probability determines how the outcome for that observation (CryoSleep = TRUE and VIP = TRUE) is predicted.</p>
 </blockquote>
 <blockquote>
-<p>Logistic Regression
-The logistic regression model is a form of linear model that uses the logit-function to transform a linear equation like</p>
+<p><strong>K-nearest neighbors</strong></p>
 </blockquote>
-<p><span class="math inline">\(y = \beta_0 + \beta_1x_1 + \beta_2x_2\)</span></p>
 <blockquote>
-<p>into a logistic equation that would ensure that the probability of the outcome would stay between 0 and 1. The logit function is then used to transform the coefficients fitted to a linear model into a response that can be assigned to descrete values. To assign correct probabilities to different classes, the model uses maximul likelihood estimation.</p>
+<p>It has some similarity to the Naive Bayes model in the sense that the algorithm looks for k observations that have similar values and uses the outcame that the neighbors have to predict the new observation.</p>
+</blockquote>
+<blockquote>
+<p><strong>RandomForest</strong></p>
+</blockquote>
+<blockquote>
+<p>In a traditional tree-model, the variables are split into branches over many splits until a split point is find that minimizes some criterion, often the Gini impurity that measures the proportions of misclassified records. In the case of two classes, like in our problem, the Gini impurity is given by <span class="math inline">\(p(1-p)\)</span> where p is the proportion of missclassified records in a partition.</p>
+</blockquote>
+<blockquote>
+<p>Random forest is an extention of this but it uses random sampling of variable sets as well as records to build a forest of decision trees using bootstrap sampling and then aggregates the results across the entire forest of trees.</p>
+</blockquote>
+<blockquote>
+<p><strong>Boosted tree-model (XGBoost)</strong></p>
+</blockquote>
+<blockquote>
+<p>Boosting is a process of fitting a series of models into an ensamble but adding greater weights to observations whose models performed worse so that each new iteration forces the newer model to train more heavily on the obeservations that had a poorer performance.</p>
 </blockquote>
 <div id="complete-preprocess" class="section level2" number="8.1">
 <h2>
@@ -170,9 +204,9 @@ The logistic regression model is a form of linear model that uses the logit-func
 <span>  <span class="fu">step_zv</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">step_select</span><span class="op">(</span><span class="fu">all_outcomes</span><span class="op">(</span><span class="op">)</span>, <span class="fu">contains</span><span class="op">(</span><span class="st">"_x_"</span><span class="op">)</span>, <span class="fu">all_of</span><span class="op">(</span><span class="fu">matches</span><span class="op">(</span><span class="fu">str_c</span><span class="op">(</span><span class="va">rfe_best_vars</span>, collapse <span class="op">=</span> <span class="st">"|"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, skip <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="glm" class="section level2" number="8.2">
+<div id="logistic-regression---glm" class="section level2" number="8.2">
 <h2>
-<span class="header-section-number">8.2</span> GLM<a class="anchor" aria-label="anchor" href="#glm"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.2</span> Logistic regression - GLM<a class="anchor" aria-label="anchor" href="#logistic-regression---glm"><i class="fas fa-link"></i></a>
 </h2>
 <div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glm_final_bake</span> <span class="op">&lt;-</span> <span class="va">final_rec</span> <span class="op">%&gt;%</span></span>
@@ -201,7 +235,12 @@ The logistic regression model is a form of linear model that uses the logit-func
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="va">glm_df</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Age</span>, y <span class="op">=</span> <span class="va">PartialResid</span>, solid <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span>shape <span class="op">=</span> <span class="fl">46</span>, alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">labs</span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Partial Residual"</span><span class="op">)</span></span></code></pre></div>
-<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/glm-1.png" width="672"></div>
+<div class="figure">
+<span style="display:block;" id="fig:glm"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/glm-1.png" alt="Residuals from GLM model." width="672"><p class="caption">
+Figure 8.1: Residuals from GLM model.
+</p>
+</div>
 <div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu">confusionMatrix</span><span class="op">(</span>data <span class="op">=</span> <span class="va">glm_final_pred</span><span class="op">$</span><span class="va">.pred_class</span>, reference <span class="op">=</span> <span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span><span class="op">)</span></span>
@@ -232,11 +271,11 @@ The logistic regression model is a form of linear model that uses the logit-func
 <span><span class="co">#&gt;                                           </span></span>
 <span><span class="co">#&gt;        'Positive' Class : False           </span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
-<p>We can see from the results of residuals in Figure <a href="#fig:glm"><strong>??</strong></a> that the GLM model (red lines) does pretty well against the categorical variables but does poorly against the numerical ones. This is because these variables don’t have a linear relationship to the response, as we’ve seen in our exploratory chapter of numerical variables. The accuracy is very low, 0.64.</p>
+<p>We can see from the results of residuals in Figure <a href="final-model-tuning.html#fig:glm">8.1</a> that the GLM model (red lines) does pretty well against the categorical variables but does poorly against the numerical ones. This is because these variables don’t have a linear relationship to the response, as we’ve seen in our exploratory chapter of numerical variables. The accuracy is very low, 0.64.</p>
 </div>
-<div id="glmnet-lassoridge" class="section level2" number="8.3">
+<div id="penalized-logistic-regression---glmnet" class="section level2" number="8.3">
 <h2>
-<span class="header-section-number">8.3</span> GLMNET Lasso/Ridge<a class="anchor" aria-label="anchor" href="#glmnet-lassoridge"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.3</span> Penalized logistic regression - GLMNET<a class="anchor" aria-label="anchor" href="#penalized-logistic-regression---glmnet"><i class="fas fa-link"></i></a>
 </h2>
 <div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Penalized regression with interactions.RData"</span><span class="op">)</span></span>
@@ -282,11 +321,174 @@ The logistic regression model is a form of linear model that uses the logit-func
 <span><span class="co">#&gt;        'Positive' Class : False           </span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 </div>
-<div id="randomforest" class="section level2" number="8.4">
+<div id="generalized-additive-models---gam" class="section level2" number="8.4">
 <h2>
-<span class="header-section-number">8.4</span> RandomForest<a class="anchor" aria-label="anchor" href="#randomforest"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.4</span> Generalized additive models - GAM<a class="anchor" aria-label="anchor" href="#generalized-additive-models---gam"><i class="fas fa-link"></i></a>
 </h2>
+</div>
+<div id="svm" class="section level2" number="8.5">
+<h2>
+<span class="header-section-number">8.5</span> SVM<a class="anchor" aria-label="anchor" href="#svm"><i class="fas fa-link"></i></a>
+</h2>
+<p>svm_linear: This method defines a SVM model that uses a linear class boundary12. For classification, the model tries to maximize the width of the margin between classes using a linear class boundary. For regression, the model optimizes a robust loss function that is only affected by very large model residuals and uses a linear fit12.</p>
+<p>svm_poly: This method defines a SVM model that uses a polynomial class boundary345. For classification, the model tries to maximize the width of the margin between classes using a polynomial class boundary. For regression, the model optimizes a robust loss function that is only affected by very large model residuals and uses polynomial functions of the predictors345.</p>
+<p>svm_rbf: This method defines a SVM model that uses a nonlinear class boundary67. For classification, the model tries to maximize the width of the margin between classes using a nonlinear class boundary. For regression, the model optimizes a robust loss function that is only affected by very large model residuals and uses nonlinear functions of the predictors67.</p>
 <div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">svm_final_mod</span> <span class="op">&lt;-</span> <span class="fu">svm_rbf</span><span class="op">(</span>cost <span class="op">=</span> <span class="fl">1</span>, margin <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"kernlab"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">svm_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">svm_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">svm_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">svm_final_wf</span>, <span class="va">final_train</span><span class="op">)</span></span>
+<span><span class="va">svm_fitted</span> <span class="op">&lt;-</span> <span class="fu">extract_fit_engine</span><span class="op">(</span><span class="va">svm_final_fit</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">svm_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">svm_final_fit</span>, <span class="va">final_test</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">confusionMatrix</span><span class="op">(</span>data <span class="op">=</span> <span class="va">svm_final_pred</span><span class="op">$</span><span class="va">.pred_class</span>, reference <span class="op">=</span> <span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Confusion Matrix and Statistics</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;           Reference</span></span>
+<span><span class="co">#&gt; Prediction False True</span></span>
+<span><span class="co">#&gt;      False   722  202</span></span>
+<span><span class="co">#&gt;      True    160  655</span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;                Accuracy : 0.7918         </span></span>
+<span><span class="co">#&gt;                  95% CI : (0.772, 0.8107)</span></span>
+<span><span class="co">#&gt;     No Information Rate : 0.5072         </span></span>
+<span><span class="co">#&gt;     P-Value [Acc &gt; NIR] : &lt; 2e-16        </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;                   Kappa : 0.5833         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;  Mcnemar's Test P-Value : 0.03117        </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;             Sensitivity : 0.8186         </span></span>
+<span><span class="co">#&gt;             Specificity : 0.7643         </span></span>
+<span><span class="co">#&gt;          Pos Pred Value : 0.7814         </span></span>
+<span><span class="co">#&gt;          Neg Pred Value : 0.8037         </span></span>
+<span><span class="co">#&gt;              Prevalence : 0.5072         </span></span>
+<span><span class="co">#&gt;          Detection Rate : 0.4152         </span></span>
+<span><span class="co">#&gt;    Detection Prevalence : 0.5313         </span></span>
+<span><span class="co">#&gt;       Balanced Accuracy : 0.7914         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;        'Positive' Class : False          </span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
+</div>
+<div id="naive-bayes" class="section level2" number="8.6">
+<h2>
+<span class="header-section-number">8.6</span> Naive Bayes<a class="anchor" aria-label="anchor" href="#naive-bayes"><i class="fas fa-link"></i></a>
+</h2>
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">nb_final_mod</span> <span class="op">&lt;-</span> <span class="fu">naive_Bayes</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"klaR"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">nb_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">nb_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">nb_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">nb_final_wf</span>, <span class="va">final_train</span><span class="op">)</span></span>
+<span><span class="va">nb_fitted</span> <span class="op">&lt;-</span> <span class="fu">extract_fit_engine</span><span class="op">(</span><span class="va">nb_final_fit</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">nb_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">nb_final_fit</span>, <span class="va">final_test</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">confusionMatrix</span><span class="op">(</span>data <span class="op">=</span> <span class="va">nb_final_pred</span><span class="op">$</span><span class="va">.pred_class</span>, reference <span class="op">=</span> <span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Confusion Matrix and Statistics</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;           Reference</span></span>
+<span><span class="co">#&gt; Prediction False True</span></span>
+<span><span class="co">#&gt;      False   625  171</span></span>
+<span><span class="co">#&gt;      True    257  686</span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;                Accuracy : 0.7539         </span></span>
+<span><span class="co">#&gt;                  95% CI : (0.7329, 0.774)</span></span>
+<span><span class="co">#&gt;     No Information Rate : 0.5072         </span></span>
+<span><span class="co">#&gt;     P-Value [Acc &gt; NIR] : &lt; 2.2e-16      </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;                   Kappa : 0.5084         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;  Mcnemar's Test P-Value : 3.98e-05       </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;             Sensitivity : 0.7086         </span></span>
+<span><span class="co">#&gt;             Specificity : 0.8005         </span></span>
+<span><span class="co">#&gt;          Pos Pred Value : 0.7852         </span></span>
+<span><span class="co">#&gt;          Neg Pred Value : 0.7275         </span></span>
+<span><span class="co">#&gt;              Prevalence : 0.5072         </span></span>
+<span><span class="co">#&gt;          Detection Rate : 0.3594         </span></span>
+<span><span class="co">#&gt;    Detection Prevalence : 0.4577         </span></span>
+<span><span class="co">#&gt;       Balanced Accuracy : 0.7545         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;        'Positive' Class : False          </span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
+</div>
+<div id="knn" class="section level2" number="8.7">
+<h2>
+<span class="header-section-number">8.7</span> KNN<a class="anchor" aria-label="anchor" href="#knn"><i class="fas fa-link"></i></a>
+</h2>
+<p>Rectangular: This is also known as the uniform kernel. It gives equal weight to all neighbors within the window, effectively creating a binary situation where points are either in the neighborhood (and given equal weight) or not.</p>
+<p>Triangular: This kernel assigns weights linearly decreasing from the center. It gives the maximum weight to the nearest neighbor and the minimum weight to the farthest neighbor within the window.</p>
+<p>Epanechnikov: This kernel is parabolic with a maximum at the center, decreasing to zero at the window’s edge. It is often used because it minimizes the mean integrated square error.</p>
+<p>Biweight: This is a smooth, bell-shaped kernel that gives more weight to the nearer neighbors.</p>
+<p>Triweight: This is similar to the biweight but gives even more weight to the nearer neighbors.</p>
+<p>Cos: This kernel uses the cosine of the distance to weight the neighbors.</p>
+<p>Inv: This kernel gives weights as the inverse of the distance.</p>
+<p>Gaussian: This kernel uses the Gaussian function to assign weights. It has a bell shape and does not compactly support, meaning it gives some weight to all points in the dataset, but the weight decreases rapidly as the distance increases.</p>
+<p>Rank: This kernel uses the ranks of the distances rather than the distances themselves.</p>
+<p>Optimal: This kernel attempts to choose the best weighting function based on the data.</p>
+<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">knn_final_mod</span> <span class="op">&lt;-</span> <span class="fu">nearest_neighbor</span><span class="op">(</span>neighbors <span class="op">=</span> <span class="fl">5</span>, weight_func <span class="op">=</span> <span class="st">"optimal"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"kknn"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">knn_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">knn_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">knn_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">knn_final_wf</span>, <span class="va">final_train</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'kknn'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:caret':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     contr.dummy</span></span>
+<span><span class="va">knn_fitted</span> <span class="op">&lt;-</span> <span class="fu">extract_fit_engine</span><span class="op">(</span><span class="va">knn_final_fit</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">knn_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">knn_final_fit</span>, <span class="va">final_test</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">confusionMatrix</span><span class="op">(</span>data <span class="op">=</span> <span class="va">knn_final_pred</span><span class="op">$</span><span class="va">.pred_class</span>, reference <span class="op">=</span> <span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Confusion Matrix and Statistics</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;           Reference</span></span>
+<span><span class="co">#&gt; Prediction False True</span></span>
+<span><span class="co">#&gt;      False   636  217</span></span>
+<span><span class="co">#&gt;      True    246  640</span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;                Accuracy : 0.7338          </span></span>
+<span><span class="co">#&gt;                  95% CI : (0.7123, 0.7544)</span></span>
+<span><span class="co">#&gt;     No Information Rate : 0.5072          </span></span>
+<span><span class="co">#&gt;     P-Value [Acc &gt; NIR] : &lt;2e-16          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;                   Kappa : 0.4677          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;  Mcnemar's Test P-Value : 0.1932          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;             Sensitivity : 0.7211          </span></span>
+<span><span class="co">#&gt;             Specificity : 0.7468          </span></span>
+<span><span class="co">#&gt;          Pos Pred Value : 0.7456          </span></span>
+<span><span class="co">#&gt;          Neg Pred Value : 0.7223          </span></span>
+<span><span class="co">#&gt;              Prevalence : 0.5072          </span></span>
+<span><span class="co">#&gt;          Detection Rate : 0.3657          </span></span>
+<span><span class="co">#&gt;    Detection Prevalence : 0.4905          </span></span>
+<span><span class="co">#&gt;       Balanced Accuracy : 0.7339          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;        'Positive' Class : False           </span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
+</div>
+<div id="randomforest" class="section level2" number="8.8">
+<h2>
+<span class="header-section-number">8.8</span> RandomForest<a class="anchor" aria-label="anchor" href="#randomforest"><i class="fas fa-link"></i></a>
+</h2>
+<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
 <span><span class="va">rf_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">TRUE</span>, save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">rf_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>trees <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">2000</span>, <span class="fl">10000</span><span class="op">)</span>, min_n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
@@ -321,7 +523,7 @@ The logistic regression model is a form of linear model that uses the logit-func
 <div class="inline-figure">
 <img src="SpaceshipTitanicBook_files/figure-html/randomForest-tune-1.png" width="672">
 The results from the model tuning indicate that the improvement is very limited with more trees than somewhere around 2000 so I will assume this as the optimal. With tree based models, too much trees can overfit the data so it’s a good idea not to</div>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rf_best_tune</span> <span class="op">&lt;-</span> <span class="fu">select_best</span><span class="op">(</span><span class="va">rf_final_tune</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rf_final_mod</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span>trees <span class="op">=</span> <span class="fl">2000</span>, min_n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -366,18 +568,120 @@ The results from the model tuning indicate that the improvement is very limited 
 <span><span class="co">#&gt;        'Positive' Class : False          </span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 </div>
+<div id="xgboost" class="section level2" number="8.9">
+<h2>
+<span class="header-section-number">8.9</span> XGBoost<a class="anchor" aria-label="anchor" href="#xgboost"><i class="fas fa-link"></i></a>
+</h2>
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">xgb_final_mod</span> <span class="op">&lt;-</span> <span class="fu">boost_tree</span><span class="op">(</span>trees <span class="op">=</span> <span class="fl">15</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"xgboost"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">xgb_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">xgb_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">xgb_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">xgb_final_wf</span>, <span class="va">final_train</span><span class="op">)</span></span>
+<span><span class="va">xgb_fitted</span> <span class="op">&lt;-</span> <span class="fu">extract_fit_engine</span><span class="op">(</span><span class="va">xgb_final_fit</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">xgb_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">xgb_final_fit</span>, <span class="va">final_test</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">confusionMatrix</span><span class="op">(</span>data <span class="op">=</span> <span class="va">xgb_final_pred</span><span class="op">$</span><span class="va">.pred_class</span>, reference <span class="op">=</span> <span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Confusion Matrix and Statistics</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;           Reference</span></span>
+<span><span class="co">#&gt; Prediction False True</span></span>
+<span><span class="co">#&gt;      False   714  187</span></span>
+<span><span class="co">#&gt;      True    168  670</span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;                Accuracy : 0.7959          </span></span>
+<span><span class="co">#&gt;                  95% CI : (0.7761, 0.8146)</span></span>
+<span><span class="co">#&gt;     No Information Rate : 0.5072          </span></span>
+<span><span class="co">#&gt;     P-Value [Acc &gt; NIR] : &lt;2e-16          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;                   Kappa : 0.5915          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;  Mcnemar's Test P-Value : 0.3394          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;             Sensitivity : 0.8095          </span></span>
+<span><span class="co">#&gt;             Specificity : 0.7818          </span></span>
+<span><span class="co">#&gt;          Pos Pred Value : 0.7925          </span></span>
+<span><span class="co">#&gt;          Neg Pred Value : 0.7995          </span></span>
+<span><span class="co">#&gt;              Prevalence : 0.5072          </span></span>
+<span><span class="co">#&gt;          Detection Rate : 0.4106          </span></span>
+<span><span class="co">#&gt;    Detection Prevalence : 0.5181          </span></span>
+<span><span class="co">#&gt;       Balanced Accuracy : 0.7957          </span></span>
+<span><span class="co">#&gt;                                           </span></span>
+<span><span class="co">#&gt;        'Positive' Class : False           </span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
+</div>
+<div id="c5" class="section level2" number="8.10">
+<h2>
+<span class="header-section-number">8.10</span> C5<a class="anchor" aria-label="anchor" href="#c5"><i class="fas fa-link"></i></a>
+</h2>
+<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">c50_final_mod</span> <span class="op">&lt;-</span> <span class="fu">boost_tree</span><span class="op">(</span>trees <span class="op">=</span> <span class="fl">15</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"C5.0"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">c50_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">c50_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">c50_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">c50_final_wf</span>, <span class="va">final_train</span><span class="op">)</span></span>
+<span><span class="va">c50_fitted</span> <span class="op">&lt;-</span> <span class="fu">extract_fit_engine</span><span class="op">(</span><span class="va">c50_final_fit</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">c50_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">c50_final_fit</span>, <span class="va">final_test</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">confusionMatrix</span><span class="op">(</span>data <span class="op">=</span> <span class="va">c50_final_pred</span><span class="op">$</span><span class="va">.pred_class</span>, reference <span class="op">=</span> <span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Confusion Matrix and Statistics</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;           Reference</span></span>
+<span><span class="co">#&gt; Prediction False True</span></span>
+<span><span class="co">#&gt;      False   708  188</span></span>
+<span><span class="co">#&gt;      True    174  669</span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;                Accuracy : 0.7918         </span></span>
+<span><span class="co">#&gt;                  95% CI : (0.772, 0.8107)</span></span>
+<span><span class="co">#&gt;     No Information Rate : 0.5072         </span></span>
+<span><span class="co">#&gt;     P-Value [Acc &gt; NIR] : &lt;2e-16         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;                   Kappa : 0.5835         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;  Mcnemar's Test P-Value : 0.4944         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;             Sensitivity : 0.8027         </span></span>
+<span><span class="co">#&gt;             Specificity : 0.7806         </span></span>
+<span><span class="co">#&gt;          Pos Pred Value : 0.7902         </span></span>
+<span><span class="co">#&gt;          Neg Pred Value : 0.7936         </span></span>
+<span><span class="co">#&gt;              Prevalence : 0.5072         </span></span>
+<span><span class="co">#&gt;          Detection Rate : 0.4071         </span></span>
+<span><span class="co">#&gt;    Detection Prevalence : 0.5152         </span></span>
+<span><span class="co">#&gt;       Balanced Accuracy : 0.7917         </span></span>
+<span><span class="co">#&gt;                                          </span></span>
+<span><span class="co">#&gt;        'Positive' Class : False          </span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
+<p>Our score on Kaggle was 0.7898 which is very close to our tuned values. This indicates that our process gives us accurate estimations and now we must consider how we can improve it or select a better model.</p>
+
+</div>
 </div>
   <div class="chapter-nav">
 <div class="prev"><a href="feature-selection-and-elimination.html"><span class="header-section-number">7</span> Feature selection and elimination</a></div>
-<div class="next"><a href="knn.html"><span class="header-section-number">9</span> KNN</a></div>
+<div class="empty"></div>
 </div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
     <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
       <ul class="nav navbar-nav">
 <li><a class="nav-link" href="#final-model-tuning"><span class="header-section-number">8</span> Final model tuning</a></li>
 <li><a class="nav-link" href="#complete-preprocess"><span class="header-section-number">8.1</span> Complete preprocess</a></li>
-<li><a class="nav-link" href="#glm"><span class="header-section-number">8.2</span> GLM</a></li>
-<li><a class="nav-link" href="#glmnet-lassoridge"><span class="header-section-number">8.3</span> GLMNET Lasso/Ridge</a></li>
-<li><a class="nav-link" href="#randomforest"><span class="header-section-number">8.4</span> RandomForest</a></li>
+<li><a class="nav-link" href="#logistic-regression---glm"><span class="header-section-number">8.2</span> Logistic regression - GLM</a></li>
+<li><a class="nav-link" href="#penalized-logistic-regression---glmnet"><span class="header-section-number">8.3</span> Penalized logistic regression - GLMNET</a></li>
+<li><a class="nav-link" href="#generalized-additive-models---gam"><span class="header-section-number">8.4</span> Generalized additive models - GAM</a></li>
+<li><a class="nav-link" href="#svm"><span class="header-section-number">8.5</span> SVM</a></li>
+<li><a class="nav-link" href="#naive-bayes"><span class="header-section-number">8.6</span> Naive Bayes</a></li>
+<li><a class="nav-link" href="#knn"><span class="header-section-number">8.7</span> KNN</a></li>
+<li><a class="nav-link" href="#randomforest"><span class="header-section-number">8.8</span> RandomForest</a></li>
+<li><a class="nav-link" href="#xgboost"><span class="header-section-number">8.9</span> XGBoost</a></li>
+<li><a class="nav-link" href="#c5"><span class="header-section-number">8.10</span> C5</a></li>
 </ul>
 
       <div class="book-extra">
@@ -395,7 +699,7 @@ The results from the model tuning indicate that the improvement is very limited 
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-07.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-08.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

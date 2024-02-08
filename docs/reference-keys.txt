@@ -50,6 +50,7 @@ fig:genetic-internal
 fig:genetic-external
 fig:feature-selection-comparison
 fig:rf-random-comparison-sign
+fig:glm
 introduction
 early-data-exploration
 overview-of-the-data
@@ -89,11 +90,12 @@ genetic-algorithm
 check-performance-with-random-subsets
 final-model-tuning
 complete-preprocess
-glm
-glmnet-lassoridge
-randomforest
-knn
+logistic-regression---glm
+penalized-logistic-regression---glmnet
+generalized-additive-models---gam
 svm
+naive-bayes
+knn
+randomforest
 xgboost
 c5
-naive-bayes
