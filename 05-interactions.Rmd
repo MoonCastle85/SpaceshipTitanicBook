@@ -1,4 +1,4 @@
-# Interactions
+# Interactions {#chapter-6}
 So far we've only created features from single variables but what about the effects of two variables together? Would it help our models if we added an interaction effect between for example HomePlanet and Destination to create the new feature HomeDestination? What about other such interactions?
 
 In the previous competition for the Titanic of 1912, the sex of a passenger mattered (women more likely to survive) and the ticket class mattered (first class more likely to survive) but the interaction "woman in first class" had an almost 100% of survival and this interaction improved the model (if I remember correctly). We want to discover if such interactions exist between the variables that we have for our space odyssey.
@@ -477,12 +477,14 @@ pen_int_vars <- pen_int_coef %>%
   filter(abs(estimate) != 0 & term != "(Intercept)") %>%
   filter(str_detect(term, "_x_")) %>%
   mutate(V1 = str_split_i(term, "_x_", 1),
-         V1 = str_split_i(term, "_x_", 1),
+         V1 = str_split_i(term, "_", 1),
          V2 = str_split_i(term, "_x_", 2),
          V2 = str_split_i(V2, "_", 1),
          ForFormula = str_c("starts_with('", V1, "'):starts_with('", V2, "')"),
          RevFormula = str_c("starts_with('", V2, "'):starts_with('", V1, "')")) %>%
   select(V1, V2, ForFormula, RevFormula)
+
+save(pen_int_vars, file = "Extra/Best interactions.RData")
 ```
 
 ## Tree model interactions

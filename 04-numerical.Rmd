@@ -1,4 +1,4 @@
-# Exploration of numerical variables
+# Exploration of numerical variables {#chapter-5}
 We now turn to our numerical variables to see how they affect the response.
 
 ## Name variable
@@ -132,6 +132,21 @@ my_smooth_plot(train6 %>% filter(CryoSleep == "False"), "TotalSpent")
 ```
 
 Our TotalSpent variable seems to smooth out the effects of individual amenities and might reduce model performance. We should be prepared to remove it from our models.
+
+In summary, since our amenity variables have a lot of zero values even when we control for CryoSleep, we want to create binary variables to indicate zero value. The binary variable will be zero when amenities have non-zero values and therefore will drop out of models that use coefficients while it will act like a categorical variable when the value of amenities is zero.
+
+```{r zero-infl}
+bin_for_zero <- function(df) {
+  res <- df %>% mutate(ZeroRoomService = if_else(CryoSleep == "False" & RoomService == 0, 1, 0),
+                       ZeroFoodCourt = if_else(CryoSleep == "False" & FoodCourt == 0, 1, 0),
+                       ZeroShoppingMall = if_else(CryoSleep == "False" & ShoppingMall == 0, 1, 0),
+                       ZeroSpa = if_else(CryoSleep == "False" & Spa == 0, 1, 0),
+                       ZeroVRDeck = if_else(CryoSleep == "False" & VRDeck == 0, 1, 0))
+  return(res)
+}
+
+train6 <- bin_for_zero(train6)
+```
 
 ## Correlations
 We can see that PassengerGroup and CabinNumber are highly correlated with each other could cause problems with some models that are sensitive to correlated variables. We should consider using one of of each variable and see which one gives better results.

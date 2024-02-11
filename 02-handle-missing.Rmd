@@ -1,4 +1,4 @@
-# Handle missing data
+# Handle missing data {#chapter-3}
 The best way to handle missing data is first to visualize it to get a sense of what's going on. 
 
 ## Simple but useful features
@@ -428,6 +428,5 @@ plot_na_hclust(train4)
 The only missing values are now in the variables that we won't use for modelling (we'll use features derived from them instead).
 
 ```{r remove-02, include=FALSE}
-rm(train3_for_knn, vars_to_impute, vars_for_imputing, train3_noNA, knn_impute_rec, knn_impute_prep, knn_impute_bake, my_skim,
-   no_imp_skim, ranger_skim, knn_skim, h1, h2, h3, c1, c2, c3, check_knn, fixed_knn)
+rm(list = setdiff(ls(), c("train2", "train3", "train4")))
 ```

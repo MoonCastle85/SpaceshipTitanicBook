@@ -1,4 +1,4 @@
-# Early data exploration
+# Early data exploration {#chapter-2}
 ## Overview of the data
 The data has already been divided into train and test sets so let's load them and get a sense of how the *train* data looks like. We'll leave the *test* data (won't even look at it) until the end. 
 
@@ -64,5 +64,5 @@ All of the predictor variables have around 2% missing data which is relatively l
 However, we will see in our exploration of the data that there might be some pattern missingness, or at least values that are missing that can be inferred from the others.
 
 ```{r remove-01, include=FALSE}
-rm(plotsToSVG)
+rm(list = setdiff(ls(), "train"))
 ```

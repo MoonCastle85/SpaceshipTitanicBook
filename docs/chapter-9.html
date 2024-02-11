@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Chapter 9 Final results | Spaceship Titanic - A comprehensive guide</title>
+<meta name="author" content="Vanja Manborg">
+<meta name="description" content="Let’s make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage. # glm_ultimate_pred &lt;- predict(glm_final_fit,...">
+<meta name="generator" content="bookdown 0.37 with bs4_book()">
+<meta property="og:title" content="Chapter 9 Final results | Spaceship Titanic - A comprehensive guide">
+<meta property="og:type" content="book">
+<meta property="og:url" content="https://spaceshiptitanic.manborgconsulting.com/chapter-9.html">
+<meta property="og:description" content="Let’s make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage. # glm_ultimate_pred &lt;- predict(glm_final_fit,...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chapter 9 Final results | Spaceship Titanic - A comprehensive guide">
+<meta name="twitter:description" content="Let’s make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage. # glm_ultimate_pred &lt;- predict(glm_final_fit,...">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script><script src="libs/jquery-migrate-3.1.0/jquery-migrate-3.1.0.min.js"></script><link href="libs/slick-1.8.1/slick/slick.css" rel="stylesheet">
+<link href="libs/slick-1.8.1/slick/slick-theme.css" rel="stylesheet">
+<script src="libs/slick-1.8.1/slick/slick.min.js"></script><script src="libs/css-resize-1.2.1/ResizeSensor.js"></script><script src="libs/css-resize-1.2.1/ElementQueries.js"></script><link href="libs/slickR-0.0.2/slick.css" rel="stylesheet">
+<link href="libs/slickR-0.0.2/slick-theme.css" rel="stylesheet">
+<script src="libs/slickR-0.0.2/slickR.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+<script>
+    /* ========================================================================
+     * Bootstrap: transition.js v3.3.7
+     * http://getbootstrap.com/javascript/#transitions
+     * ========================================================================
+     * Copyright 2011-2016 Twitter, Inc.
+     * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+     * ======================================================================== */
+
+
+    +function ($) {
+      'use strict';
+
+      // CSS TRANSITION SUPPORT (Shoutout: http://www.modernizr.com/)
+      // ============================================================
+
+      function transitionEnd() {
+        var el = document.createElement('bootstrap')
+
+        var transEndEventNames = {
+          WebkitTransition : 'webkitTransitionEnd',
+          MozTransition    : 'transitionend',
+          OTransition      : 'oTransitionEnd otransitionend',
+          transition       : 'transitionend'
+        }
+
+        for (var name in transEndEventNames) {
+          if (el.style[name] !== undefined) {
+            return { end: transEndEventNames[name] }
+          }
+        }
+
+        return false // explicit for ie8 (  ._.)
+      }
+
+      // http://blog.alexmaccaw.com/css-transitions
+      $.fn.emulateTransitionEnd = function (duration) {
+        var called = false
+        var $el = this
+        $(this).one('bsTransitionEnd', function () { called = true })
+        var callback = function () { if (!called) $($el).trigger($.support.transition.end) }
+        setTimeout(callback, duration)
+        return this
+      }
+
+      $(function () {
+        $.support.transition = transitionEnd()
+
+        if (!$.support.transition) return
+
+        $.event.special.bsTransitionEnd = {
+          bindType: $.support.transition.end,
+          delegateType: $.support.transition.end,
+          handle: function (e) {
+            if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments)
+          }
+        }
+      })
+
+    }(jQuery);
+    </script><script>
+    /* ========================================================================
+     * Bootstrap: collapse.js v3.3.7
+     * http://getbootstrap.com/javascript/#collapse
+     * ========================================================================
+     * Copyright 2011-2016 Twitter, Inc.
+     * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+     * ======================================================================== */
+
+    /* jshint latedef: false */
+
+    +function ($) {
+      'use strict';
+
+      // COLLAPSE PUBLIC CLASS DEFINITION
+      // ================================
+
+      var Collapse = function (element, options) {
+        this.$element      = $(element)
+        this.options       = $.extend({}, Collapse.DEFAULTS, options)
+        this.$trigger      = $('[data-toggle="collapse"][href="#' + element.id + '"],' +
+                               '[data-toggle="collapse"][data-target="#' + element.id + '"]')
+        this.transitioning = null
+
+        if (this.options.parent) {
+          this.$parent = this.getParent()
+        } else {
+          this.addAriaAndCollapsedClass(this.$element, this.$trigger)
+        }
+
+        if (this.options.toggle) this.toggle()
+      }
+
+      Collapse.VERSION  = '3.3.7'
+
+      Collapse.TRANSITION_DURATION = 350
+
+      Collapse.DEFAULTS = {
+        toggle: true
+      }
+
+      Collapse.prototype.dimension = function () {
+        var hasWidth = this.$element.hasClass('width')
+        return hasWidth ? 'width' : 'height'
+      }
+
+      Collapse.prototype.show = function () {
+        if (this.transitioning || this.$element.hasClass('in')) return
+
+        var activesData
+        var actives = this.$parent && this.$parent.children('.panel').children('.in, .collapsing')
+
+        if (actives && actives.length) {
+          activesData = actives.data('bs.collapse')
+          if (activesData && activesData.transitioning) return
+        }
+
+        var startEvent = $.Event('show.bs.collapse')
+        this.$element.trigger(startEvent)
+        if (startEvent.isDefaultPrevented()) return
+
+        if (actives && actives.length) {
+          Plugin.call(actives, 'hide')
+          activesData || actives.data('bs.collapse', null)
+        }
+
+        var dimension = this.dimension()
+
+        this.$element
+          .removeClass('collapse')
+          .addClass('collapsing')[dimension](0)
+          .attr('aria-expanded', true)
+
+        this.$trigger
+          .removeClass('collapsed')
+          .attr('aria-expanded', true)
+
+        this.transitioning = 1
+
+        var complete = function () {
+          this.$element
+            .removeClass('collapsing')
+            .addClass('collapse in')[dimension]('')
+          this.transitioning = 0
+          this.$element
+            .trigger('shown.bs.collapse')
+        }
+
+        if (!$.support.transition) return complete.call(this)
+
+        var scrollSize = $.camelCase(['scroll', dimension].join('-'))
+
+        this.$element
+          .one('bsTransitionEnd', $.proxy(complete, this))
+          .emulateTransitionEnd(Collapse.TRANSITION_DURATION)[dimension](this.$element[0][scrollSize])
+      }
+
+      Collapse.prototype.hide = function () {
+        if (this.transitioning || !this.$element.hasClass('in')) return
+
+        var startEvent = $.Event('hide.bs.collapse')
+        this.$element.trigger(startEvent)
+        if (startEvent.isDefaultPrevented()) return
+
+        var dimension = this.dimension()
+
+        this.$element[dimension](this.$element[dimension]())[0].offsetHeight
+
+        this.$element
+          .addClass('collapsing')
+          .removeClass('collapse in')
+          .attr('aria-expanded', false)
+
+        this.$trigger
+          .addClass('collapsed')
+          .attr('aria-expanded', false)
+
+        this.transitioning = 1
+
+        var complete = function () {
+          this.transitioning = 0
+          this.$element
+            .removeClass('collapsing')
+            .addClass('collapse')
+            .trigger('hidden.bs.collapse')
+        }
+
+        if (!$.support.transition) return complete.call(this)
+
+        this.$element
+          [dimension](0)
+          .one('bsTransitionEnd', $.proxy(complete, this))
+          .emulateTransitionEnd(Collapse.TRANSITION_DURATION)
+      }
+
+      Collapse.prototype.toggle = function () {
+        this[this.$element.hasClass('in') ? 'hide' : 'show']()
+      }
+
+      Collapse.prototype.getParent = function () {
+        return $(this.options.parent)
+          .find('[data-toggle="collapse"][data-parent="' + this.options.parent + '"]')
+          .each($.proxy(function (i, element) {
+            var $element = $(element)
+            this.addAriaAndCollapsedClass(getTargetFromTrigger($element), $element)
+          }, this))
+          .end()
+      }
+
+      Collapse.prototype.addAriaAndCollapsedClass = function ($element, $trigger) {
+        var isOpen = $element.hasClass('in')
+
+        $element.attr('aria-expanded', isOpen)
+        $trigger
+          .toggleClass('collapsed', !isOpen)
+          .attr('aria-expanded', isOpen)
+      }
+
+      function getTargetFromTrigger($trigger) {
+        var href
+        var target = $trigger.attr('data-target')
+          || (href = $trigger.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '') // strip for ie7
+
+        return $(target)
+      }
+
+
+      // COLLAPSE PLUGIN DEFINITION
+      // ==========================
+
+      function Plugin(option) {
+        return this.each(function () {
+          var $this   = $(this)
+          var data    = $this.data('bs.collapse')
+          var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
+
+          if (!data && options.toggle && /show|hide/.test(option)) options.toggle = false
+          if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
+          if (typeof option == 'string') data[option]()
+        })
+      }
+
+      var old = $.fn.collapse
+
+      $.fn.collapse             = Plugin
+      $.fn.collapse.Constructor = Collapse
+
+
+      // COLLAPSE NO CONFLICT
+      // ====================
+
+      $.fn.collapse.noConflict = function () {
+        $.fn.collapse = old
+        return this
+      }
+
+
+      // COLLAPSE DATA-API
+      // =================
+
+      $(document).on('click.bs.collapse.data-api', '[data-toggle="collapse"]', function (e) {
+        var $this   = $(this)
+
+        if (!$this.attr('data-target')) e.preventDefault()
+
+        var $target = getTargetFromTrigger($this)
+        var data    = $target.data('bs.collapse')
+        var option  = data ? 'toggle' : $this.data()
+
+        Plugin.call($target, option)
+      })
+
+    }(jQuery);
+    </script><script>
+    window.initializeCodeFolding = function(show) {
+
+      // handlers for show-all and hide all
+      $("#rmd-show-all-code").click(function() {
+        $('div.r-code-collapse').each(function() {
+          $(this).collapse('show');
+        });
+      });
+      $("#rmd-hide-all-code").click(function() {
+        $('div.r-code-collapse').each(function() {
+          $(this).collapse('hide');
+        });
+      });
+
+      // index for unique code element ids
+      var currentIndex = 1;
+
+      // select all R code blocks
+      var rCodeBlocks = $('pre.sourceCode, pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan');
+      rCodeBlocks.each(function() {
+
+        // create a collapsable div to wrap the code in
+        var div = $('<div class="collapse r-code-collapse"></div>');
+        if (show)
+          div.addClass('in');
+        var id = 'rcode-643E0F36' + currentIndex++;
+        div.attr('id', id);
+        $(this).before(div);
+        $(this).detach().appendTo(div);
+
+        // add a show code button right above
+        var showCodeText = $('<span>' + (show ? 'Hide' : 'Code') + '</span>');
+        var showCodeButton = $('<button type="button" class="btn btn-default btn-xs code-folding-btn pull-right"></button>');
+        showCodeButton.append(showCodeText);
+        showCodeButton
+            .attr('data-toggle', 'collapse')
+            .attr('data-target', '#' + id)
+            .attr('aria-expanded', show)
+            .attr('aria-controls', id);
+
+        var buttonRow = $('<div class="row"></div>');
+        var buttonCol = $('<div class="col-md-12"></div>');
+
+        buttonCol.append(showCodeButton);
+        buttonRow.append(buttonCol);
+
+        div.before(buttonRow);
+
+        // update state of button on show/hide
+        div.on('hidden.bs.collapse', function () {
+          showCodeText.text('Code');
+        });
+        div.on('show.bs.collapse', function () {
+          showCodeText.text('Hide');
+        });
+      });
+
+    }
+    </script><style type="text/css">
+    .code-folding-btn { margin-bottom: 4px; }
+    .row { display: flex; }
+    .collapse { display: none; }
+    .in { display:block }
+    </style>
+<script>
+    $(document).ready(function () {
+      window.initializeCodeFolding("show" === "show");
+    });
+    </script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Spaceship Titanic - A comprehensive guide</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> Introduction</a></li>
+<li><a class="" href="chapter-2.html"><span class="header-section-number">2</span> Early data exploration</a></li>
+<li><a class="" href="chapter-3.html"><span class="header-section-number">3</span> Handle missing data</a></li>
+<li><a class="" href="chapter-4.html"><span class="header-section-number">4</span> Exploration of categorical variables</a></li>
+<li><a class="" href="chapter-5.html"><span class="header-section-number">5</span> Exploration of numerical variables</a></li>
+<li><a class="" href="chapter-6.html"><span class="header-section-number">6</span> Interactions</a></li>
+<li><a class="" href="chapter-7.html"><span class="header-section-number">7</span> Feature selection and elimination</a></li>
+<li><a class="" href="chapter-8.html"><span class="header-section-number">8</span> Final model tuning</a></li>
+<li><a class="active" href="chapter-9.html"><span class="header-section-number">9</span> Final results</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/MoonCastle85/SpaceshipTitanicBook">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="chapter-9" class="section level1" number="9">
+<h1>
+<span class="header-section-number">9</span> Final results<a class="anchor" aria-label="anchor" href="#chapter-9"><i class="fas fa-link"></i></a>
+</h1>
+<p>Let’s make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage.</p>
+<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># glm_ultimate_pred &lt;- predict(glm_final_fit, final_test_df, type = "prob") %&gt;%</span></span>
+<span><span class="co">#   mutate(Prediction = as.factor(if_else(.pred_True &lt; 0.46, "False", "True")))</span></span>
+<span><span class="co"># glm_final_acc &lt;- accuracy_vec(final_test_df$Transported, glm_ultimate_pred$Prediction)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># glmnet_ultimate_pred &lt;- predict(glmnet_final_fit, final_test_df, type = "class")</span></span>
+<span><span class="co"># glmnet_final_acc &lt;- accuracy_vec(final_test_df$Transported, glmnet_ultimate_pred$.pred_class)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># gam_ultimate_pred &lt;- predict(gam_final_fit, final_test_df, type = "class")</span></span>
+<span><span class="co"># gam_final_acc &lt;- accuracy_vec(final_test_df$Transported, gam_ultimate_pred$.pred_class)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># svm_linear_ultimate_pred &lt;- predict(svm_linear_final_fit, final_test_df, type = "class")</span></span>
+<span><span class="co"># svm_linear_final_acc &lt;- accuracy_vec(final_test_df$Transported, svm_linear_ultimate_pred$.pred_class)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># svm_poly_ultimate_pred &lt;- predict(svm_poly_final_fit, final_test_df, type = "class")</span></span>
+<span><span class="co"># svm_poly_final_acc &lt;- accuracy_vec(final_test_df$Transported, svm_poly_ultimate_pred$.pred_class)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># svm_rbf_ultimate_pred &lt;- predict(svm_rbf_final_fit, final_test_df, type = "class")</span></span>
+<span><span class="co"># svm_rbf_final_acc &lt;- accuracy_vec(final_test_df$Transported, svm_rbf_ultimate_pred$.pred_class)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># nb_ultimate_pred &lt;- predict(nb_final_fit, final_test_df, type = "class")</span></span>
+<span><span class="co"># nb_final_acc &lt;- accuracy_vec(final_test_df$Transported, nb_ultimate_pred$.pred_class)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># knn_ultimate_pred &lt;- predict(knn_final_fit, final_test_df, type = "class")</span></span>
+<span><span class="co"># knn_final_acc &lt;- accuracy_vec(final_test_df$Transported, knn_ultimate_pred$.pred_class)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># C5.0_ultimate_pred &lt;- predict(C5.0_final_fit, final_test_df, type = "class")</span></span>
+<span><span class="co"># C5.0_final_acc &lt;- accuracy_vec(final_test_df$Transported, C5.0_ultimate_pred$.pred_class)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># rf_ultimate_pred &lt;- predict(rf_final_fit, final_test_df, type = "class")</span></span>
+<span><span class="co"># rf_final_acc &lt;- accuracy_vec(final_test_df$Transported, rf_ultimate_pred$.pred_class)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># xgb_ultimate_pred &lt;- predict(xgb_final_fit, final_test_df, type = "class")</span></span>
+<span><span class="co"># xgb_final_acc &lt;- accuracy_vec(final_test_df$Transported, xgb_ultimate_pred$.pred_class)</span></span></code></pre></div>
+<p>Our score on Kaggle was 0.7898 which is very close to our tuned values. This indicates that our process gives us accurate estimations and now we must consider how we can improve it or select a better model.</p>
+
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="chapter-8.html"><span class="header-section-number">8</span> Final model tuning</a></div>
+<div class="empty"></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav"><li><a class="nav-link" href="#chapter-9"><span class="header-section-number">9</span> Final results</a></li></ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/blob/master/08-final-results.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/edit/master/08-final-results.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-11.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>

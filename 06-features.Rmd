@@ -1,4 +1,4 @@
-# Feature selection and elimination
+# Feature selection and elimination {#chapter-7}
 Now that we have created several new features and discovered promising interaction effects, we must explore which of these have the potential to improve our models and which don't. Kuhn and Johnson recommend several methods for feature selection and elimination that we'll explore.
 
 :::{.rmdwarning}

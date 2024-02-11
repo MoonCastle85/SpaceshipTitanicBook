@@ -1,0 +1,149 @@
+# Final results {#chapter-9}
+
+```{r summarise-testdata, include=FALSE}
+test <- read_csv("train.csv", na = "", col_types = "ccfccnfnnnnncf")
+
+# Create group variables, seperate CabinNumber, Deck and Side from Cabin
+test2 <- useful_features(test)
+
+# Replace structurally missing NA
+test3 <- my_na_replace(test2)
+test3 <- useful_features(test3)
+
+# KNN impute remaining missing values
+test3_for_knn <- test3 %>%
+  mutate(across(.cols = where(is.factor), .fns = as.character))
+
+vars_to_impute <- c("HomePlanet", "CryoSleep", "Destination", "Age", "VIP", "RoomService", "FoodCourt", "ShoppingMall",
+                    "Spa", "VRDeck", "Deck", "Side", "CabinNumber", "LastName")
+vars_for_imputing <- c("HomePlanet", "CryoSleep", "Destination", "Age", "VIP", "RoomService", "FoodCourt",
+                              "ShoppingMall", "Spa", "VRDeck", "PassengerGroup", "Deck", "Side", "CabinNumber",
+                              "PassengerGroupSize", "DestinationsPerGroup", "CabinsPerGroup",
+                              "CryoSleepsPerGroup", "VIPsPerGroup", "LastNamesPerGroup")
+
+test3_noNA <- test3_for_knn[complete.cases(test3_for_knn),]
+  
+knn_impute_rec <- recipe(Transported ~ ., data = test3_noNA) %>%
+  step_normalize(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck) %>%
+  step_impute_knn(recipe = ., all_of(vars_to_impute), impute_with = imp_vars(all_of(vars_for_imputing)), neighbors = 5) 
+
+set.seed(8584)
+knn_impute_prep <- knn_impute_rec %>% prep(strings_as_factors = FALSE)
+
+set.seed(8584)
+knn_impute_bake <- bake(knn_impute_prep, new_data = test3_for_knn)
+
+knn_impute_res <- knn_impute_bake %>%
+  mutate(across(.cols = c(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
+                .fns = ~ rev_normalization(.x, knn_impute_prep)))
+
+# Fixed KNN imputation where structural missing rules were broken
+fixed_knn <- fix_knn(knn_impute_res)
+test4 <- useful_features2(fixed_knn)
+
+# Add new features we've discovered from our visual exploration
+test5 <- add_grp_features(test4)
+test6 <- add_name_features(test5)
+test7 <- bin_for_zero(test6)
+
+# Get our variables in order for modelling
+final_test_df <- test7 %>%
+  select(-c(PassengerCount, HomePlanetsPerGroup, Cabin, Name, LastName)) %>%
+  mutate(across(.cols = c(PassengerGroupSize, ends_with("PerGroup")), .fns = as.integer),
+         Transported = as.factor(Transported))
+```
+
+Let's make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage. 
+
+```{r ultimate-acc}
+# glm_ultimate_pred <- predict(glm_final_fit, final_test_df, type = "prob") %>%
+#   mutate(Prediction = as.factor(if_else(.pred_True < 0.46, "False", "True")))
+# glm_final_acc <- accuracy_vec(final_test_df$Transported, glm_ultimate_pred$Prediction)
+# 
+# glmnet_ultimate_pred <- predict(glmnet_final_fit, final_test_df, type = "class")
+# glmnet_final_acc <- accuracy_vec(final_test_df$Transported, glmnet_ultimate_pred$.pred_class)
+# 
+# gam_ultimate_pred <- predict(gam_final_fit, final_test_df, type = "class")
+# gam_final_acc <- accuracy_vec(final_test_df$Transported, gam_ultimate_pred$.pred_class)
+# 
+# svm_linear_ultimate_pred <- predict(svm_linear_final_fit, final_test_df, type = "class")
+# svm_linear_final_acc <- accuracy_vec(final_test_df$Transported, svm_linear_ultimate_pred$.pred_class)
+# 
+# svm_poly_ultimate_pred <- predict(svm_poly_final_fit, final_test_df, type = "class")
+# svm_poly_final_acc <- accuracy_vec(final_test_df$Transported, svm_poly_ultimate_pred$.pred_class)
+# 
+# svm_rbf_ultimate_pred <- predict(svm_rbf_final_fit, final_test_df, type = "class")
+# svm_rbf_final_acc <- accuracy_vec(final_test_df$Transported, svm_rbf_ultimate_pred$.pred_class)
+# 
+# nb_ultimate_pred <- predict(nb_final_fit, final_test_df, type = "class")
+# nb_final_acc <- accuracy_vec(final_test_df$Transported, nb_ultimate_pred$.pred_class)
+# 
+# knn_ultimate_pred <- predict(knn_final_fit, final_test_df, type = "class")
+# knn_final_acc <- accuracy_vec(final_test_df$Transported, knn_ultimate_pred$.pred_class)
+# 
+# C5.0_ultimate_pred <- predict(C5.0_final_fit, final_test_df, type = "class")
+# C5.0_final_acc <- accuracy_vec(final_test_df$Transported, C5.0_ultimate_pred$.pred_class)
+# 
+# rf_ultimate_pred <- predict(rf_final_fit, final_test_df, type = "class")
+# rf_final_acc <- accuracy_vec(final_test_df$Transported, rf_ultimate_pred$.pred_class)
+# 
+# xgb_ultimate_pred <- predict(xgb_final_fit, final_test_df, type = "class")
+# xgb_final_acc <- accuracy_vec(final_test_df$Transported, xgb_ultimate_pred$.pred_class)
+```
+
+
+```{r summary-acc, echo=FALSE, cache=TRUE}
+# modelinfo <- readxl::read_xlsx("Extra/Modelinfo.xlsx")
+# modelinfo2 <- modelinfo %>%
+#   mutate(ResampleAccuracy = c(glm_final_acc, glmnet_final_acc, gam_final_acc, 
+#                       average(svm_linear_final_acc, svm_poly_final_acc, svm_rbf_final_acc), nb_final_acc, knn_final_acc,
+#                       C5_final_acc, rf_final_acc, xgb_final_acc),
+#          FinalAccuracy = c(glm_ultimate_acc, glmnet_ultimate_acc, gam_ultimate_acc, 
+#                       average(svm_linear_ultimate_acc, svm_poly_ultimate_acc, svm_rbf_ultimate_acc), nb_ultimate_acc, knn_ultimate_acc,
+#                       C5_ultimate_acc, rf_ultimate_acc, xgb_ultimate_acc)) %>%
+#   select(-Description)
+# 
+# knitr::kable(modelinfo2) %>%
+#   kableExtra::kable_styling(bootstrap_options = "striped")
+```
+
+```{r rf-pred-kaggl, warning=FALSE, include=FALSE}
+# test <- read_csv("test.csv", na = "", col_types = "cccccncnnnnnc")
+# 
+# # Create group variables, seperate CabinNumber, Deck and Side from Cabin
+# test2 <- useful_features(test)
+# 
+# # Replace structurally missing NA
+# test3 <- my_na_replace(test2)
+# test3 <- useful_features(test3)
+# 
+# # KNN impute remaining missing values
+# test3_for_knn <- test3 %>%
+#   mutate(across(.cols = where(is.factor), .fns = as.character))
+# 
+# set.seed(8584)
+# knn_impute_test <- bake(knn_impute_prep, new_data = test3_for_knn)
+# 
+# knn_impute_test_res <- knn_impute_test %>%
+#   mutate(across(.cols = c(Age, CabinNumber, RoomService, FoodCourt, ShoppingMall, Spa, VRDeck),
+#                 .fns = ~ rev_normalization(.x, knn_impute_prep)))
+# 
+# # Fixed KNN imputation where structural missing rules were broken
+# fixed_test_knn <- fix_knn(knn_impute_test_res)
+# test4 <- useful_features2(fixed_test_knn)
+# 
+# # Add new features we've discovered from our visual exploration
+# test5 <- add_grp_features(test4)
+# test6 <- add_name_features(test5)
+# 
+# final_df_test <- test6 %>%
+#   select(-c(PassengerCount, HomePlanetsPerGroup, Cabin, Name, LastName)) %>%
+#   mutate(across(.cols = c(PassengerGroupSize, ends_with("PerGroup")), .fns = as.integer))
+# 
+# rf_kaggle_pred <- predict(rf_final_fit, final_df_test)
+# rf_submission <- bind_cols(PassengerId = final_df_test$PassengerId, Transported = rf_kaggle_pred$.pred_class)
+# 
+# write_csv(rf_submission, file = "RF submission 2024-01-30 21_50.csv")
+```
+
+Our score on Kaggle was 0.7898 which is very close to our tuned values. This indicates that our process gives us accurate estimations and now we must consider how we can improve it or select a better model.

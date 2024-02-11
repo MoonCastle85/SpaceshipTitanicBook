@@ -1,4 +1,4 @@
-# Exploration of categorical variables
+# Exploration of categorical variables {#chapter-4}
 ## Chi-squared tests
 The traditional statistical test between two categorical values is the chi\^2 test, which compares the actual frequencies of each combination of categorical variables to a perfectly independent frequency (a frequency that would occur if each combination had the same ratio as the overall ratio for one variable). The null hypothesis for the chi\^2 test is that there is no relationship between the variables.
 

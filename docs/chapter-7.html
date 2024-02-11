@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Chapter 7 Feature selection and elimination | Spaceship Titanic - A comprehensive guide</title>
+<meta name="author" content="Vanja Manborg">
+<meta name="description" content="Now that we have created several new features and discovered promising interaction effects, we must explore which of these have the potential to improve our models and which don’t. Kuhn and...">
+<meta name="generator" content="bookdown 0.37 with bs4_book()">
+<meta property="og:title" content="Chapter 7 Feature selection and elimination | Spaceship Titanic - A comprehensive guide">
+<meta property="og:type" content="book">
+<meta property="og:url" content="https://spaceshiptitanic.manborgconsulting.com/chapter-7.html">
+<meta property="og:description" content="Now that we have created several new features and discovered promising interaction effects, we must explore which of these have the potential to improve our models and which don’t. Kuhn and...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chapter 7 Feature selection and elimination | Spaceship Titanic - A comprehensive guide">
+<meta name="twitter:description" content="Now that we have created several new features and discovered promising interaction effects, we must explore which of these have the potential to improve our models and which don’t. Kuhn and...">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script><script src="libs/jquery-migrate-3.1.0/jquery-migrate-3.1.0.min.js"></script><link href="libs/slick-1.8.1/slick/slick.css" rel="stylesheet">
+<link href="libs/slick-1.8.1/slick/slick-theme.css" rel="stylesheet">
+<script src="libs/slick-1.8.1/slick/slick.min.js"></script><script src="libs/css-resize-1.2.1/ResizeSensor.js"></script><script src="libs/css-resize-1.2.1/ElementQueries.js"></script><link href="libs/slickR-0.0.2/slick.css" rel="stylesheet">
+<link href="libs/slickR-0.0.2/slick-theme.css" rel="stylesheet">
+<script src="libs/slickR-0.0.2/slickR.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+<script>
+    /* ========================================================================
+     * Bootstrap: transition.js v3.3.7
+     * http://getbootstrap.com/javascript/#transitions
+     * ========================================================================
+     * Copyright 2011-2016 Twitter, Inc.
+     * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+     * ======================================================================== */
+
+
+    +function ($) {
+      'use strict';
+
+      // CSS TRANSITION SUPPORT (Shoutout: http://www.modernizr.com/)
+      // ============================================================
+
+      function transitionEnd() {
+        var el = document.createElement('bootstrap')
+
+        var transEndEventNames = {
+          WebkitTransition : 'webkitTransitionEnd',
+          MozTransition    : 'transitionend',
+          OTransition      : 'oTransitionEnd otransitionend',
+          transition       : 'transitionend'
+        }
+
+        for (var name in transEndEventNames) {
+          if (el.style[name] !== undefined) {
+            return { end: transEndEventNames[name] }
+          }
+        }
+
+        return false // explicit for ie8 (  ._.)
+      }
+
+      // http://blog.alexmaccaw.com/css-transitions
+      $.fn.emulateTransitionEnd = function (duration) {
+        var called = false
+        var $el = this
+        $(this).one('bsTransitionEnd', function () { called = true })
+        var callback = function () { if (!called) $($el).trigger($.support.transition.end) }
+        setTimeout(callback, duration)
+        return this
+      }
+
+      $(function () {
+        $.support.transition = transitionEnd()
+
+        if (!$.support.transition) return
+
+        $.event.special.bsTransitionEnd = {
+          bindType: $.support.transition.end,
+          delegateType: $.support.transition.end,
+          handle: function (e) {
+            if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments)
+          }
+        }
+      })
+
+    }(jQuery);
+    </script><script>
+    /* ========================================================================
+     * Bootstrap: collapse.js v3.3.7
+     * http://getbootstrap.com/javascript/#collapse
+     * ========================================================================
+     * Copyright 2011-2016 Twitter, Inc.
+     * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+     * ======================================================================== */
+
+    /* jshint latedef: false */
+
+    +function ($) {
+      'use strict';
+
+      // COLLAPSE PUBLIC CLASS DEFINITION
+      // ================================
+
+      var Collapse = function (element, options) {
+        this.$element      = $(element)
+        this.options       = $.extend({}, Collapse.DEFAULTS, options)
+        this.$trigger      = $('[data-toggle="collapse"][href="#' + element.id + '"],' +
+                               '[data-toggle="collapse"][data-target="#' + element.id + '"]')
+        this.transitioning = null
+
+        if (this.options.parent) {
+          this.$parent = this.getParent()
+        } else {
+          this.addAriaAndCollapsedClass(this.$element, this.$trigger)
+        }
+
+        if (this.options.toggle) this.toggle()
+      }
+
+      Collapse.VERSION  = '3.3.7'
+
+      Collapse.TRANSITION_DURATION = 350
+
+      Collapse.DEFAULTS = {
+        toggle: true
+      }
+
+      Collapse.prototype.dimension = function () {
+        var hasWidth = this.$element.hasClass('width')
+        return hasWidth ? 'width' : 'height'
+      }
+
+      Collapse.prototype.show = function () {
+        if (this.transitioning || this.$element.hasClass('in')) return
+
+        var activesData
+        var actives = this.$parent && this.$parent.children('.panel').children('.in, .collapsing')
+
+        if (actives && actives.length) {
+          activesData = actives.data('bs.collapse')
+          if (activesData && activesData.transitioning) return
+        }
+
+        var startEvent = $.Event('show.bs.collapse')
+        this.$element.trigger(startEvent)
+        if (startEvent.isDefaultPrevented()) return
+
+        if (actives && actives.length) {
+          Plugin.call(actives, 'hide')
+          activesData || actives.data('bs.collapse', null)
+        }
+
+        var dimension = this.dimension()
+
+        this.$element
+          .removeClass('collapse')
+          .addClass('collapsing')[dimension](0)
+          .attr('aria-expanded', true)
+
+        this.$trigger
+          .removeClass('collapsed')
+          .attr('aria-expanded', true)
+
+        this.transitioning = 1
+
+        var complete = function () {
+          this.$element
+            .removeClass('collapsing')
+            .addClass('collapse in')[dimension]('')
+          this.transitioning = 0
+          this.$element
+            .trigger('shown.bs.collapse')
+        }
+
+        if (!$.support.transition) return complete.call(this)
+
+        var scrollSize = $.camelCase(['scroll', dimension].join('-'))
+
+        this.$element
+          .one('bsTransitionEnd', $.proxy(complete, this))
+          .emulateTransitionEnd(Collapse.TRANSITION_DURATION)[dimension](this.$element[0][scrollSize])
+      }
+
+      Collapse.prototype.hide = function () {
+        if (this.transitioning || !this.$element.hasClass('in')) return
+
+        var startEvent = $.Event('hide.bs.collapse')
+        this.$element.trigger(startEvent)
+        if (startEvent.isDefaultPrevented()) return
+
+        var dimension = this.dimension()
+
+        this.$element[dimension](this.$element[dimension]())[0].offsetHeight
+
+        this.$element
+          .addClass('collapsing')
+          .removeClass('collapse in')
+          .attr('aria-expanded', false)
+
+        this.$trigger
+          .addClass('collapsed')
+          .attr('aria-expanded', false)
+
+        this.transitioning = 1
+
+        var complete = function () {
+          this.transitioning = 0
+          this.$element
+            .removeClass('collapsing')
+            .addClass('collapse')
+            .trigger('hidden.bs.collapse')
+        }
+
+        if (!$.support.transition) return complete.call(this)
+
+        this.$element
+          [dimension](0)
+          .one('bsTransitionEnd', $.proxy(complete, this))
+          .emulateTransitionEnd(Collapse.TRANSITION_DURATION)
+      }
+
+      Collapse.prototype.toggle = function () {
+        this[this.$element.hasClass('in') ? 'hide' : 'show']()
+      }
+
+      Collapse.prototype.getParent = function () {
+        return $(this.options.parent)
+          .find('[data-toggle="collapse"][data-parent="' + this.options.parent + '"]')
+          .each($.proxy(function (i, element) {
+            var $element = $(element)
+            this.addAriaAndCollapsedClass(getTargetFromTrigger($element), $element)
+          }, this))
+          .end()
+      }
+
+      Collapse.prototype.addAriaAndCollapsedClass = function ($element, $trigger) {
+        var isOpen = $element.hasClass('in')
+
+        $element.attr('aria-expanded', isOpen)
+        $trigger
+          .toggleClass('collapsed', !isOpen)
+          .attr('aria-expanded', isOpen)
+      }
+
+      function getTargetFromTrigger($trigger) {
+        var href
+        var target = $trigger.attr('data-target')
+          || (href = $trigger.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '') // strip for ie7
+
+        return $(target)
+      }
+
+
+      // COLLAPSE PLUGIN DEFINITION
+      // ==========================
+
+      function Plugin(option) {
+        return this.each(function () {
+          var $this   = $(this)
+          var data    = $this.data('bs.collapse')
+          var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
+
+          if (!data && options.toggle && /show|hide/.test(option)) options.toggle = false
+          if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
+          if (typeof option == 'string') data[option]()
+        })
+      }
+
+      var old = $.fn.collapse
+
+      $.fn.collapse             = Plugin
+      $.fn.collapse.Constructor = Collapse
+
+
+      // COLLAPSE NO CONFLICT
+      // ====================
+
+      $.fn.collapse.noConflict = function () {
+        $.fn.collapse = old
+        return this
+      }
+
+
+      // COLLAPSE DATA-API
+      // =================
+
+      $(document).on('click.bs.collapse.data-api', '[data-toggle="collapse"]', function (e) {
+        var $this   = $(this)
+
+        if (!$this.attr('data-target')) e.preventDefault()
+
+        var $target = getTargetFromTrigger($this)
+        var data    = $target.data('bs.collapse')
+        var option  = data ? 'toggle' : $this.data()
+
+        Plugin.call($target, option)
+      })
+
+    }(jQuery);
+    </script><script>
+    window.initializeCodeFolding = function(show) {
+
+      // handlers for show-all and hide all
+      $("#rmd-show-all-code").click(function() {
+        $('div.r-code-collapse').each(function() {
+          $(this).collapse('show');
+        });
+      });
+      $("#rmd-hide-all-code").click(function() {
+        $('div.r-code-collapse').each(function() {
+          $(this).collapse('hide');
+        });
+      });
+
+      // index for unique code element ids
+      var currentIndex = 1;
+
+      // select all R code blocks
+      var rCodeBlocks = $('pre.sourceCode, pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan');
+      rCodeBlocks.each(function() {
+
+        // create a collapsable div to wrap the code in
+        var div = $('<div class="collapse r-code-collapse"></div>');
+        if (show)
+          div.addClass('in');
+        var id = 'rcode-643E0F36' + currentIndex++;
+        div.attr('id', id);
+        $(this).before(div);
+        $(this).detach().appendTo(div);
+
+        // add a show code button right above
+        var showCodeText = $('<span>' + (show ? 'Hide' : 'Code') + '</span>');
+        var showCodeButton = $('<button type="button" class="btn btn-default btn-xs code-folding-btn pull-right"></button>');
+        showCodeButton.append(showCodeText);
+        showCodeButton
+            .attr('data-toggle', 'collapse')
+            .attr('data-target', '#' + id)
+            .attr('aria-expanded', show)
+            .attr('aria-controls', id);
+
+        var buttonRow = $('<div class="row"></div>');
+        var buttonCol = $('<div class="col-md-12"></div>');
+
+        buttonCol.append(showCodeButton);
+        buttonRow.append(buttonCol);
+
+        div.before(buttonRow);
+
+        // update state of button on show/hide
+        div.on('hidden.bs.collapse', function () {
+          showCodeText.text('Code');
+        });
+        div.on('show.bs.collapse', function () {
+          showCodeText.text('Hide');
+        });
+      });
+
+    }
+    </script><style type="text/css">
+    .code-folding-btn { margin-bottom: 4px; }
+    .row { display: flex; }
+    .collapse { display: none; }
+    .in { display:block }
+    </style>
+<script>
+    $(document).ready(function () {
+      window.initializeCodeFolding("show" === "show");
+    });
+    </script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><style type="text/css">
+    
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  </style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Spaceship Titanic - A comprehensive guide</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html"><span class="header-section-number">1</span> Introduction</a></li>
+<li><a class="" href="chapter-2.html"><span class="header-section-number">2</span> Early data exploration</a></li>
+<li><a class="" href="chapter-3.html"><span class="header-section-number">3</span> Handle missing data</a></li>
+<li><a class="" href="chapter-4.html"><span class="header-section-number">4</span> Exploration of categorical variables</a></li>
+<li><a class="" href="chapter-5.html"><span class="header-section-number">5</span> Exploration of numerical variables</a></li>
+<li><a class="" href="chapter-6.html"><span class="header-section-number">6</span> Interactions</a></li>
+<li><a class="active" href="chapter-7.html"><span class="header-section-number">7</span> Feature selection and elimination</a></li>
+<li><a class="" href="chapter-8.html"><span class="header-section-number">8</span> Final model tuning</a></li>
+<li><a class="" href="chapter-9.html"><span class="header-section-number">9</span> Final results</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/MoonCastle85/SpaceshipTitanicBook">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="chapter-7" class="section level1" number="7">
+<h1>
+<span class="header-section-number">7</span> Feature selection and elimination<a class="anchor" aria-label="anchor" href="#chapter-7"><i class="fas fa-link"></i></a>
+</h1>
+<p>Now that we have created several new features and discovered promising interaction effects, we must explore which of these have the potential to improve our models and which don’t. Kuhn and Johnson recommend several methods for feature selection and elimination that we’ll explore.</p>
+<div class="rmdwarning">
+<p>Please note that the chunks below can take many (48-96) hours to run, depending on your setup. To reduce computation time, lower the <code>size</code>-variables to a smaller grid search.</p>
+</div>
+<div id="recursive-feature-elimination" class="section level2" number="7.1">
+<h2>
+<span class="header-section-number">7.1</span> Recursive feature elimination<a class="anchor" aria-label="anchor" href="#recursive-feature-elimination"><i class="fas fa-link"></i></a>
+</h2>
+<p>Recursive feature elimination is a process that begins with a model that includes all the features and through a systematized resampling process removes sets of variables to see whether it improves performance. The goal of the process is to converge on a set of predictor variables that produce the best results.</p>
+<p>We’ll use all of our original variables as well as the interaction effects we’ve identified in the previous chapter.</p>
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rfe_df</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Cabin</span>, <span class="va">Name</span>, <span class="va">LastName</span>, <span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">rfe_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">rfe_df</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">rfe_train</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">rfe_split</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rfe_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">rfe_df</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Roles <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="st">"PassengerId"</span> <span class="op">~</span> <span class="st">"id"</span>,</span>
+<span>                           <span class="va">Variables</span> <span class="op">==</span> <span class="st">"Transported"</span> <span class="op">~</span> <span class="st">"outcome"</span>,</span>
+<span>                           .default <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">int_formula</span> <span class="op">&lt;-</span> <span class="va">pen_int_vars</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">ForFormula</span>, <span class="va">RevFormula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unname.html">unname</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">str_flatten</span><span class="op">(</span><span class="va">.</span>, collapse <span class="op">=</span> <span class="st">"+"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">str_c</span><span class="op">(</span><span class="st">"~"</span>, <span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/formula.html">as.formula</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rfe_rec</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span>x <span class="op">=</span> <span class="va">rfe_train</span>, vars <span class="op">=</span> <span class="va">rfe_vars</span><span class="op">$</span><span class="va">Variables</span>, roles <span class="op">=</span> <span class="va">rfe_vars</span><span class="op">$</span><span class="va">Roles</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">PassengerGroup</span>, <span class="va">CabinNumber</span>, <span class="va">TotalSpent</span>,</span>
+<span>                 <span class="va">TotalSpentPerGroup</span>, <span class="va">LastNameAsNumber</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_dummy</span><span class="op">(</span><span class="fu">all_nominal_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_interact</span><span class="op">(</span><span class="va">int_formula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_zv</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">many_stats</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">lev</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">obs</span><span class="op">)</span>, <span class="va">model</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu">twoClassSummary</span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, lev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">obs</span><span class="op">)</span>, <span class="va">model</span><span class="op">)</span>,</span>
+<span>      <span class="fu">prSummary</span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, lev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">obs</span><span class="op">)</span>, <span class="va">model</span><span class="op">)</span>,</span>
+<span>      <span class="fu">mnLogLoss</span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, lev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">obs</span><span class="op">)</span>, <span class="va">model</span><span class="op">)</span>,</span>
+<span>      <span class="fu">defaultSummary</span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, lev <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">obs</span><span class="op">)</span>, <span class="va">model</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">rfe_funcs</span> <span class="op">&lt;-</span> <span class="fu">caret</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/caret/man/caretFuncs.html">caretFuncs</a></span></span>
+<span><span class="va">rfe_funcs</span><span class="op">$</span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="va">many_stats</span></span>
+<span><span class="va">rfe_funcs</span><span class="op">$</span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="kw">function</span> <span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">first</span>, <span class="va">last</span>, <span class="va">...</span><span class="op">)</span> </span>
+<span>  <span class="fu">train</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, trControl <span class="op">=</span> <span class="fu">trainControl</span><span class="op">(</span>classProbs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="va">rfe_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">350</span>, <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="va">rfe_ctrl</span> <span class="op">&lt;-</span> <span class="fu">rfeControl</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"repeatedcv"</span>, repeats <span class="op">=</span> <span class="fl">5</span>, functions <span class="op">=</span> <span class="va">rfe_funcs</span>, returnResamp <span class="op">=</span> <span class="st">"all"</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
+<span><span class="co"># registerDoSNOW(my_cluster)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># snow::clusterEvalQ(my_cluster, library(recipes))</span></span>
+<span><span class="co"># snow::clusterExport(my_cluster, "int_formula")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># system.time({</span></span>
+<span><span class="co">#   set.seed(8584)</span></span>
+<span><span class="co">#   rfe_acc &lt;- rfe(rfe_rec, data = rfe_train, method = "glm", family = "binomial", metric = "Accuracy", sizes = rfe_sizes,</span></span>
+<span><span class="co">#                  rfeControl = rfe_ctrl)</span></span>
+<span><span class="co"># })</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># save(rfe_acc, file = "Extra/Recursive feature elimination with interactions.RData")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># stopCluster(my_cluster)</span></span>
+<span><span class="co"># unregister()</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Recursive feature elimination with interactions.RData"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rfe_avg_res</span> <span class="op">&lt;-</span> <span class="va">rfe_acc</span><span class="op">$</span><span class="va">results</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Variables</span>, <span class="va">Accuracy</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rfe_avg_res</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">.</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Variables</span>, y <span class="op">=</span> <span class="va">Accuracy</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">110</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"blue"</span>, size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:rfe-process-result"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/rfe-process-result-1.png" alt="Estimated performance with recursive feature elimination based on the number of variables that are included." width="672"><p class="caption">
+Figure 7.1: Estimated performance with recursive feature elimination based on the number of variables that are included.
+</p>
+</div>
+<p>The results for the RFE-process indicate is that the accuracy doesn’t improve beyond 110 variables. Let’s save those.</p>
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rfe_best</span> <span class="op">&lt;-</span> <span class="va">rfe_acc</span><span class="op">[[</span><span class="st">"variables"</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="fl">110</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">var</span>, <span class="va">Resample</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">nest</span><span class="op">(</span>.by <span class="op">=</span> <span class="va">Resample</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">left_join</span><span class="op">(</span><span class="va">.</span>, <span class="va">rfe_acc</span><span class="op">[[</span><span class="st">"resample"</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span> </span>
+<span>              <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="fl">110</span><span class="op">)</span> <span class="op">%&gt;%</span> </span>
+<span>              <span class="fu">select</span><span class="op">(</span><span class="va">Accuracy</span>, <span class="va">Resample</span><span class="op">)</span>,</span>
+<span>            by <span class="op">=</span> <span class="st">"Resample"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rfe_best_vars</span> <span class="op">&lt;-</span> <span class="va">rfe_best</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Accuracy</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">Accuracy</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">rfe_best_vars</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">rfe_best_vars</span></span></code></pre></div>
+</div>
+<div id="simulated-annealing" class="section level2" number="7.2">
+<h2>
+<span class="header-section-number">7.2</span> Simulated annealing<a class="anchor" aria-label="anchor" href="#simulated-annealing"><i class="fas fa-link"></i></a>
+</h2>
+<p>Kuhn and Johnson describe the process of simulated annealing in detail in their book but the main purpose is to iterate over random subsets of predictor variables and calculate performance until an optimal set is found. The process starts from a given set of variables and then adds or removes subsets and evaluates if these add to the performance. If they do, the new subset its kept and tested against others. The process uses randomness to avoid converging on a subset of variables that has high performance in a particular resample (local optima).</p>
+<p>We’ll use the same setup as we did for the recursive feature elimination above. We initiate the process with a random subset of 30% of the variables.</p>
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sa_df</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Cabin</span>, <span class="va">Name</span>, <span class="va">LastName</span>, <span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">sa_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">sa_df</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">sa_train</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">sa_split</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sa_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">sa_df</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Roles <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="st">"PassengerId"</span> <span class="op">~</span> <span class="st">"id"</span>,</span>
+<span>                           <span class="va">Variables</span> <span class="op">==</span> <span class="st">"Transported"</span> <span class="op">~</span> <span class="st">"outcome"</span>,</span>
+<span>                           .default <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">int_formula</span> <span class="op">&lt;-</span> <span class="va">pen_int_vars</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">ForFormula</span>, <span class="va">RevFormula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unname.html">unname</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">str_flatten</span><span class="op">(</span><span class="va">.</span>, collapse <span class="op">=</span> <span class="st">"+"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">str_c</span><span class="op">(</span><span class="st">"~"</span>, <span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/formula.html">as.formula</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sa_rec</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span>x <span class="op">=</span> <span class="va">sa_train</span>, vars <span class="op">=</span> <span class="va">sa_vars</span><span class="op">$</span><span class="va">Variables</span>, roles <span class="op">=</span> <span class="va">sa_vars</span><span class="op">$</span><span class="va">Roles</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_normalize</span><span class="op">(</span><span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">PassengerGroup</span>, <span class="va">CabinNumber</span>, <span class="va">TotalSpent</span>,</span>
+<span>                 <span class="va">TotalSpentPerGroup</span>, <span class="va">LastNameAsNumber</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_dummy</span><span class="op">(</span><span class="fu">all_nominal_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_interact</span><span class="op">(</span><span class="va">int_formula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_zv</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sa_bake</span> <span class="op">&lt;-</span> <span class="va">sa_rec</span> <span class="op">%&gt;%</span> <span class="fu">prep</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">bake</span><span class="op">(</span>new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sa_funcs</span> <span class="op">&lt;-</span> <span class="va">caretSA</span></span>
+<span><span class="va">sa_funcs</span><span class="op">$</span><span class="va">fitness_extern</span> <span class="op">&lt;-</span> <span class="va">many_stats</span></span>
+<span><span class="va">sa_funcs</span><span class="op">$</span><span class="va">initial</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">vars</span>, <span class="va">prob</span> <span class="op">=</span> <span class="fl">0.30</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span> <span class="co"># Change the prob to begin from a lower or higher subset</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample.int</a></span><span class="op">(</span><span class="va">vars</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">floor</a></span><span class="op">(</span><span class="va">vars</span> <span class="op">*</span> <span class="va">prob</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Inner control</span></span>
+<span><span class="va">sa_ctrl_inner</span> <span class="op">&lt;-</span> <span class="fu">trainControl</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"boot"</span>, p <span class="op">=</span> <span class="fl">0.90</span>, number <span class="op">=</span> <span class="fl">1</span>, summaryFunction <span class="op">=</span> <span class="va">many_stats</span>, classProbs <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>                        allowParallel <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Outer control for SA</span></span>
+<span><span class="va">sa_ctrl_outer</span> <span class="op">&lt;-</span> <span class="fu">safsControl</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"cv"</span>, metric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>internal <span class="op">=</span> <span class="st">"Accuracy"</span>, external <span class="op">=</span> <span class="st">"Accuracy"</span><span class="op">)</span>, </span>
+<span>                       maximize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>internal <span class="op">=</span> <span class="cn">TRUE</span>, external <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, functions <span class="op">=</span> <span class="va">sa_funcs</span>, improve <span class="op">=</span> <span class="fl">20</span>, returnResamp <span class="op">=</span> <span class="st">"all"</span>,</span>
+<span>                       verbose <span class="op">=</span> <span class="cn">FALSE</span>, allowParallel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
+<span><span class="co"># registerDoSNOW(my_cluster)</span></span>
+<span><span class="co"># snow::clusterExport(cl = my_cluster, "int_formula")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># system.time({</span></span>
+<span><span class="co">#   set.seed(8485)</span></span>
+<span><span class="co">#   sa_30pct_init &lt;- safs(sa_rec, data = sa_train, iters = 500, safsControl = sa_ctrl_outer, method = "glm",</span></span>
+<span><span class="co">#                             trControl = sa_ctrl_inner, metric = "Accuracy")</span></span>
+<span><span class="co"># })</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># save(sa_30pct_init, file = "Extra/Simulated annealing.RData")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># snow::stopCluster(my_cluster)</span></span>
+<span><span class="co"># unregister()</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Simulated annealing.RData"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sa_acc_int</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">$</span><span class="va">internal</span></span>
+<span><span class="va">sa_acc_int2</span> <span class="op">&lt;-</span> <span class="va">sa_acc_int</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>Accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">Accuracy</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">sa_acc_int</span><span class="op">$</span><span class="va">Resample</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Resample <span class="op">=</span> <span class="st">"Averaged"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bind_rows</span><span class="op">(</span><span class="va">sa_acc_int</span>, <span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>colour_grp <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Resample</span> <span class="op">==</span> <span class="st">"Averaged"</span>, <span class="st">"yes"</span>, <span class="st">"no"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sa_avg_int</span> <span class="op">&lt;-</span> <span class="va">sa_acc_int2</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Resample</span> <span class="op">==</span> <span class="st">"Averaged"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">Iter</span>, <span class="va">Accuracy</span><span class="op">)</span></span>
+<span>  </span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">sa_acc_int2</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">Accuracy</span>, colour <span class="op">=</span> <span class="va">colour_grp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">Resample</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:simulated-annealing-internal"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/simulated-annealing-internal-1.png" alt="Estimated performance of internal resamples from simulated annealing." width="672"><p class="caption">
+Figure 7.2: Estimated performance of internal resamples from simulated annealing.
+</p>
+</div>
+<p>The results from the internal simulated annealing process suggest that our initial random set of 30% of the variables has relatively high accuracy but that some improvement is made through the iterations, based on how the average accuracy increasesfor the first 100 iterations.</p>
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sa_acc_ext</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">$</span><span class="va">external</span></span>
+<span><span class="va">sa_acc_ext2</span> <span class="op">&lt;-</span> <span class="va">sa_acc_ext</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>Accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">Accuracy</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">sa_acc_ext</span><span class="op">$</span><span class="va">Resample</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Resample <span class="op">=</span> <span class="st">"Averaged"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bind_rows</span><span class="op">(</span><span class="va">sa_acc_ext</span>, <span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>colour_grp <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Resample</span> <span class="op">==</span> <span class="st">"Averaged"</span>, <span class="st">"yes"</span>, <span class="st">"no"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sa_avg_ext</span> <span class="op">&lt;-</span> <span class="va">sa_acc_ext2</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Resample</span> <span class="op">==</span> <span class="st">"Averaged"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">Iter</span>, <span class="va">Accuracy</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ext_int_corr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html">cor</a></span><span class="op">(</span><span class="va">sa_avg_int</span><span class="op">$</span><span class="va">Accuracy</span>, <span class="va">sa_avg_ext</span><span class="op">$</span><span class="va">Accuracy</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">Accuracy</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sa_avg_int</span>, <span class="fu">aes</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"Internal"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sa_avg_ext</span>, <span class="fu">aes</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"External"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_label</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sa_avg_ext</span>, x <span class="op">=</span> <span class="fl">5</span>, y <span class="op">=</span> <span class="fl">0.795</span>, label <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"Corr: "</span>, <span class="va">ext_int_corr</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"Estimate"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_colour_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Internal"</span> <span class="op">=</span> <span class="st">"red"</span>, <span class="st">"External"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:simulated-annealing-external"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/simulated-annealing-external-1.png" alt="Estimated performance of external resamples from simulated annealing." width="672"><p class="caption">
+Figure 7.3: Estimated performance of external resamples from simulated annealing.
+</p>
+</div>
+<p>The external resampling is used to check performance for different iterations and since it correlates relatively well with the internal resamples, we can conclude that the internal resamples haven’t overfitted to the data.</p>
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sa_final</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">$</span><span class="va">sa</span></span>
+<span><span class="va">sa_final2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Iter <span class="op">=</span> <span class="va">sa_final</span><span class="op">[[</span><span class="st">"internal"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Iter</span>, Accuracy <span class="op">=</span> <span class="va">sa_final</span><span class="op">[[</span><span class="st">"internal"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Accuracy</span>,</span>
+<span>                                Subset_Size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">sa_final</span><span class="op">[[</span><span class="st">"subsets"</span><span class="op">]</span><span class="op">]</span>, <span class="va">length</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">pivot_longer</span><span class="op">(</span><span class="op">-</span><span class="va">Iter</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">sa_final2</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">488</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"blue"</span>, size <span class="op">=</span> <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">name</span>, nrow <span class="op">=</span> <span class="fl">2</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:simulated-annealing-best"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/simulated-annealing-best-1.png" alt="Estimated performance of best resample from simulated annealing." width="672"><p class="caption">
+Figure 7.4: Estimated performance of best resample from simulated annealing.
+</p>
+</div>
+<p>The final results from the simulated annealing process indicate that a subset of 142 variables produces the best accuracy, which is close to 0.81. It is possible that more iterations would’ve revealed further improvements but since this subset is close to the one produced from the RFE-model (110), we’ll assume that the number of iterations were enough.</p>
+<p>Let us save the best variables from the process for possible later use.</p>
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sa_best_vars</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">[[</span><span class="st">"optVariables"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+</div>
+<div id="genetic-algorithm" class="section level2" number="7.3">
+<h2>
+<span class="header-section-number">7.3</span> Genetic algorithm<a class="anchor" aria-label="anchor" href="#genetic-algorithm"><i class="fas fa-link"></i></a>
+</h2>
+<p>The final process for feature selection that we’ll use is a genetic algorithm. Similar to simulated annealing, it starts with a subset of variables as the first generation and then iterates over different generation (external resampling) while it selects subsets of variables for ‘mating’ to see whether the new “offspring” improves performance. The process also involves steps to avoid local optima.</p>
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ga_df</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Cabin</span>, <span class="va">Name</span>, <span class="va">LastName</span>, <span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">ga_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">ga_df</span>, prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">ga_train</span> <span class="op">&lt;-</span> <span class="fu">training</span><span class="op">(</span><span class="va">ga_split</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ga_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">ga_df</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Roles <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="st">"PassengerId"</span> <span class="op">~</span> <span class="st">"id"</span>,</span>
+<span>                           <span class="va">Variables</span> <span class="op">==</span> <span class="st">"Transported"</span> <span class="op">~</span> <span class="st">"outcome"</span>,</span>
+<span>                           .default <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">int_formula</span> <span class="op">&lt;-</span> <span class="va">pen_int_vars</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">ForFormula</span>, <span class="va">RevFormula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unname.html">unname</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">str_flatten</span><span class="op">(</span><span class="va">.</span>, collapse <span class="op">=</span> <span class="st">"+"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">str_c</span><span class="op">(</span><span class="st">"~"</span>, <span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/formula.html">as.formula</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ga_rec</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span>x <span class="op">=</span> <span class="va">ga_train</span>, vars <span class="op">=</span> <span class="va">ga_vars</span><span class="op">$</span><span class="va">Variables</span>, roles <span class="op">=</span> <span class="va">ga_vars</span><span class="op">$</span><span class="va">Roles</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_dummy</span><span class="op">(</span><span class="fu">all_nominal_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_interact</span><span class="op">(</span><span class="va">int_formula</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_zv</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">step_corr</span><span class="op">(</span><span class="fu">all_numeric_predictors</span><span class="op">(</span><span class="op">)</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ga_funcs</span> <span class="op">&lt;-</span> <span class="va">caretGA</span></span>
+<span><span class="va">ga_funcs</span><span class="op">$</span><span class="va">fitness_extern</span> <span class="op">&lt;-</span> <span class="va">many_stats</span></span>
+<span></span>
+<span><span class="co"># Inner control</span></span>
+<span><span class="va">ga_ctrl_inner</span> <span class="op">&lt;-</span> <span class="fu">trainControl</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"boot"</span>, p <span class="op">=</span> <span class="fl">0.90</span>, number <span class="op">=</span> <span class="fl">1</span>, summaryFunction <span class="op">=</span> <span class="va">many_stats</span>, classProbs <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                        allowParallel <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Outer control for SA</span></span>
+<span><span class="va">ga_ctrl_outer</span> <span class="op">&lt;-</span> <span class="fu">gafsControl</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"cv"</span>, metric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>internal <span class="op">=</span> <span class="st">"Accuracy"</span>, external <span class="op">=</span> <span class="st">"Accuracy"</span><span class="op">)</span>,</span>
+<span>                       maximize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>internal <span class="op">=</span> <span class="cn">TRUE</span>, external <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, functions <span class="op">=</span> <span class="va">ga_funcs</span>, returnResamp <span class="op">=</span> <span class="st">"all"</span>,</span>
+<span>                       verbose <span class="op">=</span> <span class="cn">FALSE</span>, allowParallel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
+<span><span class="co"># registerDoSNOW(my_cluster)</span></span>
+<span><span class="co"># snow::clusterExport(cl = my_cluster, "int_formula")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># system.time({</span></span>
+<span><span class="co">#   set.seed(8584)</span></span>
+<span><span class="co">#   ga_acc &lt;- gafs(ga_rec, data = ga_train, iters = 50, gafsControl = ga_ctrl_outer, method = "glm",</span></span>
+<span><span class="co">#                  trControl = ga_ctrl_inner, metric = "Accuracy")</span></span>
+<span><span class="co"># })</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># save(ga_acc, file = "Extra/Genetic algorithm feature selection.RData")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># snow::stopCluster(my_cluster)</span></span>
+<span><span class="co"># unregister()</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Genetic algorithm feature selection.RData"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ga_acc_int</span> <span class="op">&lt;-</span> <span class="va">ga_acc</span><span class="op">$</span><span class="va">internal</span></span>
+<span><span class="va">ga_acc_int2</span> <span class="op">&lt;-</span> <span class="va">ga_acc_int</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>Accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">Accuracy</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">ga_acc_int</span><span class="op">$</span><span class="va">Resample</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Resample <span class="op">=</span> <span class="st">"Averaged"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bind_rows</span><span class="op">(</span><span class="va">ga_acc_int</span>, <span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>colour_grp <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Resample</span> <span class="op">==</span> <span class="st">"Averaged"</span>, <span class="st">"yes"</span>, <span class="st">"no"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ga_avg_int</span> <span class="op">&lt;-</span> <span class="va">ga_acc_int2</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Resample</span> <span class="op">==</span> <span class="st">"Averaged"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">Iter</span>, <span class="va">Accuracy</span><span class="op">)</span></span>
+<span>  </span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">ga_acc_int2</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">Accuracy</span>, colour <span class="op">=</span> <span class="va">colour_grp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">Resample</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:genetic-internal"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/genetic-internal-1.png" alt="Estimated performance of internal resamples from the genetic algorithm." width="672"><p class="caption">
+Figure 7.5: Estimated performance of internal resamples from the genetic algorithm.
+</p>
+</div>
+<p>The inner resamples of the genetic algorithm suggest a plateau after around twenty generations (iterations).</p>
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ga_acc_ext</span> <span class="op">&lt;-</span> <span class="va">ga_acc</span><span class="op">$</span><span class="va">external</span></span>
+<span><span class="va">ga_acc_ext2</span> <span class="op">&lt;-</span> <span class="va">ga_acc_ext</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>Accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">Accuracy</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">ga_acc_ext</span><span class="op">$</span><span class="va">Resample</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Resample <span class="op">=</span> <span class="st">"Averaged"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bind_rows</span><span class="op">(</span><span class="va">ga_acc_ext</span>, <span class="va">.</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>colour_grp <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">Resample</span> <span class="op">==</span> <span class="st">"Averaged"</span>, <span class="st">"yes"</span>, <span class="st">"no"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ga_avg_ext</span> <span class="op">&lt;-</span> <span class="va">ga_acc_ext2</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Resample</span> <span class="op">==</span> <span class="st">"Averaged"</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">Iter</span>, <span class="va">Accuracy</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ga_ext_int_corr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html">cor</a></span><span class="op">(</span><span class="va">ga_avg_int</span><span class="op">$</span><span class="va">Accuracy</span>, <span class="va">ga_avg_ext</span><span class="op">$</span><span class="va">Accuracy</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">Accuracy</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">ga_avg_int</span>, <span class="fu">aes</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"Internal"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">ga_avg_ext</span>, <span class="fu">aes</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"External"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_label</span><span class="op">(</span>data <span class="op">=</span> <span class="va">ga_avg_ext</span>, x <span class="op">=</span> <span class="fl">5</span>, y <span class="op">=</span> <span class="fl">0.803</span>, label <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="st">"Corr: "</span>, <span class="va">ga_ext_int_corr</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"Estimate"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_colour_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Internal"</span> <span class="op">=</span> <span class="st">"red"</span>, <span class="st">"External"</span> <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:genetic-external"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/genetic-external-1.png" alt="Estimated performance of external resamples from the genetic algorithm." width="672"><p class="caption">
+Figure 7.6: Estimated performance of external resamples from the genetic algorithm.
+</p>
+</div>
+<p>For the genetic algorithm, we see that the internal folds got better results which could indicate that the selections of subsets of variables (the populations) overfit to the data while the external validations (number of generations) found a more general population mix that hopefully better describes the unseen data.</p>
+<p>Let’s save the best variables from this process for possible later use.</p>
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ga_best_vars</span> <span class="op">&lt;-</span> <span class="va">ga_acc</span><span class="op">[[</span><span class="st">"optVariables"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+</div>
+<div id="check-performance-with-random-subsets" class="section level2" number="7.4">
+<h2>
+<span class="header-section-number">7.4</span> Check performance with random subsets<a class="anchor" aria-label="anchor" href="#check-performance-with-random-subsets"><i class="fas fa-link"></i></a>
+</h2>
+<p>The results of our three feature selection processes suggest that the optimal set of variables (including dummy variables and their interactions) is between 110 (RFE) and 174 (SA) with the genetic algorithm coming in between these at 136.</p>
+<p>To get a sense of how well these processes have selected subsets of variables, we can run an iteration that takes random subsets and evaluates performance. This will tell us if the processes are better than random chance. We’ll use the smallest subset (RFE) to reduce the computational demands.</p>
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rand_subset_size</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">rfe_best_vars</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rfe_bake</span> <span class="op">&lt;-</span> <span class="va">rfe_rec</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">prep</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">bake</span><span class="op">(</span>new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">PassengerId</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">full_vars</span> <span class="op">&lt;-</span> <span class="va">rfe_bake</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
+<span><span class="va">half_full_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">full_vars</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">map_seq</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="va">half_full_vars</span> <span class="co"># Number of iterations half of total number of variables to ensure sufficient combinations</span></span>
+<span></span>
+<span><span class="va">rand_subset</span> <span class="op">&lt;-</span> <span class="fu">map</span><span class="op">(</span><span class="va">map_seq</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">full_vars</span>, <span class="va">rand_subset_size</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">rand_data</span> <span class="op">&lt;-</span> <span class="fu">map</span><span class="op">(</span><span class="va">rand_subset</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">rfe_bake</span> <span class="op">%&gt;%</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">Transported</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">rand_rec</span> <span class="op">&lt;-</span> <span class="fu">map</span><span class="op">(</span><span class="va">rand_data</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="fu">recipe</span><span class="op">(</span><span class="va">Transported</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">df</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">subset_ctrl</span> <span class="op">&lt;-</span> <span class="fu">trainControl</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"cv"</span>, classProbs <span class="op">=</span> <span class="cn">TRUE</span>, summaryFunction <span class="op">=</span> <span class="va">many_stats</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
+<span><span class="co"># registerDoSNOW(my_cluster)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># system.time({</span></span>
+<span><span class="co">#   subset_model &lt;- map2(.x = rand_rec, .y = rand_data,</span></span>
+<span><span class="co">#                        .f = \(rec, df) train(rec, data = df, method = "glm", trControl = subset_ctrl, metric = "Accuracy"))</span></span>
+<span><span class="co"># })</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># subset_perf &lt;- map(subset_model, .f = \(m) getTrainPerf(m))</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># save(subset_perf, file = "Extra/Random subsets performance.RData")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># snow::stopCluster(my_cluster)</span></span>
+<span><span class="co"># unregister()</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Random subsets performance.RData"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rf_random_avg</span> <span class="op">&lt;-</span> <span class="fu">map_dbl</span><span class="op">(</span><span class="va">subset_perf</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">TrainAccuracy</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">enframe</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">rfe_avg_res</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Variables</span>, y <span class="op">=</span> <span class="va">Accuracy</span>, colour <span class="op">=</span> <span class="st">"RFE"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sa_avg_ext</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">Accuracy</span>, colour <span class="op">=</span> <span class="st">"SA"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">ga_avg_ext</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Iter</span>, y <span class="op">=</span> <span class="va">Accuracy</span>, colour <span class="op">=</span> <span class="st">"GA"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">rf_random_avg</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">name</span>, y <span class="op">=</span> <span class="va">value</span>, colour <span class="op">=</span> <span class="st">"Random"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_colour_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RFE"</span> <span class="op">=</span> <span class="st">"green"</span>, <span class="st">"RFE Tree"</span> <span class="op">=</span> <span class="st">"blue"</span>, <span class="st">"SA"</span> <span class="op">=</span> <span class="st">"orange"</span>, <span class="st">"GA"</span> <span class="op">=</span> <span class="st">"red"</span>, <span class="st">"Random"</span> <span class="op">=</span> <span class="st">"darkgrey"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Variables(RFE) or iterations"</span>, y <span class="op">=</span> <span class="st">"Accuracy"</span>, colour <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">lims</span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:feature-selection-comparison"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/feature-selection-comparison-1.png" alt="Comparison of different feature selection results against a random subset result." width="672"><p class="caption">
+Figure 7.7: Comparison of different feature selection results against a random subset result.
+</p>
+</div>
+<p>It seems visually that all of our feature selection methods outperform random variable subsets most of the time but let’s quantify the differences and test for significance.</p>
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_sample_size</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">name</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">random_avg_acc</span> <span class="op">&lt;-</span> <span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span></span>
+<span><span class="va">rfe_avg_acc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">rfe_avg_res</span><span class="op">$</span><span class="va">Accuracy</span>, <span class="va">my_sample_size</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">sa_avg_acc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">sa_avg_ext</span><span class="op">$</span><span class="va">Accuracy</span>, <span class="va">my_sample_size</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">ga_avg_acc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">ga_avg_ext</span><span class="op">$</span><span class="va">Accuracy</span>, <span class="va">my_sample_size</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p_wilcox_rfe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/wilcox.test.html">wilcox.test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">rfe_avg_acc</span>, y <span class="op">=</span> <span class="va">random_avg_acc</span>, paired <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span></span>
+<span><span class="va">p_ttest_rfe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/t.test.html">t.test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">rfe_avg_acc</span>, y <span class="op">=</span> <span class="va">random_avg_acc</span>, paired <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span></span>
+<span></span>
+<span><span class="va">p_wilcox_sa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/wilcox.test.html">wilcox.test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sa_avg_acc</span>, y <span class="op">=</span> <span class="va">random_avg_acc</span>, paired <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span></span>
+<span><span class="va">p_ttest_sa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/t.test.html">t.test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sa_avg_acc</span>, y <span class="op">=</span> <span class="va">random_avg_acc</span>, paired <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span></span>
+<span></span>
+<span><span class="va">p_wilcox_ga</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/wilcox.test.html">wilcox.test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">ga_avg_acc</span>, y <span class="op">=</span> <span class="va">random_avg_acc</span>, paired <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span></span>
+<span><span class="va">p_ttest_ga</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/t.test.html">t.test</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">ga_avg_acc</span>, y <span class="op">=</span> <span class="va">random_avg_acc</span>,  paired <span class="op">=</span> <span class="cn">TRUE</span>, alternative <span class="op">=</span> <span class="st">"greater"</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span></span>
+<span></span>
+<span><span class="va">p_tests</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>test <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Wilcoxon paired"</span>, <span class="st">"t.test paired"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>                      colour_grp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RFE"</span>, <span class="st">"SA"</span>, <span class="st">"GA"</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>                      value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">p_wilcox_rfe</span>, <span class="va">p_wilcox_sa</span>, <span class="va">p_wilcox_ga</span>,</span>
+<span>                                <span class="va">p_ttest_rfe</span>, <span class="va">p_ttest_sa</span>, <span class="va">p_ttest_ga</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">p_tests</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">test</span>, y <span class="op">=</span> <span class="va">value</span>, colour <span class="op">=</span> <span class="va">colour_grp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0.05</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"red"</span>, show.legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_colour_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RFE"</span> <span class="op">=</span> <span class="st">"green"</span>, <span class="st">"SA"</span> <span class="op">=</span> <span class="st">"orange"</span>, <span class="st">"GA"</span> <span class="op">=</span> <span class="st">"red"</span>, <span class="st">"size"</span> <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Tests of difference"</span>, y <span class="op">=</span> <span class="st">"P value"</span>, colour <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:rf-random-comparison-sign"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/rf-random-comparison-sign-1.png" alt="Tests if significance between different feature selection methods and random samples. The figure shows that medians (Wilcoxon) and means(t-test) for accuracy are significantly higher for results produced by the methods compared to the ones produced by random subsets." width="672"><p class="caption">
+Figure 7.8: Tests if significance between different feature selection methods and random samples. The figure shows that medians (Wilcoxon) and means(t-test) for accuracy are significantly higher for results produced by the methods compared to the ones produced by random subsets.
+</p>
+</div>
+<p>The Wilcoxon test checks whether the median of the difference in accuracy between a processed sample and a random sample are significant and it doesn’t require the distribution of the differences between the paired samples to be normal. The t.test compares the means and does require the sample differences to be relatively normal. The null hypothesis in both cases is that the accuracies from the processed samples are smaller or equal to accuracies from random samples and so low p-values mean that the processed samples have significantly greater accuracies that random samples.</p>
+<p>We see that all of the methods have significant improvement over the random sample and if we look back at Figure <a href="chapter-7.html#fig:feature-selection-comparison">7.7</a>, we can see that the accuracy results seem to be comparable between the methods. Let’s therefore save the variables from the SA process since they offered the best results.</p>
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">best_vars</span> <span class="op">&lt;-</span> <span class="va">sa_best_vars</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">best_vars</span>, file <span class="op">=</span> <span class="st">"Extra/Best variables.RData"</span><span class="op">)</span></span></code></pre></div>
+
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="chapter-6.html"><span class="header-section-number">6</span> Interactions</a></div>
+<div class="next"><a href="chapter-8.html"><span class="header-section-number">8</span> Final model tuning</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#chapter-7"><span class="header-section-number">7</span> Feature selection and elimination</a></li>
+<li><a class="nav-link" href="#recursive-feature-elimination"><span class="header-section-number">7.1</span> Recursive feature elimination</a></li>
+<li><a class="nav-link" href="#simulated-annealing"><span class="header-section-number">7.2</span> Simulated annealing</a></li>
+<li><a class="nav-link" href="#genetic-algorithm"><span class="header-section-number">7.3</span> Genetic algorithm</a></li>
+<li><a class="nav-link" href="#check-performance-with-random-subsets"><span class="header-section-number">7.4</span> Check performance with random subsets</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/blob/master/06-features.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/MoonCastle85/SpaceshipTitanicBook/edit/master/06-features.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-11.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
+</script>
+</body>
+</html>
