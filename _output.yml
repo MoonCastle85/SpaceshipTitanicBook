@@ -1,7 +1,8 @@
 bookdown::bs4_book:
+  includes:
+    in_header: header.html
   css: style.css
   theme: 
     bootswatch: yeti
   repo: https://github.com/MoonCastle85/SpaceshipTitanicBook
-  includes:
-    in_header: header.html
+  

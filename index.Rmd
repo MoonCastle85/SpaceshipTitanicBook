@@ -43,9 +43,8 @@ library(conflicted)
 
 conflict_prefer("select", "dplyr")
 conflict_prefer("filter", "dplyr")
+conflict_prefer("slice", "dplyr")
 conflict_prefer("View", "utils")
-
-knitr::opts_chunk$set(echo = TRUE)
 
 theme_set(ggthemes::theme_clean(base_size = 24))
 
@@ -53,6 +52,8 @@ unregister <- function() { # Helper function to unregister parallel processes th
   env <- foreach:::.foreachGlobals
   rm(list=ls(name=env), pos=env)
 }
+
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r htmlTemp3, echo=FALSE, eval=TRUE}
@@ -84,5 +85,5 @@ $(document).ready(function () {
 </script>
 ', sep = "\n")
 
-readr::write_lines(htmlhead, path = "header.html")
+readr::write_lines(htmlhead, file = "header.html")
 ```

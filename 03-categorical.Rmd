@@ -166,9 +166,6 @@ slickR::slickR(binom_slick, height = "480px", width = "672px") +
   slickR::settings(slidesToShow = 1, dots = TRUE)
 ```
   
-  
-  
-  
 We see a lot of interesting details so let us focus on a few of our features that relate to the passenger group.
 
 ```{r binom-passgrp, warning = FALSE, message = FALSE, fig.cap = "PassengerGroupSize plotted as a binomial plot with confidence intervals. The red dotted line shows the average probability of the response across the entire training set."}
@@ -233,5 +230,5 @@ g2 <- train5 %>%
 ```
 
 ```{r remove-03, include=FALSE}
-rm(chi_sqr_res, my_tables, mosaic_plots, plotsToSVG, binom_plots, g1, g2, g3)
+rm(list = setdiff(ls(), "train5"))
 ```

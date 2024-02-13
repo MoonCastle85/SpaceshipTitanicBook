@@ -157,5 +157,5 @@ train6 %>%
 ```
 
 ```{r remove-04, include=FALSE}
-rm(df1, df2, g1, g2)
+rm(list = setdiff(ls(), "train6"))
 ```

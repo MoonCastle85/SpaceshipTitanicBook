@@ -50,6 +50,16 @@ fig:genetic-internal
 fig:genetic-external
 fig:feature-selection-comparison
 fig:rf-random-comparison-sign
+fig:glm
+fig:glmnet
+fig:svm-linear-final
+fig:svm-poly-final
+fig:svm-rbf-final
+fig:naive-bayes-final
+fig:knn-final
+fig:c5-final
+fig:randomForest-tune
+fig:xgboost-final
 chapter-1
 chapter-2
 overview-of-the-data

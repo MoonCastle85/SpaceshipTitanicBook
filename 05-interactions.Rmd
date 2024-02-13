@@ -543,8 +543,5 @@ ggplot(rf_imp, aes(x = reorder(Predictor, Importance), y = Importance)) +
 The tree model heavily favours the amenity variables, especially the TotalSpent feature that we've created. However, this feature was penalized to zero in our penalized regression, most likely because it correlates to the other amenity variables. All other amenities are, however, represented among the variables from our best penalized results so we'll stick with them going forward.
 
 ```{r remove-05, include=FALSE}
-rm(pairs, pair_int_plots, plotsToSVG, pairs_cols, int_mods, no_int_mods, no_int_acc, diff_res, diff_res2, my_split, int_train,
-   norm_ctrl, norm_rec, diff_all_res2, diff_all_res2_adj, df_pen, my_pen_split, pen_train, my_pen_folds, my_vars, pen_rec, 
-   pen_ctrl, pen_grid, glmnet_mod, pen_best, pen_coef, int_vars, int_formula, pen_int_rec, pen_int_top, rf_imp, df_tree,
-   my_tree_split, tree_train, tree_rec, tree_baked)
+rm(list = setdiff(ls(), c("train6", "pen_int_best", "pen_int_vars")))
 ```

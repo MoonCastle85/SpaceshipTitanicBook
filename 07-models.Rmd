@@ -270,7 +270,7 @@ final_rec <- recipe(Transported ~ ., data = final_train)
 ```
 
 ## Logistic regression - GLM
-```{r glm, warning=FALSE, cache=TRUE}
+```{r glm, cache=TRUE, message=FALSE, warning=FALSE, fig.cap="Tuning results for the GLM model."}
 glm_final_mod <- logistic_reg() %>%
   set_engine("glm", family = "binomial")
 
@@ -353,45 +353,45 @@ glm_final_acc <- accuracy_vec(final_test$Transported, glm_final_pred$Prediction)
 Based on resamples, it seems that the best threshold for the probability cutoff is 0.46 instead of the normal 0.5. The best accuracy we seem able to get is just above 0.8 with the glm-model.
 
 ## Penalized logistic regression - GLMNET
-```{r glmnet, cache=TRUE}
-# glmnet_final_mod <- logistic_reg(penalty = tune(), mixture = tune()) %>%
-#   set_engine("glmnet", family = "binomial")
+```{r glmnet, cache=TRUE, message=FALSE, warning=FALSE, fig.cap="Tuning results for the GLMNET model."}
+glmnet_final_mod <- logistic_reg(penalty = tune(), mixture = tune()) %>%
+  set_engine("glmnet", family = "binomial")
+
+glmnet_final_wf <- glm_final_wf %>%
+  update_model(glmnet_final_mod)
+
+my_acc <- metric_set(accuracy)
+glmnet_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
+glmnet_grid <- expand.grid(mixture = 1, penalty = seq(1e-07, 1e-04, 1e-06))
+
+# my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
+# registerDoSNOW(my_cluster)
 # 
-# glmnet_final_wf <- glm_final_wf %>%
-#   update_model(glmnet_final_mod)
+# system.time({
+#   set.seed(8584)
+#   glmnet_final_tune <- glmnet_final_wf %>%
+#     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = glmnet_ctrl, grid = glmnet_grid)
+# })
 # 
-# my_acc <- metric_set(accuracy)
-# glmnet_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
-# glmnet_grid <- expand.grid(mixture = 1, penalty = seq(1e-07, 1e-04, 1e-06))
+# save(glmnet_final_tune, file = "Extra/Final glmnet tune.RData")
 # 
-# # my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
-# # registerDoSNOW(my_cluster)
-# # 
-# # system.time({
-# #   set.seed(8584)
-# #   glmnet_final_tune <- glmnet_final_wf %>%
-# #     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = glmnet_ctrl, grid = glmnet_grid)
-# # })
-# # 
-# # save(glmnet_final_tune, file = "Extra/Final glmnet tune.RData")
-# # 
-# # snow::stopCluster(my_cluster)
-# # unregister()
-# 
-# load("Extra/Final glmnet tune.RData")
-# 
-# show_best(glmnet_final_tune, metric = "accuracy", n = 20) %>%
-#   mutate(mixture = as.factor(round(mixture, 2))) %>%
-#   ggplot(aes(x = penalty, y = mean, label = mixture, colour = mixture)) +
-#   geom_line() +
-#   geom_point() +
-#   labs(title = "Final tune results", x = "Lambda penalty", y = "Resample accuracy", colour = "Alpha")
-# 
-# set.seed(8584)
-# glmnet_final_fit <- fit_best(glmnet_final_tune)
-# 
-# glmnet_final_pred <- predict(glmnet_final_fit, final_test, type = "class")
-# glmnet_final_acc <- accuracy_vec(final_test$Transported, glmnet_final_pred$.pred_class)
+# snow::stopCluster(my_cluster)
+# unregister()
+
+load("Extra/Final glmnet tune.RData")
+
+show_best(glmnet_final_tune, metric = "accuracy", n = 20) %>%
+  mutate(mixture = as.factor(round(mixture, 2))) %>%
+  ggplot(aes(x = penalty, y = mean, label = mixture, colour = mixture)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Final tune results", x = "Lambda penalty", y = "Resample accuracy", colour = "Alpha")
+
+set.seed(8584)
+glmnet_final_fit <- fit_best(glmnet_final_tune)
+
+glmnet_final_pred <- predict(glmnet_final_fit, final_test, type = "class")
+glmnet_final_acc <- accuracy_vec(final_test$Transported, glmnet_final_pred$.pred_class)
 ```
 ## Generalized additive models - GAM
 ```{r gam-final}
@@ -413,105 +413,105 @@ The parsnip package offers three different SVM engines.
 
 **SVM_linear** defines a SVM model that uses a linear class boundary. For classification, the model tries to maximize the width of the margin between classes using a linear class boundary. There is a single tuning parameter (named *cost* in parsnip) that determines how strict misclassification should be treated. The stricter the cost, the greater risk of overfitting.
 
-```{r svm-linear-final, cache=TRUE}
-# svm_linear_final_mod <- svm_linear(cost = tune()) %>%
-#   set_mode("classification") %>%
-#   set_engine("kernlab")
+```{r svm-linear-final, cache=TRUE, message=FALSE, warning=FALSE, fig.cap="Tuning results for the SVM linear model."}
+svm_linear_final_mod <- svm_linear(cost = tune()) %>%
+  set_mode("classification") %>%
+  set_engine("kernlab")
+
+svm_linear_final_wf <- glm_final_wf %>%
+  update_model(svm_linear_final_mod)
+
+my_acc <- metric_set(accuracy)
+svm_linear_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
+svm_linear_grid <- expand.grid(cost = seq(0, 2, 0.2))
+
+# my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
+# registerDoSNOW(my_cluster)
 # 
-# svm_linear_final_wf <- glm_final_wf %>%
-#   update_model(svm_linear_final_mod)
+# system.time({
+#   set.seed(8584)
+#   svm_linear_final_tune <- svm_linear_final_wf %>%
+#     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = svm_linear_ctrl, grid = svm_linear_grid)
+# })
 # 
-# my_acc <- metric_set(accuracy)
-# svm_linear_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
-# svm_linear_grid <- expand.grid(cost = seq(0, 2, 0.2))
+# save(svm_linear_final_tune, file = "Extra/Final SVM linear tune.RData")
 # 
-# # my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
-# # registerDoSNOW(my_cluster)
-# # 
-# # system.time({
-# #   set.seed(8584)
-# #   svm_linear_final_tune <- svm_linear_final_wf %>%
-# #     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = svm_linear_ctrl, grid = svm_linear_grid)
-# # })
-# # 
-# # save(svm_linear_final_tune, file = "Extra/Final SVM linear tune.RData")
-# # 
-# # snow::stopCluster(my_cluster)
-# # unregister()
-# 
-# load("Extra/Final SVM linear tune.RData")
-# 
-# show_best(svm_linear_final_tune, metric = "accuracy", n = 20) %>%
-#   ggplot(aes(x = cost, y = mean)) +
-#   geom_line() +
-#   geom_point() +
-#   scale_x_continuous(breaks = seq(0, 2, 0.2)) +
-#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")
-# 
-# set.seed(8584)
-# svm_linear_final_fit <- fit_best(svm_linear_final_tune)
-# 
-# svm_linear_final_pred <- predict(svm_linear_final_fit, final_test, type = "class")
-# svm_linear_final_acc <- accuracy_vec(final_test$Transported, svm_linear_final_pred$.pred_class)
+# snow::stopCluster(my_cluster)
+# unregister()
+
+load("Extra/Final SVM linear tune.RData")
+
+show_best(svm_linear_final_tune, metric = "accuracy", n = 20) %>%
+  ggplot(aes(x = cost, y = mean)) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks = seq(0, 2, 0.2)) +
+  labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")
+
+set.seed(8584)
+svm_linear_final_fit <- fit_best(svm_linear_final_tune)
+
+svm_linear_final_pred <- predict(svm_linear_final_fit, final_test, type = "class")
+svm_linear_final_acc <- accuracy_vec(final_test$Transported, svm_linear_final_pred$.pred_class)
 ```
 
 **SVM_poly** model tries to maximize the width of the margin between classes using a polynomial class boundary. There are three tuning parameters in parsnip: *cost*, *degree* and *scale*. The cost-parameter is the same as for the linear model while the degree-parameter determines the degree of the polynomial. Lower degrees might find polynomial functions that underfit while higher might overfit. The scale factor is used to scale the data and isn't necessary if the predictors are already scaled.
 
-```{r svm-poly-final, cache=TRUE}
-# svm_poly_final_mod <- svm_poly(cost = tune(), degree = tune(), scale_factor = tune()) %>%
-#   set_mode("classification") %>%
-#   set_engine("kernlab")
+```{r svm-poly-final, cache=TRUE, message=FALSE, warning=FALSE, fig.cap="Tuning results for the SVM poly model."}
+svm_poly_final_mod <- svm_poly(cost = tune(), degree = tune(), scale_factor = tune()) %>%
+  set_mode("classification") %>%
+  set_engine("kernlab")
+
+svm_poly_final_wf <- glm_final_wf %>%
+  update_model(svm_poly_final_mod)
+
+my_acc <- metric_set(accuracy)
+svm_poly_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
+svm_poly_grid <- expand.grid(cost = c(0.2, 0.6, 1), degree = c(1, 2, 3, 4), scale_factor = 1)
+
+# my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
+# registerDoSNOW(my_cluster)
 # 
-# svm_poly_final_wf <- glm_final_wf %>%
-#   update_model(svm_poly_final_mod)
+# system.time({
+#   set.seed(8584)
+#   svm_poly_final_tune <- svm_poly_final_wf %>%
+#     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = svm_poly_ctrl, grid = svm_poly_grid)
+# })
 # 
-# my_acc <- metric_set(accuracy)
-# svm_poly_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
-# svm_poly_grid <- expand.grid(cost = c(0.2, 0.6, 1), degree = c(1, 2, 3, 4), scale_factor = 1)
+# save(svm_poly_final_tune, file = "Extra/Final SVM polynomial tune.RData")
 # 
-# # my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
-# # registerDoSNOW(my_cluster)
-# # 
-# # system.time({
-# #   set.seed(8584)
-# #   svm_poly_final_tune <- svm_poly_final_wf %>%
-# #     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = svm_poly_ctrl, grid = svm_poly_grid)
-# # })
-# # 
-# # save(svm_poly_final_tune, file = "Extra/Final SVM polynomial tune.RData")
-# # 
-# # snow::stopCluster(my_cluster)
-# # unregister()
-# 
-# svm_poly_final_tune <- load("Extra/Final SVM polynomial tune.RData")
-# 
-# show_best(svm_poly_final_tune, metric = "accuracy", n = 20) %>%
-#   ggplot(aes(x = as.factor(cost), y = mean, colour = as.factor(degree))) +
-#   geom_point() +
-#   scale_y_continuous(breaks = seq(0.7, 0.8, 0.01)) +
-#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy", colour = "Polynomial\ndegree")
-# 
-# set.seed(8584)
-# svm_poly_final_fit <- fit_best(svm_poly_final_tune)
-# 
-# svm_poly_final_pred <- predict(svm_poly_final_fit, final_test, type = "class")
-# svm_poly_final_acc <- accuracy_vec(final_test$Transported, svm_poly_final_pred$.pred_class)
+# snow::stopCluster(my_cluster)
+# unregister()
+
+load("Extra/Final SVM polynomial tune.RData")
+
+show_best(svm_poly_final_tune, metric = "accuracy", n = 20) %>%
+  ggplot(aes(x = as.factor(cost), y = mean, colour = as.factor(degree))) +
+  geom_point() +
+  scale_y_continuous(breaks = seq(0.7, 0.8, 0.01)) +
+  labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy", colour = "Polynomial\ndegree")
+
+set.seed(8584)
+svm_poly_final_fit <- fit_best(svm_poly_final_tune)
+
+svm_poly_final_pred <- predict(svm_poly_final_fit, final_test, type = "class")
+svm_poly_final_acc <- accuracy_vec(final_test$Transported, svm_poly_final_pred$.pred_class)
 ```
 
 **SVM_rbf** model stands for Radial Basis Function and tries to maximize the width of the margin between classes using a nonlinear class boundary. It is useful to predictors that overlap since it maps the data into an infinite dimension space. It has two tuning parameters: *cost* and *$\sigma$*. The cost-parameter is the same as for the other two SVM-models while the $\sigma$-parameter can be seen as a weighting parameter to adjust the influence of nearby data.
 
-```{r svm-rbf-final, cache=TRUE}
-# svm_rbf_final_mod <- svm_rbf(cost = tune(), degree = tune(), scale_factor = tune()) %>%
-#   set_mode("classification") %>%
-#   set_engine("kernlab")
-# 
-# svm_rbf_final_wf <- glm_final_wf %>%
-#   update_model(svm_rbf_final_mod)
-# 
-# my_acc <- metric_set(accuracy)
-# svm_rbf_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
-# svm_rbf_grid <- expand.grid(cost = c(0.2, 0.6, 1), degree = c(1, 2, 3), scale_factor = 1)
-# 
+```{r svm-rbf-final, cache=TRUE, message=FALSE, warning=FALSE, fig.cap="Tuning results for the SVM rbf model."}
+svm_rbf_final_mod <- svm_rbf(cost = tune()) %>%
+  set_mode("classification") %>%
+  set_engine("kernlab")
+
+svm_rbf_final_wf <- glm_final_wf %>%
+  update_model(svm_rbf_final_mod)
+
+my_acc <- metric_set(accuracy)
+svm_rbf_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
+svm_rbf_grid <- expand.grid(cost = c(0.2, 0.6, 1, 1.2, 1.8, 3, 5))
+
 # my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
 # 
@@ -525,39 +525,38 @@ The parsnip package offers three different SVM engines.
 # 
 # snow::stopCluster(my_cluster)
 # unregister()
-# 
-# load("Extra/Final SVM rbf tune.RData")
-# 
-# show_best(svm_rbf_final_tune, metric = "accuracy", n = 20) %>%
-#   ggplot(aes(x = cost, y = mean)) +
-#   geom_line() +
-#   geom_point() +
-#   scale_x_continuous(breaks = seq(0, 2, 0.2)) +
-#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")
-# 
-# set.seed(8584)
-# svm_rbf_final_fit <- fit_best(svm_rbf_final_tune)
-# 
-# svm_rbf_final_pred <- predict(svm_rbf_final_fit, final_test, type = "class")
-# svm_rbf_final_acc <- accuracy_vec(final_test$Transported, svm_rbf_final_pred$.pred_class)
+
+load("Extra/Final SVM rbf tune.RData")
+
+show_best(svm_rbf_final_tune, metric = "accuracy", n = 20) %>%
+  ggplot(aes(x = cost, y = mean)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")
+
+set.seed(8584)
+svm_rbf_final_fit <- fit_best(svm_rbf_final_tune)
+
+svm_rbf_final_pred <- predict(svm_rbf_final_fit, final_test, type = "class")
+svm_rbf_final_acc <- accuracy_vec(final_test$Transported, svm_rbf_final_pred$.pred_class)
 ```
 
 ## Naive Bayes
 The Naive Bayes model has two tuning parameters in the parsnip package: *smoothness* and *Laplace*. The smoothness parameter controls the models class boundaries where lower values mean that the probabilities are more closely based on what we see in the training data while a higher value means that the probabilities are more smoothed (imagine points on a graph: low smoothness would draw a complex line through each point while high smoothness might draw a simple linear line - the best fit is probably somewhere in between). 
 The Laplace-parameter can be used to add a value to the probability calculations to avoid zero probabilities in cases when variables have very low frequency values or when the test data has values not present in the training data.
 
-```{r naive-bayes-final, cache=TRUE}
-# nb_final_mod <- naive_Bayes(smoothness = tune(), Laplace = tune()) %>%
-#   set_engine("klaR") %>%
-#   set_mode("classification")
-# 
-# nb_final_wf <- glm_final_wf %>%
-#   update_model(nb_final_mod)
-# 
-# my_acc <- metric_set(accuracy)
-# nb_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
-# nb_grid <- expand.grid(smoothness = seq(0, 5, 0.5), Laplace = 1)
-# 
+```{r naive-bayes-final, cache=TRUE, message=FALSE, warning=FALSE, fig.cap="Tuning results for the Naive Bayes model."}
+nb_final_mod <- naive_Bayes(smoothness = tune(), Laplace = tune()) %>%
+  set_engine("klaR") %>%
+  set_mode("classification")
+
+nb_final_wf <- glm_final_wf %>%
+  update_model(nb_final_mod)
+
+my_acc <- metric_set(accuracy)
+nb_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
+nb_grid <- expand.grid(smoothness = seq(0, 5, 0.5), Laplace = 1)
+
 # my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
 # 
@@ -571,21 +570,20 @@ The Laplace-parameter can be used to add a value to the probability calculations
 # 
 # snow::stopCluster(my_cluster)
 # unregister()
-# 
-# load("Extra/Final Naive Bayes tune.RData")
-# 
-# show_best(nb_final_tune, metric = "accuracy", n = 20) %>%
-#   ggplot(aes(x = cost, y = mean)) +
-#   geom_line() +
-#   geom_point() +
-#   scale_x_continuous(breaks = seq(0, 2, 0.2)) +
-#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")
-# 
-# set.seed(8584)
-# nb_final_fit <- fit_best(nb_final_tune)
-# 
-# nb_final_pred <- predict(nb_final_fit, final_test, type = "class")
-# nb_final_acc <- accuracy_vec(final_test$Transported, nb_final_pred$.pred_class)
+
+load("Extra/Final Naive Bayes tune.RData")
+
+show_best(nb_final_tune, metric = "accuracy", n = 20) %>%
+  ggplot(aes(x = smoothness, y = mean)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")
+
+set.seed(8584)
+nb_final_fit <- fit_best(nb_final_tune)
+
+nb_final_pred <- predict(nb_final_fit, final_test, type = "class")
+nb_final_acc <- accuracy_vec(final_test$Transported, nb_final_pred$.pred_class)
 ```
 
 ## KNN
@@ -603,18 +601,18 @@ We've already used the K-Nearest Neighbours function to impute data in \@ref(cha
 
 For our purposes, we probably want to use the rectangular kernel to keep it simple. I'm not sure if any weighting makes sense for our type of variables and response.
 
-```{r knn-final, cache=TRUE}
-# knn_final_mod <- nearest_neighbor(neighbors = tune(), weight_func = "rectangular") %>%
-#   set_engine("kknn") %>%
-#   set_mode("classification")
-# 
-# knn_final_wf <- glm_final_wf %>%
-#   update_model(knn_final_mod)
-# 
-# my_acc <- metric_set(accuracy)
-# knn_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
-# knn_grid <- expand.grid(smoothness = seq(0, 5, 0.5), Laplace = 1)
-# 
+```{r knn-final, cache=TRUE, message=FALSE, warning=FALSE, fig.cap="Tuning results for the KNN model."}
+knn_final_mod <- nearest_neighbor(neighbors = tune(), weight_func = "rectangular") %>%
+  set_engine("kknn") %>%
+  set_mode("classification")
+
+knn_final_wf <- glm_final_wf %>%
+  update_model(knn_final_mod)
+
+my_acc <- metric_set(accuracy)
+knn_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
+knn_grid <- expand.grid(neighbors = seq(3, 20, 1))
+
 # my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
 # 
@@ -628,112 +626,112 @@ For our purposes, we probably want to use the rectangular kernel to keep it simp
 # 
 # snow::stopCluster(my_cluster)
 # unregister()
-# 
-# load("Extra/Final KNN tune.RData")
-# 
-# show_best(knn_final_tune, metric = "accuracy", n = 20) %>%
-#   ggplot(aes(x = cost, y = mean)) +
-#   geom_line() +
-#   geom_point() +
-#   scale_x_continuous(breaks = seq(0, 2, 0.2)) +
-#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")
-# 
-# set.seed(8584)
-# knn_final_fit <- fit_best(knn_final_tune)
-# 
-# knn_final_pred <- predict(knn_final_fit, final_test, type = "class")
-# knn_final_acc <- accuracy_vec(final_test$Transported, knn_final_pred$.pred_class)
+
+load("Extra/Final KNN tune.RData")
+
+show_best(knn_final_tune, metric = "accuracy", n = 20) %>%
+  ggplot(aes(x = neighbors, y = mean)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")
+
+set.seed(8584)
+knn_final_fit <- fit_best(knn_final_tune)
+
+knn_final_pred <- predict(knn_final_fit, final_test, type = "class")
+knn_final_acc <- accuracy_vec(final_test$Transported, knn_final_pred$.pred_class)
 ```
 
 ## C5
 The C5.0 model for decision trees for has only a single tuning parameter in parsnip: *min_n*. This parameter sets the minimal node size which is a lower boundary for how many values a node must have if it is to be split further.
 
-```{r c5-final, cache=TRUE}
-# c5.0_final_mod <- decision_tree(min_n = tune()) %>%
-#   set_mode("classification") %>%
-#   set_engine("C5.0")
-# 
-# c5.0_final_wf <- glm_final_wf %>%
-#   update_model(c5.0_final_mod)
-# 
-# my_acc <- metric_set(accuracy)
-# c5.0_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
-# c5.0_grid <- expand.grid(min_n = seq(2, 3, 4, 5, 8, 12, 24, 48))
-# 
+```{r c5-final, cache=TRUE, message=FALSE, warning=FALSE, fig.cap="Tuning results for the C5.0 model."}
+c5.0_final_mod <- decision_tree(min_n = tune()) %>%
+  set_mode("classification") %>%
+  set_engine("C5.0")
+
+c5.0_final_wf <- glm_final_wf %>%
+  update_model(c5.0_final_mod)
+
+my_acc <- metric_set(accuracy)
+c5.0_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
+c5.0_grid <- expand.grid(min_n = c(2, 3, 4, 5, 8, 12, 24, 48, 72, 96, 120, 144))
+
 # my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
 # 
 # system.time({
 #   set.seed(8584)
-#   C5.0_final_tune <- C5.0_final_wf %>%
-#     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = C5.0_ctrl, grid = C5.0_grid)
+#   c5.0_final_tune <- c5.0_final_wf %>%
+#     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = c5.0_ctrl, grid = c5.0_grid)
 # })
 # 
-# save(C5.0_final_tune, file = "Extra/Final C5_0 tune.RData")
+# save(c5.0_final_tune, file = "Extra/Final C5_0 tune.RData")
 # 
 # snow::stopCluster(my_cluster)
 # unregister()
-# 
-# load("Extra/Final C5_0 tune.RData")
-# 
-# show_best(C5.0_final_tune, metric = "accuracy", n = 20) %>%
-#   ggplot(aes(x = cost, y = mean)) +
-#   geom_line() +
-#   geom_point() +
-#   scale_x_continuous(breaks = seq(0, 2, 0.2)) +
-#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")
-# 
-# set.seed(8584)
-# C5.0_final_fit <- fit_best(C5.0_final_tune)
-# 
-# C5.0_final_pred <- predict(C5.0_final_fit, final_test, type = "class")
-# C5.0_final_acc <- accuracy_vec(final_test$Transported, C5.0_final_pred$.pred_class)
+
+load("Extra/Final C5_0 tune.RData")
+
+show_best(c5.0_final_tune, metric = "accuracy", n = 20) %>%
+  ggplot(aes(x = min_n, y = mean)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Final tune results", x = "Minimum values in leaf node", y = "Resample accuracy")
+
+set.seed(8584)
+c5.0_final_fit <- fit_best(c5.0_final_tune)
+
+c5.0_final_pred <- predict(c5.0_final_fit, final_test, type = "class")
+c5.0_final_acc <- accuracy_vec(final_test$Transported, c5.0_final_pred$.pred_class)
 ```
 
 ## RandomForest
 This model has three tuning parameters: *mtry*, *trees* and *min_n*. The mtry-parameter sets the number of randomly selected predictors used to initiate each tree in the forest while the tree-parameter sets the maximum number of trees that are to be used. The min_n is the same as for the C5.0 model and decides the lowest number of values that must be present in a node so that it is allowed to be split.
 We will leave the mtry-parameter to its default value.
 
-```{r randomForest-tune, cache=TRUE}
-# rf_final_mod <- rand_forest(trees = tune(), min_n = tune()) %>%
-#   set_mode("classification") %>%
-#   set_engine("randomForest")
-# 
-# rf_final_wf <- glm_final_wf %>%
-#   update_model(rf_final_mod)
-# 
-# my_acc <- metric_set(accuracy)
-# rf_ctrl <- control_grid(verbose = TRUE, save_pred = TRUE, save_workflow = TRUE)
-# rf_grid <- expand.grid(trees = c(500, 1000, 5000, 100000, 20000, 30000, 40000), min_n = select_best(C5.0_final_tune))
-# 
+```{r randomForest-tune, cache=TRUE, message=FALSE, warning=FALSE, fig.cap="Tuning results for the RandomForest model."}
+my_min_n <- select_best(c5.0_final_tune)$min_n
+
+rf_final_mod <- rand_forest(trees = tune(), min_n = !!my_min_n) %>%
+  set_engine("randomForest") %>%
+    set_mode("classification")
+
+rf_final_wf <- glm_final_wf %>%
+  update_model(rf_final_mod)
+
+my_acc <- metric_set(accuracy)
+rf_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE, parallel_over = "resamples")
+rf_grid <- expand.grid(trees = seq(300, 800, 100))
+
 # my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
 # 
 # system.time({
 #   set.seed(8584)
-#   rf_final_tune <- rf_final_mod_tune %>%
-#     tune_grid(rf_final_wf, resamples = final_folds, metrics = my_acc, control = rf_ctrl, grid = rf_grid)
+#   rf_final_tune <- rf_final_wf %>%
+#     tune_grid(., resamples = final_folds, metrics = my_acc, control = rf_ctrl, grid = rf_grid)
 # })
 # 
 # save(rf_final_tune, file = "Extra/Final randomForest tune.RData")
 # 
 # snow::stopCluster(my_cluster)
 # unregister()
-# 
-# load("Extra/Final randomForest tune.RData")
-# 
-# show_best(rf_final_tune, metric = "accuracy", n = 20) %>%
-#   ggplot(aes(x = trees, y = mean)) +
-#   geom_line() +
-#   geom_point() +
-#   scale_x_log10() +
-#   labs(title = "Tune results for RandomForest", x = "Number of trees", y = "Resample accuracy")
-# 
-# set.seed(8584)
-# rf_final_fit <- fit_best(rf_final_tune)
-# 
-# rf_final_pred <- predict(rf_final_fit, final_test, type = "class")
-# rf_final_acc <- accuracy_vec(final_test$Transported, rf_final_pred$.pred_class)
+
+load("Extra/Final randomForest tune.RData")
+
+show_best(rf_final_tune, metric = "accuracy", n = 20) %>%
+  ggplot(aes(x = trees, y = mean)) +
+  geom_line() +
+  geom_point() +
+  scale_x_log10() +
+  labs(title = "Tune results for RandomForest", x = "Number of trees", y = "Resample accuracy")
+
+set.seed(8584)
+rf_final_fit <- fit_best(rf_final_tune)
+
+rf_final_pred <- predict(rf_final_fit, final_test, type = "class")
+rf_final_acc <- accuracy_vec(final_test$Transported, rf_final_pred$.pred_class)
 ```
 
 ## XGBoost
@@ -741,50 +739,56 @@ XGBoost is a very complicated tree-based model that uses boosting where each ite
 
 The ones we will tune is the tree depth, the learn-rate and the loss reduction. The tree depth sets the maxim number of splits within each tree. The learn-rate determines how large steps between boosting iterations the model takes. The larger the steps, the better the performance but the model may miss an important solution. The loss reduction determines the minimum loss that is required to further split a node of a tree. High values lead to less overfitting but also a higher risk of underfitting while low values increase the risk of overfitting.
 
-```{r xgboost-final, cache=TRUE}
-# xgb_final_mod <- boost_tree(tree_depth = tune(), learn_rate = tune(), loss_reduction = tune(),
-#                             min_n = select_best(C5.0_final_tune), trees = select_best(rf_final_tune)) %>%
-#   set_engine("xgboost") %>%
-#   set_mode("classification")
-# 
-# xgb_final_wf <- glm_final_wf %>%
-#   update_model(xgb_final_mod)
-# 
-# my_acc <- metric_set(accuracy)
-# xgb_ctrl <- control_grid(verbose = TRUE, save_pred = TRUE, save_workflow = TRUE)
-# xgb_grid <- expand.grid(tree_depth = seq(3, 9, 1), learn_rate = seq(0.2, 0.4, 0.1), loss_reduction = seq(0, 0.3, 0.1))
-# 
+```{r xgboost-final, cache=TRUE, message=FALSE, warning=FALSE, fig.cap="Tuning results for the XGBoost model."}
+my_min_n <- select_best(c5.0_final_tune)$min_n
+my_trees <- select_best(rf_final_tune)$trees
+
+xgb_final_mod <- boost_tree(tree_depth = tune(), learn_rate = tune(), loss_reduction = tune(),
+                            min_n = !!my_min_n, trees = !!my_trees) %>%
+  set_engine("xgboost") %>%
+  set_mode("classification")
+
+xgb_final_wf <- glm_final_wf %>%
+  update_model(xgb_final_mod)
+
+my_acc <- metric_set(accuracy)
+xgb_ctrl <- control_grid(save_pred = TRUE, save_workflow = TRUE)
+xgb_grid <- expand.grid(tree_depth = 3, learn_rate = seq(0, 0.2, 0.02), loss_reduction = seq(0, 1, 0.5))
+
 # my_cluster <- snow::makeCluster(detectCores() - 1, type = 'SOCK')
 # registerDoSNOW(my_cluster)
 # 
 # system.time({
 #   set.seed(8584)
-#   xgb_final_tune <- xgb_final_mod_tune %>%
-#     tune_grid(xgb_final_wf, resamples = final_folds, metrics = my_acc, control = xgb_ctrl, grid = xgb_grid)
+#   xgb_final_tune <- xgb_final_wf %>%
+#     tune_grid(., resamples = final_folds, metrics = my_acc, control = xgb_ctrl, grid = xgb_grid)
 # })
 # 
 # save(xgb_final_tune, file = "Extra/Final XGBoost tune.RData")
 # 
 # snow::stopCluster(my_cluster)
 # unregister()
-# 
-# load("Extra/Final XGBoost tune.RData")
-# 
-# show_best(xgb_final_tune, metric = "accuracy", n = 20) %>%
-#   ggplot(aes(x = trees, y = mean)) +
-#   geom_line() +
-#   geom_point() +
-#   scale_x_log10() +
-#   labs(title = "Tune results for RandomForest", x = "Number of trees", y = "Resample accuracy")
-# 
-# set.seed(8584)
-# xgb_final_fit <- fit_best(xgb_final_tune)
-# 
-# xgb_final_pred <- predict(xgb_final_fit, final_test, type = "class")
-# xgb_final_acc <- accuracy_vec(final_test$Transported, xgb_final_pred$.pred_class)
+
+load("Extra/Final XGBoost tune.RData")
+
+show_best(xgb_final_tune, metric = "accuracy", n = 110) %>%
+  ggplot(aes(x = learn_rate, y = mean, colour = as.factor(loss_reduction))) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Tune results for XGBoost", x = "Learn rate", y = "Resample accuracy", colour = "Loss\nreduction")
+
+set.seed(8584)
+xgb_final_fit <- fit_best(xgb_final_tune)
+
+xgb_final_pred <- predict(xgb_final_fit, final_test, type = "class")
+xgb_final_acc <- accuracy_vec(final_test$Transported, xgb_final_pred$.pred_class)
 ```
 
 ```{r remove-07, include=FALSE}
-rm(train2, train3, train3_for_knn, vars_to_impute, vars_for_imputing, train3_noNA, knn_impute_rec, knn_impute_prep, knn_impute_bake,
-   knn_impute_res, fixed_knn, train4, train5, train6, my_vars, final_interactions, final_split, final_train, final_folds)
+rm(list = setdiff(ls(), c("glm_final_acc", "glmnet_final_acc", "gam_final_acc", "svm_linear_final_acc", "svm_poly_final_acc", 
+                          "svm_rbf_final_acc", "nb_final_acc", "knn_final_acc", "c5.0_final_acc", "rf_final_acc", "xgb_final_acc", 
+                          "glm_final_fit", "glmnet_final_fit", "gam_final_fit", "svm_linear_final_fit", "svm_poly_final_fit", 
+                          "svm_rbf_final_fit", "nb_final_fit", "knn_final_fit", "c5.0_final_fit", "rf_final_fit", "xgb_final_fit",
+                          "useful_features", "my_na_replace", "useful_features2", "fix_knn", "add_grp_features",
+                          "encode_cat_to_numeric", "add_name_features", "rev_normalization", "bin_for_zero")))
 ```

@@ -6,15 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Chapter 9 Final results | Spaceship Titanic - A comprehensive guide</title>
 <meta name="author" content="Vanja Manborg">
-<meta name="description" content="Let’s make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage. # glm_ultimate_pred &lt;- predict(glm_final_fit,...">
+<meta name="description" content="Let’s make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage. glm_ultimate_pred &lt;- predict(glm_final_fit, final_test_df2,...">
 <meta name="generator" content="bookdown 0.37 with bs4_book()">
 <meta property="og:title" content="Chapter 9 Final results | Spaceship Titanic - A comprehensive guide">
 <meta property="og:type" content="book">
 <meta property="og:url" content="https://spaceshiptitanic.manborgconsulting.com/chapter-9.html">
-<meta property="og:description" content="Let’s make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage. # glm_ultimate_pred &lt;- predict(glm_final_fit,...">
+<meta property="og:description" content="Let’s make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage. glm_ultimate_pred &lt;- predict(glm_final_fit, final_test_df2,...">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Chapter 9 Final results | Spaceship Titanic - A comprehensive guide">
-<meta name="twitter:description" content="Let’s make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage. # glm_ultimate_pred &lt;- predict(glm_final_fit,...">
+<meta name="twitter:description" content="Let’s make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage. glm_ultimate_pred &lt;- predict(glm_final_fit, final_test_df2,...">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
 <script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
@@ -354,7 +354,7 @@
         });
       });
 
-    }
+    };
     </script><style type="text/css">
     .code-folding-btn { margin-bottom: 4px; }
     .row { display: flex; }
@@ -412,41 +412,201 @@
 <span class="header-section-number">9</span> Final results<a class="anchor" aria-label="anchor" href="#chapter-9"><i class="fas fa-link"></i></a>
 </h1>
 <p>Let’s make our final predictions using so far unseen data. After this, we cannot adjust the models anymore without risking data leakage.</p>
-<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># glm_ultimate_pred &lt;- predict(glm_final_fit, final_test_df, type = "prob") %&gt;%</span></span>
-<span><span class="co">#   mutate(Prediction = as.factor(if_else(.pred_True &lt; 0.46, "False", "True")))</span></span>
-<span><span class="co"># glm_final_acc &lt;- accuracy_vec(final_test_df$Transported, glm_ultimate_pred$Prediction)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># glmnet_ultimate_pred &lt;- predict(glmnet_final_fit, final_test_df, type = "class")</span></span>
-<span><span class="co"># glmnet_final_acc &lt;- accuracy_vec(final_test_df$Transported, glmnet_ultimate_pred$.pred_class)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># gam_ultimate_pred &lt;- predict(gam_final_fit, final_test_df, type = "class")</span></span>
-<span><span class="co"># gam_final_acc &lt;- accuracy_vec(final_test_df$Transported, gam_ultimate_pred$.pred_class)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># svm_linear_ultimate_pred &lt;- predict(svm_linear_final_fit, final_test_df, type = "class")</span></span>
-<span><span class="co"># svm_linear_final_acc &lt;- accuracy_vec(final_test_df$Transported, svm_linear_ultimate_pred$.pred_class)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># svm_poly_ultimate_pred &lt;- predict(svm_poly_final_fit, final_test_df, type = "class")</span></span>
-<span><span class="co"># svm_poly_final_acc &lt;- accuracy_vec(final_test_df$Transported, svm_poly_ultimate_pred$.pred_class)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># svm_rbf_ultimate_pred &lt;- predict(svm_rbf_final_fit, final_test_df, type = "class")</span></span>
-<span><span class="co"># svm_rbf_final_acc &lt;- accuracy_vec(final_test_df$Transported, svm_rbf_ultimate_pred$.pred_class)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># nb_ultimate_pred &lt;- predict(nb_final_fit, final_test_df, type = "class")</span></span>
-<span><span class="co"># nb_final_acc &lt;- accuracy_vec(final_test_df$Transported, nb_ultimate_pred$.pred_class)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># knn_ultimate_pred &lt;- predict(knn_final_fit, final_test_df, type = "class")</span></span>
-<span><span class="co"># knn_final_acc &lt;- accuracy_vec(final_test_df$Transported, knn_ultimate_pred$.pred_class)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># C5.0_ultimate_pred &lt;- predict(C5.0_final_fit, final_test_df, type = "class")</span></span>
-<span><span class="co"># C5.0_final_acc &lt;- accuracy_vec(final_test_df$Transported, C5.0_ultimate_pred$.pred_class)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># rf_ultimate_pred &lt;- predict(rf_final_fit, final_test_df, type = "class")</span></span>
-<span><span class="co"># rf_final_acc &lt;- accuracy_vec(final_test_df$Transported, rf_ultimate_pred$.pred_class)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># xgb_ultimate_pred &lt;- predict(xgb_final_fit, final_test_df, type = "class")</span></span>
-<span><span class="co"># xgb_final_acc &lt;- accuracy_vec(final_test_df$Transported, xgb_ultimate_pred$.pred_class)</span></span></code></pre></div>
-<p>Our score on Kaggle was 0.7898 which is very close to our tuned values. This indicates that our process gives us accurate estimations and now we must consider how we can improve it or select a better model.</p>
+<div class="sourceCode" id="cb104"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">glm_ultimate_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">glm_final_fit</span>, <span class="va">final_test_df2</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Prediction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="fu">if_else</span><span class="op">(</span><span class="va">.pred_True</span> <span class="op">&lt;</span> <span class="fl">0.46</span>, <span class="st">"False"</span>, <span class="st">"True"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">glm_submission</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>PassengerId <span class="op">=</span> <span class="va">final_test_df2</span><span class="op">$</span><span class="va">PassengerId</span>, Transported <span class="op">=</span> <span class="va">glm_ultimate_pred</span><span class="op">$</span><span class="va">Prediction</span><span class="op">)</span></span>
+<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">glm_submission</span>, file <span class="op">=</span> <span class="st">"Submissions/GLM submission 2024-02-13 19_40.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">glmnet_ultimate_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">glmnet_final_fit</span>, <span class="va">final_test_df2</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">glmnet_submission</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>PassengerId <span class="op">=</span> <span class="va">final_test_df2</span><span class="op">$</span><span class="va">PassengerId</span>, Transported <span class="op">=</span> <span class="va">glmnet_ultimate_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span>
+<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">glmnet_submission</span>, file <span class="op">=</span> <span class="st">"Submissions/GLMNET submission 2024-02-13 19_40.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">gam_ultimate_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">gam_final_fit</span>, <span class="va">final_test_df2</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">gam_submission</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>PassengerId <span class="op">=</span> <span class="va">final_test_df2</span><span class="op">$</span><span class="va">PassengerId</span>, Transported <span class="op">=</span> <span class="va">gam_ultimate_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span>
+<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">gam_submission</span>, file <span class="op">=</span> <span class="st">"Submissions/GAM submission 2024-02-13 19_40.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">svm_linear_ultimate_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">svm_linear_final_fit</span>, <span class="va">final_test_df2</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">svm_linear_submission</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>PassengerId <span class="op">=</span> <span class="va">final_test_df2</span><span class="op">$</span><span class="va">PassengerId</span>, Transported <span class="op">=</span> <span class="va">svm_linear_ultimate_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span>
+<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">svm_linear_submission</span>, file <span class="op">=</span> <span class="st">"Submissions/SVM linear submission 2024-02-13 19_40.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">svm_poly_ultimate_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">svm_poly_final_fit</span>, <span class="va">final_test_df2</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">svm_poly_submission</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>PassengerId <span class="op">=</span> <span class="va">final_test_df2</span><span class="op">$</span><span class="va">PassengerId</span>, Transported <span class="op">=</span> <span class="va">svm_poly_ultimate_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span>
+<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">svm_poly_submission</span>, file <span class="op">=</span> <span class="st">"Submissions/SVM poly submission 2024-02-13 19_40.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">svm_rbf_ultimate_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">svm_rbf_final_fit</span>, <span class="va">final_test_df2</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">svm_rbf_submission</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>PassengerId <span class="op">=</span> <span class="va">final_test_df2</span><span class="op">$</span><span class="va">PassengerId</span>, Transported <span class="op">=</span> <span class="va">svm_rbf_ultimate_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span>
+<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">svm_rbf_submission</span>, file <span class="op">=</span> <span class="st">"Submissions/SVM rbf submission 2024-02-13 19_40.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">nb_ultimate_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">nb_final_fit</span>, <span class="va">final_test_df2</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">nb_submission</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>PassengerId <span class="op">=</span> <span class="va">final_test_df2</span><span class="op">$</span><span class="va">PassengerId</span>, Transported <span class="op">=</span> <span class="va">nb_ultimate_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span>
+<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">nb_submission</span>, file <span class="op">=</span> <span class="st">"Submissions/NB submission 2024-02-13 19_40.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">knn_ultimate_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">knn_final_fit</span>, <span class="va">final_test_df2</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">knn_submission</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>PassengerId <span class="op">=</span> <span class="va">final_test_df2</span><span class="op">$</span><span class="va">PassengerId</span>, Transported <span class="op">=</span> <span class="va">knn_ultimate_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span>
+<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">knn_submission</span>, file <span class="op">=</span> <span class="st">"Submissions/KNN submission 2024-02-13 19_40.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">c5.0_ultimate_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">c5.0_final_fit</span>, <span class="va">final_test_df2</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">c5.0_submission</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>PassengerId <span class="op">=</span> <span class="va">final_test_df2</span><span class="op">$</span><span class="va">PassengerId</span>, Transported <span class="op">=</span> <span class="va">c5.0_ultimate_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span>
+<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">c5.0_submission</span>, file <span class="op">=</span> <span class="st">"Submissions/C5_0 submission 2024-02-13 19_40.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rf_ultimate_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">rf_final_fit</span>, <span class="va">final_test_df2</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">rf_submission</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>PassengerId <span class="op">=</span> <span class="va">final_test_df2</span><span class="op">$</span><span class="va">PassengerId</span>, Transported <span class="op">=</span> <span class="va">rf_ultimate_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span>
+<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">rf_submission</span>, file <span class="op">=</span> <span class="st">"Submissions/RF submission 2024-02-13 19_40.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">xgb_ultimate_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">xgb_final_fit</span>, <span class="va">final_test_df2</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">xgb_submission</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span>PassengerId <span class="op">=</span> <span class="va">final_test_df2</span><span class="op">$</span><span class="va">PassengerId</span>, Transported <span class="op">=</span> <span class="va">xgb_ultimate_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span>
+<span><span class="fu">write_csv</span><span class="op">(</span><span class="va">xgb_submission</span>, file <span class="op">=</span> <span class="st">"Submissions/XGB submission 2024-02-13 19_40.csv"</span><span class="op">)</span></span></code></pre></div>
+<p>Now we summarise both resampling and test results in a table.</p>
+<div class="sourceCode" id="cb105"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">modelresults</span> <span class="op">&lt;-</span> <span class="fu">readxl</span><span class="fu">::</span><span class="fu"><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_xlsx</a></span><span class="op">(</span><span class="st">"Extra/Modelresults.xlsx"</span><span class="op">)</span></span>
+<span><span class="va">modelresults2</span> <span class="op">&lt;-</span> <span class="va">modelresults</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>`Resample Accuracy` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">glm_final_acc</span>, <span class="va">glmnet_final_acc</span>, <span class="va">gam_final_acc</span>, <span class="va">svm_linear_final_acc</span>, <span class="va">svm_poly_final_acc</span>,</span>
+<span>                                 <span class="va">svm_rbf_final_acc</span>, <span class="va">nb_final_acc</span>, <span class="va">knn_final_acc</span>, <span class="va">c5.0_final_acc</span>, <span class="va">rf_final_acc</span>, <span class="va">xgb_final_acc</span><span class="op">)</span>,</span>
+<span>         `Test Data Accuracy` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.79565</span>, <span class="fl">0.79775</span>, <span class="fl">0.79775</span>, <span class="fl">0.79424</span>, <span class="cn">NA</span>, <span class="fl">0.79658</span>, <span class="fl">0.73182</span>, <span class="fl">0.77671</span>, <span class="fl">0.76852</span>,</span>
+<span>                                  <span class="fl">0.78045</span>, <span class="fl">0.78068</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, .fns <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">.x</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="va">modelresults2</span>, align <span class="op">=</span> <span class="st">"lcc"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">kableExtra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/kableExtra/man/kable_styling.html">kable_styling</a></span><span class="op">(</span>bootstrap_options <span class="op">=</span> <span class="st">"striped"</span><span class="op">)</span></span></code></pre></div>
+<div class="inline-table"><table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead><tr>
+<th style="text-align:left;">
+Model
+</th>
+<th style="text-align:center;">
+Resample Accuracy
+</th>
+<th style="text-align:center;">
+Test Data Accuracy
+</th>
+</tr></thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Logistic Regression (GLM)
+</td>
+<td style="text-align:center;">
+0.801
+</td>
+<td style="text-align:center;">
+0.796
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Penalized logistic regression (Lasso/Ridge)
+</td>
+<td style="text-align:center;">
+0.809
+</td>
+<td style="text-align:center;">
+0.798
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Generalized Additive Models (GAM)
+</td>
+<td style="text-align:center;">
+0.807
+</td>
+<td style="text-align:center;">
+0.798
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Support Vector Machines (SVM-linear)
+</td>
+<td style="text-align:center;">
+0.804
+</td>
+<td style="text-align:center;">
+0.794
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Support Vector Machines (SVM-poly)
+</td>
+<td style="text-align:center;">
+0.804
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Support Vector Machines (SVM-rbf)
+</td>
+<td style="text-align:center;">
+0.805
+</td>
+<td style="text-align:center;">
+0.797
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Naive Bayes
+</td>
+<td style="text-align:center;">
+0.731
+</td>
+<td style="text-align:center;">
+0.732
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+K-nearest neighbors
+</td>
+<td style="text-align:center;">
+0.782
+</td>
+<td style="text-align:center;">
+0.777
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+C5.0
+</td>
+<td style="text-align:center;">
+0.772
+</td>
+<td style="text-align:center;">
+0.769
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RandomForest
+</td>
+<td style="text-align:center;">
+0.794
+</td>
+<td style="text-align:center;">
+0.780
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Boosted tree-model (XGBoost)
+</td>
+<td style="text-align:center;">
+0.795
+</td>
+<td style="text-align:center;">
+0.781
+</td>
+</tr>
+</tbody>
+</table></div>
+<p>We see that our resampling methods give reasonably accurate estimates of accuracy. Apart from the Naive Bayes model that has low performance, most other models do well with this data set. The explanation for the Naive Bayes underperformance is likely that it doesn’t do so well on data that has been converted to dummy variables - it probably requires a different recipe to reach similar performance as the other models.</p>
+<p>The simplest models seem to also have the best accuracy with the best two being penalized regression as well as general additive models. I was hoping to score above 80% but it seems as if more can be done with the data.</p>
 
 </div>
   <div class="chapter-nav">
@@ -471,7 +631,7 @@
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-11.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-13.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

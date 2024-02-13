@@ -441,9 +441,5 @@ save(best_vars, file = "Extra/Best variables.RData")
 
 
 ```{r remove-06, include=FALSE}
-rm(rfe_split, rfe_train, rfe_funcs, rfe_vars, int_formula, rfe_rec, rfe_bake, rfe_sizes, rfe_ctrl, rfe_rec_corr, rfe_bake_corr,
-   rfe_split_all, rfe_train_all, rfe_rec_all, rfe_bake_all, rfe_sizes_all, rfe_vars_best_weird, int_form_weird,
-   rfe_rec_all_weird, rf_mod, rfe_all_weird_wf, sa_split, sa_train, my_vars, sa_rec, sa_bake, sa_funcs, sa_grid, sa_ctrl_inner,
-   sa_ctrl_outer, my_frq, pen_int_best, rfe_acc, rfe_acc_all, rfe_acc_all_weird, rfe_acc_corr, sim_ann_50_ext, sim_ann_50_ext2,
-   sim_ann_50_int, sim_ann_50_int2, rand_subset, rand_data, rand_rec, subset_model)
+rm(list = setdiff(ls(), "best_vars"))
 ```

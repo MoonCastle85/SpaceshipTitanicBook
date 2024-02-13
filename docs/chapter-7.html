@@ -354,7 +354,7 @@
         });
       });
 
-    }
+    };
     </script><style type="text/css">
     .code-folding-btn { margin-bottom: 4px; }
     .row { display: flex; }
@@ -421,7 +421,7 @@
 </h2>
 <p>Recursive feature elimination is a process that begins with a model that includes all the features and through a systematized resampling process removes sets of variables to see whether it improves performance. The goal of the process is to converge on a set of predictor variables that produce the best results.</p>
 <p>We’ll use all of our original variables as well as the interaction effects we’ve identified in the previous chapter.</p>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_df</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Cabin</span>, <span class="va">Name</span>, <span class="va">LastName</span>, <span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -480,7 +480,7 @@
 <span><span class="co"># unregister()</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Recursive feature elimination with interactions.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_avg_res</span> <span class="op">&lt;-</span> <span class="va">rfe_acc</span><span class="op">$</span><span class="va">results</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">Variables</span>, <span class="va">Accuracy</span><span class="op">)</span></span>
 <span></span>
@@ -496,7 +496,7 @@ Figure 7.1: Estimated performance with recursive feature elimination based on th
 </p>
 </div>
 <p>The results for the RFE-process indicate is that the accuracy doesn’t improve beyond 110 variables. Let’s save those.</p>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rfe_best</span> <span class="op">&lt;-</span> <span class="va">rfe_acc</span><span class="op">[[</span><span class="st">"variables"</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Variables</span> <span class="op">==</span> <span class="fl">110</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">var</span>, <span class="va">Resample</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -519,7 +519,7 @@ Figure 7.1: Estimated performance with recursive feature elimination based on th
 </h2>
 <p>Kuhn and Johnson describe the process of simulated annealing in detail in their book but the main purpose is to iterate over random subsets of predictor variables and calculate performance until an optimal set is found. The process starts from a given set of variables and then adds or removes subsets and evaluates if these add to the performance. If they do, the new subset its kept and tested against others. The process uses randomness to avoid converging on a subset of variables that has high performance in a particular resample (local optima).</p>
 <p>We’ll use the same setup as we did for the recursive feature elimination above. We initiate the process with a random subset of 30% of the variables.</p>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sa_df</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Cabin</span>, <span class="va">Name</span>, <span class="va">LastName</span>, <span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -580,7 +580,7 @@ Figure 7.1: Estimated performance with recursive feature elimination based on th
 <span><span class="co"># unregister()</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Simulated annealing.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sa_acc_int</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">$</span><span class="va">internal</span></span>
 <span><span class="va">sa_acc_int2</span> <span class="op">&lt;-</span> <span class="va">sa_acc_int</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -603,7 +603,7 @@ Figure 7.2: Estimated performance of internal resamples from simulated annealing
 </p>
 </div>
 <p>The results from the internal simulated annealing process suggest that our initial random set of 30% of the variables has relatively high accuracy but that some improvement is made through the iterations, based on how the average accuracy increasesfor the first 100 iterations.</p>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sa_acc_ext</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">$</span><span class="va">external</span></span>
 <span><span class="va">sa_acc_ext2</span> <span class="op">&lt;-</span> <span class="va">sa_acc_ext</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -630,7 +630,7 @@ Figure 7.3: Estimated performance of external resamples from simulated annealing
 </p>
 </div>
 <p>The external resampling is used to check performance for different iterations and since it correlates relatively well with the internal resamples, we can conclude that the internal resamples haven’t overfitted to the data.</p>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sa_final</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">$</span><span class="va">sa</span></span>
 <span><span class="va">sa_final2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Iter <span class="op">=</span> <span class="va">sa_final</span><span class="op">[[</span><span class="st">"internal"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Iter</span>, Accuracy <span class="op">=</span> <span class="va">sa_final</span><span class="op">[[</span><span class="st">"internal"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Accuracy</span>,</span>
 <span>                                Subset_Size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">sa_final</span><span class="op">[[</span><span class="st">"subsets"</span><span class="op">]</span><span class="op">]</span>, <span class="va">length</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -648,7 +648,7 @@ Figure 7.4: Estimated performance of best resample from simulated annealing.
 </div>
 <p>The final results from the simulated annealing process indicate that a subset of 142 variables produces the best accuracy, which is close to 0.81. It is possible that more iterations would’ve revealed further improvements but since this subset is close to the one produced from the RFE-model (110), we’ll assume that the number of iterations were enough.</p>
 <p>Let us save the best variables from the process for possible later use.</p>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sa_best_vars</span> <span class="op">&lt;-</span> <span class="va">sa_30pct_init</span><span class="op">[[</span><span class="st">"optVariables"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div id="genetic-algorithm" class="section level2" number="7.3">
@@ -656,7 +656,7 @@ Figure 7.4: Estimated performance of best resample from simulated annealing.
 <span class="header-section-number">7.3</span> Genetic algorithm<a class="anchor" aria-label="anchor" href="#genetic-algorithm"><i class="fas fa-link"></i></a>
 </h2>
 <p>The final process for feature selection that we’ll use is a genetic algorithm. Similar to simulated annealing, it starts with a subset of variables as the first generation and then iterates over different generation (external resampling) while it selects subsets of variables for ‘mating’ to see whether the new “offspring” improves performance. The process also involves steps to avoid local optima.</p>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ga_df</span> <span class="op">&lt;-</span> <span class="va">train6</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Cabin</span>, <span class="va">Name</span>, <span class="va">LastName</span>, <span class="va">PassengerCount</span>, <span class="va">HomePlanetsPerGroup</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -711,7 +711,7 @@ Figure 7.4: Estimated performance of best resample from simulated annealing.
 <span><span class="co"># unregister()</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Genetic algorithm feature selection.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ga_acc_int</span> <span class="op">&lt;-</span> <span class="va">ga_acc</span><span class="op">$</span><span class="va">internal</span></span>
 <span><span class="va">ga_acc_int2</span> <span class="op">&lt;-</span> <span class="va">ga_acc_int</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -734,7 +734,7 @@ Figure 7.5: Estimated performance of internal resamples from the genetic algorit
 </p>
 </div>
 <p>The inner resamples of the genetic algorithm suggest a plateau after around twenty generations (iterations).</p>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ga_acc_ext</span> <span class="op">&lt;-</span> <span class="va">ga_acc</span><span class="op">$</span><span class="va">external</span></span>
 <span><span class="va">ga_acc_ext2</span> <span class="op">&lt;-</span> <span class="va">ga_acc_ext</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Iter</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -762,7 +762,7 @@ Figure 7.6: Estimated performance of external resamples from the genetic algorit
 </div>
 <p>For the genetic algorithm, we see that the internal folds got better results which could indicate that the selections of subsets of variables (the populations) overfit to the data while the external validations (number of generations) found a more general population mix that hopefully better describes the unseen data.</p>
 <p>Let’s save the best variables from this process for possible later use.</p>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ga_best_vars</span> <span class="op">&lt;-</span> <span class="va">ga_acc</span><span class="op">[[</span><span class="st">"optVariables"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div id="check-performance-with-random-subsets" class="section level2" number="7.4">
@@ -771,7 +771,7 @@ Figure 7.6: Estimated performance of external resamples from the genetic algorit
 </h2>
 <p>The results of our three feature selection processes suggest that the optimal set of variables (including dummy variables and their interactions) is between 110 (RFE) and 174 (SA) with the genetic algorithm coming in between these at 136.</p>
 <p>To get a sense of how well these processes have selected subsets of variables, we can run an iteration that takes random subsets and evaluates performance. This will tell us if the processes are better than random chance. We’ll use the smallest subset (RFE) to reduce the computational demands.</p>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rand_subset_size</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">rfe_best_vars</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rfe_bake</span> <span class="op">&lt;-</span> <span class="va">rfe_rec</span> <span class="op">%&gt;%</span></span>
@@ -805,7 +805,7 @@ Figure 7.6: Estimated performance of external resamples from the genetic algorit
 <span><span class="co"># unregister()</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Random subsets performance.RData"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rf_random_avg</span> <span class="op">&lt;-</span> <span class="fu">map_dbl</span><span class="op">(</span><span class="va">subset_perf</span>, .f <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">TrainAccuracy</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">enframe</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -824,7 +824,7 @@ Figure 7.7: Comparison of different feature selection results against a random s
 </p>
 </div>
 <p>It seems visually that all of our feature selection methods outperform random variable subsets most of the time but let’s quantify the differences and test for significance.</p>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_sample_size</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">rf_random_avg</span><span class="op">$</span><span class="va">name</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">random_avg_acc</span> <span class="op">&lt;-</span> <span class="va">rf_random_avg</span><span class="op">$</span><span class="va">value</span></span>
@@ -859,7 +859,7 @@ Figure 7.8: Tests if significance between different feature selection methods an
 </div>
 <p>The Wilcoxon test checks whether the median of the difference in accuracy between a processed sample and a random sample are significant and it doesn’t require the distribution of the differences between the paired samples to be normal. The t.test compares the means and does require the sample differences to be relatively normal. The null hypothesis in both cases is that the accuracies from the processed samples are smaller or equal to accuracies from random samples and so low p-values mean that the processed samples have significantly greater accuracies that random samples.</p>
 <p>We see that all of the methods have significant improvement over the random sample and if we look back at Figure <a href="chapter-7.html#fig:feature-selection-comparison">7.7</a>, we can see that the accuracy results seem to be comparable between the methods. Let’s therefore save the variables from the SA process since they offered the best results.</p>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">best_vars</span> <span class="op">&lt;-</span> <span class="va">sa_best_vars</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">best_vars</span>, file <span class="op">=</span> <span class="st">"Extra/Best variables.RData"</span><span class="op">)</span></span></code></pre></div>
 
@@ -893,7 +893,7 @@ Figure 7.8: Tests if significance between different feature selection methods an
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-11.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-13.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

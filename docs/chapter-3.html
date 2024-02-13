@@ -354,7 +354,7 @@
         });
       });
 
-    }
+    };
     </script><style type="text/css">
     .code-folding-btn { margin-bottom: 4px; }
     .row { display: flex; }
@@ -418,7 +418,7 @@
 </h2>
 <p>We’re given several useful bits of information about the data on the <a href="https://www.kaggle.com/competitions/spaceship-titanic/data">competition website</a> that we can apply to create some useful features. By features, I mean new variables that are derived from existing ones. For example, Cabin is comprised of information about the cabin number, the deck and the side and PassengerId contains the passenger group id.</p>
 <p>I’ve created a function that derives these new variables from existing ones. It also creates features that count the number of unique categories of different variables by passenger group. Since the passenger group variable is the only one with no missing values, it makes sense to start the exploration of the others based on it. Questions that we could ask are: ‘Is any passenger group travelling from different home planets?’</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">useful_features</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x2</span> <span class="op">&lt;-</span> <span class="va">x</span> <span class="op">%&gt;%</span></span>
 <span>    <span class="fu">mutate</span><span class="op">(</span>PassengerGroup <span class="op">=</span> <span class="fu">str_split_i</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="st">"_"</span>, <span class="fl">1</span><span class="op">)</span>,</span>
@@ -454,7 +454,7 @@
 <span class="header-section-number">3.2</span> Closer look at missing values<a class="anchor" aria-label="anchor" href="#closer-look-at-missing-values"><i class="fas fa-link"></i></a>
 </h2>
 <p>A closer look at each variable with missing values gives us more insights. For example, every passenger group always starts from the same home planet. Figure <a href="chapter-3.html#fig:missing-homeplanet">3.1</a> shows a sample of passenger groups and their home planets. This is one of the patterns of missingness I alluded to earlier and we can use this information to replace missing HomePlanet values for passengers belonging to a group with a known home planet. This will leave us only with passengers who are travelling alone.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">PassengerGroup</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">HomePlanet</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -472,7 +472,7 @@ Figure 3.1: Sample of missing values for HomePlanet
 </p>
 </div>
 <p>We can also see that groups with two or more travelers are never housed in the same cabins as other (non-solo) groups. In other words, a group with two or more passengers can be spread out across several cabins but never share those cabins with other groups of two or more passengers. Figure <a href="chapter-3.html#fig:missing-cabin">3.2</a> shows a sample. We can use this information to replace missing cabin values.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">PassengerGroupSize</span> <span class="op">!=</span> <span class="fl">1</span> <span class="op">&amp;</span> <span class="va">Side</span> <span class="op">==</span> <span class="st">"S"</span> <span class="op">&amp;</span> <span class="va">Deck</span> <span class="op">==</span> <span class="st">"G"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -487,7 +487,7 @@ Figure 3.2: Sample of missing values for Cabin
 </p>
 </div>
 <p>When we look at the new feature Deck, we can see that some decks seem dedicated to passengers from a specific home planet, see Figure <a href="chapter-3.html#fig:missing-deck">3.4</a>. This helps us replace even more missing values for HomePlanet.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">CabinNumber</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="va">PassengerGroup</span><span class="op">)</span>, colour <span class="op">=</span> <span class="va">Deck</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -500,7 +500,7 @@ Figure 3.3: Relationsship between Cabin and passenger group.
 </p>
 </div>
 <p>We see that the relationship between CabinNumber and PassengerGroup is linear so we can use this to replace CabinNumber where Deck is known.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Deck</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">HomePlanet</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -517,7 +517,7 @@ Figure 3.4: Missing values for Deck
 </p>
 </div>
 <p>We also see that there aren’t any VIPs travelling from Earth so we can use this information to replace missing VIP-values where the home planet is known.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">HomePlanet</span>, y <span class="op">=</span> <span class="va">PassengerCount</span>, fill <span class="op">=</span> <span class="va">VIP</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -532,7 +532,7 @@ Figure 3.5: Missing values for VIP
 </div>
 <p>We are also told that passengers in cryosleep are confined to their cabins and we must assume that this means they cannot spend any credits on amenities. In other words, we can replace missing amenities with zeroes for passengers in cryo sleep. The reverse is also true: if a passenger has spent credits, the passenger cannot be in cryo sleep.</p>
 <p>One last insight we can get from missing data is that passengers of 12 years of age or under don’t spend any credits. We can therefore use this to replace even more missing values for amenities.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train2</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Age</span>, y <span class="op">=</span> <span class="va">TotalSpent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_col</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -552,7 +552,7 @@ Figure 3.6: Missing values for ameneties
 <span class="header-section-number">3.3</span> Replace data with manual rules<a class="anchor" aria-label="anchor" href="#replace-data-with-manual-rules"><i class="fas fa-link"></i></a>
 </h2>
 <p>I’ve summed up all of these replacement rules in the function below.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_na_replace</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">cabin_coef</span> <span class="op">&lt;-</span> <span class="va">d</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">nest</span><span class="op">(</span>.by <span class="op">=</span> <span class="va">Deck</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -619,7 +619,7 @@ Figure 3.7: Missing values after manual replacement.
 <p>Most algorithms require no missing data at all and since we cannot find any more patterns for the missing data, we can use some imputation algorithms to do the rest. I’ve used two: <code>MissRanger</code> and <code>KNN</code>. Since KNN can be sensitive to the scale of the data and outliers, I’ve normalized the numeric data to avoid possible issues with the imputation.</p>
 <p>Note that I’ve saved the results for some of these imputations since they can take some time to run.
 ### MissRanger - Chained Random Forests</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rev_normalization</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">v</span>, <span class="va">rec</span><span class="op">)</span> <span class="op">{</span> <span class="co"># Custom function that will "unnormalise" numeric values inside mutate(across())</span></span>
 <span>  <span class="va">tidy_rec</span> <span class="op">&lt;-</span> <span class="fu">tidy</span><span class="op">(</span><span class="va">rec</span>, number <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span>  <span class="va">v2</span> <span class="op">&lt;-</span> <span class="va">v</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">tidy_rec</span>, <span class="va">terms</span> <span class="op">==</span> <span class="fu">cur_column</span><span class="op">(</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">statistic</span> <span class="op">==</span> <span class="st">"sd"</span><span class="op">)</span><span class="op">$</span><span class="va">value</span> <span class="op">+</span> </span>
@@ -654,7 +654,7 @@ Figure 3.7: Missing values after manual replacement.
 <span class="header-section-number">3.4.1</span> KNN - K-Nearest Neighbors<a class="anchor" aria-label="anchor" href="#knn---k-nearest-neighbors"><i class="fas fa-link"></i></a>
 </h3>
 <p>I use the <code>recipe</code>-package to set up the process of imputation where the <code>step_impute_knn</code>-function allows to specify which variables are to be used for the imputation and which are to be imputed.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train3_for_knn</span> <span class="op">&lt;-</span> <span class="va">train3</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span><span class="fu">across</span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu">where</span><span class="op">(</span><span class="va">is.factor</span><span class="op">)</span>, .fns <span class="op">=</span> <span class="va">as.character</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -687,7 +687,7 @@ Figure 3.7: Missing values after manual replacement.
 <span class="header-section-number">3.4.2</span> Comparison of imputation algorithms - numerical variables<a class="anchor" aria-label="anchor" href="#comparison-of-imputation-algorithms---numerical-variables"><i class="fas fa-link"></i></a>
 </h3>
 <p>Here I use the <code>skimr</code>-package to set up metrics to evaluate and do some data wrangling of the imputated variables to that they can be compared to the non-imputed ones.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_skim</span> <span class="op">&lt;-</span> <span class="fu">skimr</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim_with.html">skim_with</a></span><span class="op">(</span>numeric <span class="op">=</span> <span class="fu">skimr</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/sfl.html">sfl</a></span><span class="op">(</span>min <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">.</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, median <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">.</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, </span>
 <span>                                   mean <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">.</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, max <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">.</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, </span>
 <span>                                   sd <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">.</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>, append <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -727,7 +727,7 @@ Figure 3.8: Comparisson of standard deviation for numerical values before and af
 </p>
 </div>
 <p>The standard deviation for our numeric variables isn’t affected by the imputation, although this was expected since we only have 1% of missing data. The same is true for the mean, as can be seen in Figure <a href="chapter-3.html#fig:imputation-evaluation-num2">3.9</a>.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mean_skim</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Metric</span> <span class="op">!=</span> <span class="st">"No imp"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">Metric</span>, y <span class="op">=</span> <span class="va">Mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -748,7 +748,7 @@ Figure 3.9: Comparisson of mean for numerical values before and after imputation
 <span class="header-section-number">3.4.3</span> Comparison of imputation algorithms - categorical variables<a class="anchor" aria-label="anchor" href="#comparison-of-imputation-algorithms---categorical-variables"><i class="fas fa-link"></i></a>
 </h3>
 <p>A comparison of proportions of the categorical variables also shows that the imputation seems reasonable and hasn’t introduced any strange values like outliers. Below are two sample comparisons for HomePlanet and CryoSleep but I encourage you (if you follow along this code) to explore each categorical variable seperately.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_prop_plot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">v</span>, <span class="va">t</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">g</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">df</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">t</span><span class="op">)</span>, fill <span class="op">=</span> <span class="op">!</span><span class="op">!</span><span class="fu">sym</span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">geom_bar</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -770,7 +770,7 @@ Figure 3.9: Comparisson of mean for numerical values before and after imputation
 Figure 3.10: Imputed distribution for HomePlanet compared to no imputation
 </p>
 </div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">c1</span> <span class="op">&lt;-</span> <span class="fu">my_prop_plot</span><span class="op">(</span><span class="va">train3</span>, <span class="st">"CryoSleep"</span>, <span class="st">"Transported"</span><span class="op">)</span></span>
 <span><span class="va">c2</span> <span class="op">&lt;-</span> <span class="fu">my_prop_plot</span><span class="op">(</span><span class="va">ranger2</span>, <span class="st">"CryoSleep"</span>, <span class="st">"Transported"</span><span class="op">)</span></span>
 <span><span class="va">c3</span> <span class="op">&lt;-</span> <span class="fu">my_prop_plot</span><span class="op">(</span><span class="va">knn_impute_res</span>, <span class="st">"CryoSleep"</span>, <span class="st">"Transported"</span><span class="op">)</span></span>
@@ -788,7 +788,7 @@ Figure 3.11: Imputed distribution for HomePlanet compared to no imputation
 <span class="header-section-number">3.4.4</span> Do the imputated values break any “rules”?<a class="anchor" aria-label="anchor" href="#do-the-imputated-values-break-any-rules"><i class="fas fa-link"></i></a>
 </h3>
 <p>One last thing we must do before we accept the imputed values is to check whether the imputation has managed to adhere to the ‘rules’ we discovered earlier that we used for our manual replacement of NA-values. I use a modified version of the <code>useful_features</code>-function below to update the simple features.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">useful_features2</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x2</span> <span class="op">&lt;-</span> <span class="va">x</span> <span class="op">%&gt;%</span></span>
 <span>    <span class="fu">mutate</span><span class="op">(</span>TotalSpent <span class="op">=</span> <span class="va">RoomService</span> <span class="op">+</span> <span class="va">FoodCourt</span> <span class="op">+</span> <span class="va">ShoppingMall</span> <span class="op">+</span> <span class="va">Spa</span> <span class="op">+</span> <span class="va">VRDeck</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -820,7 +820,7 @@ Figure 3.11: Imputed distribution for HomePlanet compared to no imputation
 <span><span class="co">#&gt; # ℹ 3 variables: PassengerId &lt;fct&gt;, HomePlanet &lt;fct&gt;,</span></span>
 <span><span class="co">#&gt; #   HomePlanetsPerGroup &lt;fct&gt;</span></span></code></pre></div>
 <p>The imputation didn’t seem to break the rule where every passenger group travels from the same planet, which is great.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">check_knn</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Age</span> <span class="op">&lt;=</span> <span class="fl">12</span> <span class="op">&amp;</span> <span class="va">TotalSpent</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">CryoSleep</span>, <span class="va">Age</span>, <span class="va">RoomService</span>, <span class="va">FoodCourt</span>, <span class="va">ShoppingMall</span>, <span class="va">Spa</span>, <span class="va">VRDeck</span>, <span class="va">TotalSpent</span><span class="op">)</span></span>
@@ -844,7 +844,7 @@ Figure 3.11: Imputed distribution for HomePlanet compared to no imputation
 <span><span class="co">#&gt; # ℹ 3 more variables: Spa &lt;int&gt;, VRDeck &lt;int&gt;,</span></span>
 <span><span class="co">#&gt; #   TotalSpent &lt;dbl&gt;</span></span></code></pre></div>
 <p>The imputation didn’t break the rule where passengers that are &lt;=12 years old don’t spend any credits but it did break the rule where passengers that are in cryo sleep can’t spend credits.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">check_knn</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Deck</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">HomePlanet</span> <span class="op">!=</span> <span class="st">"Europa"</span> <span class="op">|</span> <span class="va">Deck</span> <span class="op">==</span> <span class="st">"G"</span> <span class="op">&amp;</span> <span class="va">HomePlanet</span> <span class="op">!=</span> <span class="st">"Earth"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">PassengerId</span>, <span class="va">HomePlanet</span>, <span class="va">Deck</span><span class="op">)</span></span>
@@ -870,7 +870,7 @@ Figure 3.11: Imputed distribution for HomePlanet compared to no imputation
 <span><span class="co">#&gt; # ℹ 3 variables: PassengerId &lt;fct&gt;, HomePlanet &lt;fct&gt;,</span></span>
 <span><span class="co">#&gt; #   VIP &lt;fct&gt;</span></span></code></pre></div>
 <p>Another rule that was broken regards the Deck variable where some passengers have been imputed as being housed on decks despite travelling from the ‘wrong’ homeplanet for that deck. We can deal with this in a general function that checks for all the ‘rules’ and adjusts.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fix_knn</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">amenities_summary</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">%&gt;%</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Age</span> <span class="op">&gt;</span> <span class="fl">12</span> <span class="op">&amp;</span> <span class="va">TotalSpent</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -965,7 +965,7 @@ Figure 3.12: Missing values overview after imputation
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-11.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-13.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

@@ -354,7 +354,7 @@
         });
       });
 
-    }
+    };
     </script><style type="text/css">
     .code-folding-btn { margin-bottom: 4px; }
     .row { display: flex; }
@@ -509,7 +509,7 @@ Boosting is a process of fitting a series of models into an ensamble but adding 
 <h2>
 <span class="header-section-number">8.2</span> Logistic regression - GLM<a class="anchor" aria-label="anchor" href="#logistic-regression---glm"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glm_final_mod</span> <span class="op">&lt;-</span> <span class="fu">logistic_reg</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"glm"</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span>
 <span></span>
@@ -582,8 +582,13 @@ Boosting is a process of fitting a series of models into an ensamble but adding 
 <span>  <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">glm_thresholds2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">glm_p1</span> <span class="op">+</span> <span class="va">glm_p2</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>axis_titles <span class="op">=</span> <span class="st">"collect_y"</span><span class="op">)</span></span></code></pre></div>
-<div class="inline-figure"><img src="SpaceshipTitanicBook_files/figure-html/glm-1.png" width="672"></div>
-<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<div class="figure">
+<span style="display:block;" id="fig:glm"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/glm-1.png" alt="Tuning results for the GLM model." width="672"><p class="caption">
+Figure 8.1: Tuning results for the GLM model.
+</p>
+</div>
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">glm_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit</span><span class="op">(</span><span class="va">glm_final_wf</span>, <span class="va">final_train</span><span class="op">)</span></span>
 <span><span class="va">glm_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">glm_final_fit</span>, <span class="va">final_test</span>, type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -595,45 +600,52 @@ Boosting is a process of fitting a series of models into an ensamble but adding 
 <h2>
 <span class="header-section-number">8.3</span> Penalized logistic regression - GLMNET<a class="anchor" aria-label="anchor" href="#penalized-logistic-regression---glmnet"><i class="fas fa-link"></i></a>
 </h2>
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">glmnet_final_mod</span> <span class="op">&lt;-</span> <span class="fu">logistic_reg</span><span class="op">(</span>penalty <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, mixture <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"glmnet"</span>, family <span class="op">=</span> <span class="st">"binomial"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">glmnet_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">glmnet_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
+<span><span class="va">glmnet_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">glmnet_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>mixture <span class="op">=</span> <span class="fl">1</span>, penalty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">1e-07</span>, <span class="fl">1e-04</span>, <span class="fl">1e-06</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
+<span><span class="co"># registerDoSNOW(my_cluster)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># system.time({</span></span>
+<span><span class="co">#   set.seed(8584)</span></span>
+<span><span class="co">#   glmnet_final_tune &lt;- glmnet_final_wf %&gt;%</span></span>
+<span><span class="co">#     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = glmnet_ctrl, grid = glmnet_grid)</span></span>
+<span><span class="co"># })</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># save(glmnet_final_tune, file = "Extra/Final glmnet tune.RData")</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># snow::stopCluster(my_cluster)</span></span>
+<span><span class="co"># unregister()</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Final glmnet tune.RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">show_best</span><span class="op">(</span><span class="va">glmnet_final_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>mixture <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">mixture</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">penalty</span>, y <span class="op">=</span> <span class="va">mean</span>, label <span class="op">=</span> <span class="va">mixture</span>, colour <span class="op">=</span> <span class="va">mixture</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Final tune results"</span>, x <span class="op">=</span> <span class="st">"Lambda penalty"</span>, y <span class="op">=</span> <span class="st">"Resample accuracy"</span>, colour <span class="op">=</span> <span class="st">"Alpha"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:glmnet"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/glmnet-1.png" alt="Tuning results for the GLMNET model." width="672"><p class="caption">
+Figure 8.2: Tuning results for the GLMNET model.
+</p>
+</div>
 <div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># glmnet_final_mod &lt;- logistic_reg(penalty = tune(), mixture = tune()) %&gt;%</span></span>
-<span><span class="co">#   set_engine("glmnet", family = "binomial")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># glmnet_final_wf &lt;- glm_final_wf %&gt;%</span></span>
-<span><span class="co">#   update_model(glmnet_final_mod)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># my_acc &lt;- metric_set(accuracy)</span></span>
-<span><span class="co"># glmnet_ctrl &lt;- control_grid(save_pred = TRUE, save_workflow = TRUE)</span></span>
-<span><span class="co"># glmnet_grid &lt;- expand.grid(mixture = 1, penalty = seq(1e-07, 1e-04, 1e-06))</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># # my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
-<span><span class="co"># # registerDoSNOW(my_cluster)</span></span>
-<span><span class="co"># # </span></span>
-<span><span class="co"># # system.time({</span></span>
-<span><span class="co"># #   set.seed(8584)</span></span>
-<span><span class="co"># #   glmnet_final_tune &lt;- glmnet_final_wf %&gt;%</span></span>
-<span><span class="co"># #     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = glmnet_ctrl, grid = glmnet_grid)</span></span>
-<span><span class="co"># # })</span></span>
-<span><span class="co"># # </span></span>
-<span><span class="co"># # save(glmnet_final_tune, file = "Extra/Final glmnet tune.RData")</span></span>
-<span><span class="co"># # </span></span>
-<span><span class="co"># # snow::stopCluster(my_cluster)</span></span>
-<span><span class="co"># # unregister()</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># load("Extra/Final glmnet tune.RData")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># show_best(glmnet_final_tune, metric = "accuracy", n = 20) %&gt;%</span></span>
-<span><span class="co">#   mutate(mixture = as.factor(round(mixture, 2))) %&gt;%</span></span>
-<span><span class="co">#   ggplot(aes(x = penalty, y = mean, label = mixture, colour = mixture)) +</span></span>
-<span><span class="co">#   geom_line() +</span></span>
-<span><span class="co">#   geom_point() +</span></span>
-<span><span class="co">#   labs(title = "Final tune results", x = "Lambda penalty", y = "Resample accuracy", colour = "Alpha")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># set.seed(8584)</span></span>
-<span><span class="co"># glmnet_final_fit &lt;- fit_best(glmnet_final_tune)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># glmnet_final_pred &lt;- predict(glmnet_final_fit, final_test, type = "class")</span></span>
-<span><span class="co"># glmnet_final_acc &lt;- accuracy_vec(final_test$Transported, glmnet_final_pred$.pred_class)</span></span></code></pre></div>
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">glmnet_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit_best</span><span class="op">(</span><span class="va">glmnet_final_tune</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">glmnet_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">glmnet_final_fit</span>, <span class="va">final_test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">glmnet_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy_vec</span><span class="op">(</span><span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="va">glmnet_final_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div id="generalized-additive-models---gam" class="section level2" number="8.4">
 <h2>
@@ -659,98 +671,113 @@ Boosting is a process of fitting a series of models into an ensamble but adding 
 <p>The parsnip package offers three different SVM engines.</p>
 <p><strong>SVM_linear</strong> defines a SVM model that uses a linear class boundary. For classification, the model tries to maximize the width of the margin between classes using a linear class boundary. There is a single tuning parameter (named <em>cost</em> in parsnip) that determines how strict misclassification should be treated. The stricter the cost, the greater risk of overfitting.</p>
 <div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># svm_linear_final_mod &lt;- svm_linear(cost = tune()) %&gt;%</span></span>
-<span><span class="co">#   set_mode("classification") %&gt;%</span></span>
-<span><span class="co">#   set_engine("kernlab")</span></span>
+<code class="sourceCode R"><span><span class="va">svm_linear_final_mod</span> <span class="op">&lt;-</span> <span class="fu">svm_linear</span><span class="op">(</span>cost <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"kernlab"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">svm_linear_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">svm_linear_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
+<span><span class="va">svm_linear_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">svm_linear_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>cost <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
+<span><span class="co"># registerDoSNOW(my_cluster)</span></span>
 <span><span class="co"># </span></span>
-<span><span class="co"># svm_linear_final_wf &lt;- glm_final_wf %&gt;%</span></span>
-<span><span class="co">#   update_model(svm_linear_final_mod)</span></span>
+<span><span class="co"># system.time({</span></span>
+<span><span class="co">#   set.seed(8584)</span></span>
+<span><span class="co">#   svm_linear_final_tune &lt;- svm_linear_final_wf %&gt;%</span></span>
+<span><span class="co">#     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = svm_linear_ctrl, grid = svm_linear_grid)</span></span>
+<span><span class="co"># })</span></span>
 <span><span class="co"># </span></span>
-<span><span class="co"># my_acc &lt;- metric_set(accuracy)</span></span>
-<span><span class="co"># svm_linear_ctrl &lt;- control_grid(save_pred = TRUE, save_workflow = TRUE)</span></span>
-<span><span class="co"># svm_linear_grid &lt;- expand.grid(cost = seq(0, 2, 0.2))</span></span>
+<span><span class="co"># save(svm_linear_final_tune, file = "Extra/Final SVM linear tune.RData")</span></span>
 <span><span class="co"># </span></span>
-<span><span class="co"># # my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
-<span><span class="co"># # registerDoSNOW(my_cluster)</span></span>
-<span><span class="co"># # </span></span>
-<span><span class="co"># # system.time({</span></span>
-<span><span class="co"># #   set.seed(8584)</span></span>
-<span><span class="co"># #   svm_linear_final_tune &lt;- svm_linear_final_wf %&gt;%</span></span>
-<span><span class="co"># #     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = svm_linear_ctrl, grid = svm_linear_grid)</span></span>
-<span><span class="co"># # })</span></span>
-<span><span class="co"># # </span></span>
-<span><span class="co"># # save(svm_linear_final_tune, file = "Extra/Final SVM linear tune.RData")</span></span>
-<span><span class="co"># # </span></span>
-<span><span class="co"># # snow::stopCluster(my_cluster)</span></span>
-<span><span class="co"># # unregister()</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># load("Extra/Final SVM linear tune.RData")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># show_best(svm_linear_final_tune, metric = "accuracy", n = 20) %&gt;%</span></span>
-<span><span class="co">#   ggplot(aes(x = cost, y = mean)) +</span></span>
-<span><span class="co">#   geom_line() +</span></span>
-<span><span class="co">#   geom_point() +</span></span>
-<span><span class="co">#   scale_x_continuous(breaks = seq(0, 2, 0.2)) +</span></span>
-<span><span class="co">#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># set.seed(8584)</span></span>
-<span><span class="co"># svm_linear_final_fit &lt;- fit_best(svm_linear_final_tune)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># svm_linear_final_pred &lt;- predict(svm_linear_final_fit, final_test, type = "class")</span></span>
-<span><span class="co"># svm_linear_final_acc &lt;- accuracy_vec(final_test$Transported, svm_linear_final_pred$.pred_class)</span></span></code></pre></div>
-<p><strong>SVM_poly</strong> model tries to maximize the width of the margin between classes using a polynomial class boundary. There are three tuning parameters in parsnip: <em>cost</em>, <em>degree</em> and <em>scale</em>. The cost-parameter is the same as for the linear model while the degree-parameter determines the degree of the polynomial. Lower degrees might find polynomial functions that underfit while higher might overfit. The scale factor is used to scale the data and isn’t necessary if the predictors are already scaled.</p>
+<span><span class="co"># snow::stopCluster(my_cluster)</span></span>
+<span><span class="co"># unregister()</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Final SVM linear tune.RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">show_best</span><span class="op">(</span><span class="va">svm_linear_final_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">cost</span>, y <span class="op">=</span> <span class="va">mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Final tune results"</span>, x <span class="op">=</span> <span class="st">"Cost penalty"</span>, y <span class="op">=</span> <span class="st">"Resample accuracy"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:svm-linear-final"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/svm-linear-final-1.png" alt="Tuning results for the SVM linear model." width="672"><p class="caption">
+Figure 8.3: Tuning results for the SVM linear model.
+</p>
+</div>
 <div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># svm_poly_final_mod &lt;- svm_poly(cost = tune(), degree = tune(), scale_factor = tune()) %&gt;%</span></span>
-<span><span class="co">#   set_mode("classification") %&gt;%</span></span>
-<span><span class="co">#   set_engine("kernlab")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># svm_poly_final_wf &lt;- glm_final_wf %&gt;%</span></span>
-<span><span class="co">#   update_model(svm_poly_final_mod)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># my_acc &lt;- metric_set(accuracy)</span></span>
-<span><span class="co"># svm_poly_ctrl &lt;- control_grid(save_pred = TRUE, save_workflow = TRUE)</span></span>
-<span><span class="co"># svm_poly_grid &lt;- expand.grid(cost = c(0.2, 0.6, 1), degree = c(1, 2, 3, 4), scale_factor = 1)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># # my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
-<span><span class="co"># # registerDoSNOW(my_cluster)</span></span>
-<span><span class="co"># # </span></span>
-<span><span class="co"># # system.time({</span></span>
-<span><span class="co"># #   set.seed(8584)</span></span>
-<span><span class="co"># #   svm_poly_final_tune &lt;- svm_poly_final_wf %&gt;%</span></span>
-<span><span class="co"># #     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = svm_poly_ctrl, grid = svm_poly_grid)</span></span>
-<span><span class="co"># # })</span></span>
-<span><span class="co"># # </span></span>
-<span><span class="co"># # save(svm_poly_final_tune, file = "Extra/Final SVM polynomial tune.RData")</span></span>
-<span><span class="co"># # </span></span>
-<span><span class="co"># # snow::stopCluster(my_cluster)</span></span>
-<span><span class="co"># # unregister()</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># svm_poly_final_tune &lt;- load("Extra/Final SVM polynomial tune.RData")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># show_best(svm_poly_final_tune, metric = "accuracy", n = 20) %&gt;%</span></span>
-<span><span class="co">#   ggplot(aes(x = as.factor(cost), y = mean, colour = as.factor(degree))) +</span></span>
-<span><span class="co">#   geom_point() +</span></span>
-<span><span class="co">#   scale_y_continuous(breaks = seq(0.7, 0.8, 0.01)) +</span></span>
-<span><span class="co">#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy", colour = "Polynomial\ndegree")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># set.seed(8584)</span></span>
-<span><span class="co"># svm_poly_final_fit &lt;- fit_best(svm_poly_final_tune)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># svm_poly_final_pred &lt;- predict(svm_poly_final_fit, final_test, type = "class")</span></span>
-<span><span class="co"># svm_poly_final_acc &lt;- accuracy_vec(final_test$Transported, svm_poly_final_pred$.pred_class)</span></span></code></pre></div>
-<p><strong>SVM_rbf</strong> model stands for Radial Basis Function and tries to maximize the width of the margin between classes using a nonlinear class boundary. It is useful to predictors that overlap since it maps the data into an infinite dimension space. It has two tuning parameters: <em>cost</em> and <em><span class="math inline">\(\sigma\)</span></em>. The cost-parameter is the same as for the other two SVM-models while the <span class="math inline">\(\sigma\)</span>-parameter can be seen as a weighting parameter to adjust the influence of nearby data.</p>
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">svm_linear_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit_best</span><span class="op">(</span><span class="va">svm_linear_final_tune</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  Setting default kernel parameters</span></span>
+<span></span>
+<span><span class="va">svm_linear_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">svm_linear_final_fit</span>, <span class="va">final_test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">svm_linear_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy_vec</span><span class="op">(</span><span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="va">svm_linear_final_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span></code></pre></div>
+<p><strong>SVM_poly</strong> model tries to maximize the width of the margin between classes using a polynomial class boundary. There are three tuning parameters in parsnip: <em>cost</em>, <em>degree</em> and <em>scale</em>. The cost-parameter is the same as for the linear model while the degree-parameter determines the degree of the polynomial. Lower degrees might find polynomial functions that underfit while higher might overfit. The scale factor is used to scale the data and isn’t necessary if the predictors are already scaled.</p>
 <div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># svm_rbf_final_mod &lt;- svm_rbf(cost = tune(), degree = tune(), scale_factor = tune()) %&gt;%</span></span>
-<span><span class="co">#   set_mode("classification") %&gt;%</span></span>
-<span><span class="co">#   set_engine("kernlab")</span></span>
+<code class="sourceCode R"><span><span class="va">svm_poly_final_mod</span> <span class="op">&lt;-</span> <span class="fu">svm_poly</span><span class="op">(</span>cost <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, degree <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, scale_factor <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"kernlab"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">svm_poly_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">svm_poly_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
+<span><span class="va">svm_poly_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">svm_poly_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>cost <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>, degree <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span>, scale_factor <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
+<span><span class="co"># registerDoSNOW(my_cluster)</span></span>
 <span><span class="co"># </span></span>
-<span><span class="co"># svm_rbf_final_wf &lt;- glm_final_wf %&gt;%</span></span>
-<span><span class="co">#   update_model(svm_rbf_final_mod)</span></span>
+<span><span class="co"># system.time({</span></span>
+<span><span class="co">#   set.seed(8584)</span></span>
+<span><span class="co">#   svm_poly_final_tune &lt;- svm_poly_final_wf %&gt;%</span></span>
+<span><span class="co">#     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = svm_poly_ctrl, grid = svm_poly_grid)</span></span>
+<span><span class="co"># })</span></span>
 <span><span class="co"># </span></span>
-<span><span class="co"># my_acc &lt;- metric_set(accuracy)</span></span>
-<span><span class="co"># svm_rbf_ctrl &lt;- control_grid(save_pred = TRUE, save_workflow = TRUE)</span></span>
-<span><span class="co"># svm_rbf_grid &lt;- expand.grid(cost = c(0.2, 0.6, 1), degree = c(1, 2, 3), scale_factor = 1)</span></span>
+<span><span class="co"># save(svm_poly_final_tune, file = "Extra/Final SVM polynomial tune.RData")</span></span>
 <span><span class="co"># </span></span>
+<span><span class="co"># snow::stopCluster(my_cluster)</span></span>
+<span><span class="co"># unregister()</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Final SVM polynomial tune.RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">show_best</span><span class="op">(</span><span class="va">svm_poly_final_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">cost</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">mean</span>, colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">degree</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_y_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0.7</span>, <span class="fl">0.8</span>, <span class="fl">0.01</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Final tune results"</span>, x <span class="op">=</span> <span class="st">"Cost penalty"</span>, y <span class="op">=</span> <span class="st">"Resample accuracy"</span>, colour <span class="op">=</span> <span class="st">"Polynomial\ndegree"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:svm-poly-final"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/svm-poly-final-1.png" alt="Tuning results for the SVM poly model." width="672"><p class="caption">
+Figure 8.4: Tuning results for the SVM poly model.
+</p>
+</div>
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">svm_poly_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit_best</span><span class="op">(</span><span class="va">svm_poly_final_tune</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">svm_poly_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">svm_poly_final_fit</span>, <span class="va">final_test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">svm_poly_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy_vec</span><span class="op">(</span><span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="va">svm_poly_final_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span></code></pre></div>
+<p><strong>SVM_rbf</strong> model stands for Radial Basis Function and tries to maximize the width of the margin between classes using a nonlinear class boundary. It is useful to predictors that overlap since it maps the data into an infinite dimension space. It has two tuning parameters: <em>cost</em> and <em><span class="math inline">\(\sigma\)</span></em>. The cost-parameter is the same as for the other two SVM-models while the <span class="math inline">\(\sigma\)</span>-parameter can be seen as a weighting parameter to adjust the influence of nearby data.</p>
+<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">svm_rbf_final_mod</span> <span class="op">&lt;-</span> <span class="fu">svm_rbf</span><span class="op">(</span>cost <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"kernlab"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">svm_rbf_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">svm_rbf_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
+<span><span class="va">svm_rbf_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">svm_rbf_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>cost <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.6</span>, <span class="fl">1</span>, <span class="fl">1.2</span>, <span class="fl">1.8</span>, <span class="fl">3</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
 <span><span class="co"># registerDoSNOW(my_cluster)</span></span>
 <span><span class="co"># </span></span>
@@ -764,21 +791,27 @@ Boosting is a process of fitting a series of models into an ensamble but adding 
 <span><span class="co"># </span></span>
 <span><span class="co"># snow::stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># load("Extra/Final SVM rbf tune.RData")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># show_best(svm_rbf_final_tune, metric = "accuracy", n = 20) %&gt;%</span></span>
-<span><span class="co">#   ggplot(aes(x = cost, y = mean)) +</span></span>
-<span><span class="co">#   geom_line() +</span></span>
-<span><span class="co">#   geom_point() +</span></span>
-<span><span class="co">#   scale_x_continuous(breaks = seq(0, 2, 0.2)) +</span></span>
-<span><span class="co">#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># set.seed(8584)</span></span>
-<span><span class="co"># svm_rbf_final_fit &lt;- fit_best(svm_rbf_final_tune)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># svm_rbf_final_pred &lt;- predict(svm_rbf_final_fit, final_test, type = "class")</span></span>
-<span><span class="co"># svm_rbf_final_acc &lt;- accuracy_vec(final_test$Transported, svm_rbf_final_pred$.pred_class)</span></span></code></pre></div>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Final SVM rbf tune.RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">show_best</span><span class="op">(</span><span class="va">svm_rbf_final_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">cost</span>, y <span class="op">=</span> <span class="va">mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Final tune results"</span>, x <span class="op">=</span> <span class="st">"Cost penalty"</span>, y <span class="op">=</span> <span class="st">"Resample accuracy"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:svm-rbf-final"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/svm-rbf-final-1.png" alt="Tuning results for the SVM rbf model." width="672"><p class="caption">
+Figure 8.5: Tuning results for the SVM rbf model.
+</p>
+</div>
+<div class="sourceCode" id="cb93"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">svm_rbf_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit_best</span><span class="op">(</span><span class="va">svm_rbf_final_tune</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">svm_rbf_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">svm_rbf_final_fit</span>, <span class="va">final_test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">svm_rbf_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy_vec</span><span class="op">(</span><span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="va">svm_rbf_final_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div id="naive-bayes" class="section level2" number="8.6">
 <h2>
@@ -786,18 +819,18 @@ Boosting is a process of fitting a series of models into an ensamble but adding 
 </h2>
 <p>The Naive Bayes model has two tuning parameters in the parsnip package: <em>smoothness</em> and <em>Laplace</em>. The smoothness parameter controls the models class boundaries where lower values mean that the probabilities are more closely based on what we see in the training data while a higher value means that the probabilities are more smoothed (imagine points on a graph: low smoothness would draw a complex line through each point while high smoothness might draw a simple linear line - the best fit is probably somewhere in between).
 The Laplace-parameter can be used to add a value to the probability calculations to avoid zero probabilities in cases when variables have very low frequency values or when the test data has values not present in the training data.</p>
-<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># nb_final_mod &lt;- naive_Bayes(smoothness = tune(), Laplace = tune()) %&gt;%</span></span>
-<span><span class="co">#   set_engine("klaR") %&gt;%</span></span>
-<span><span class="co">#   set_mode("classification")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># nb_final_wf &lt;- glm_final_wf %&gt;%</span></span>
-<span><span class="co">#   update_model(nb_final_mod)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># my_acc &lt;- metric_set(accuracy)</span></span>
-<span><span class="co"># nb_ctrl &lt;- control_grid(save_pred = TRUE, save_workflow = TRUE)</span></span>
-<span><span class="co"># nb_grid &lt;- expand.grid(smoothness = seq(0, 5, 0.5), Laplace = 1)</span></span>
-<span><span class="co"># </span></span>
+<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">nb_final_mod</span> <span class="op">&lt;-</span> <span class="fu">naive_Bayes</span><span class="op">(</span>smoothness <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, Laplace <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"klaR"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">nb_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">nb_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
+<span><span class="va">nb_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">nb_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>smoothness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">0.5</span><span class="op">)</span>, Laplace <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
 <span><span class="co"># registerDoSNOW(my_cluster)</span></span>
 <span><span class="co"># </span></span>
@@ -811,21 +844,27 @@ The Laplace-parameter can be used to add a value to the probability calculations
 <span><span class="co"># </span></span>
 <span><span class="co"># snow::stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># load("Extra/Final Naive Bayes tune.RData")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># show_best(nb_final_tune, metric = "accuracy", n = 20) %&gt;%</span></span>
-<span><span class="co">#   ggplot(aes(x = cost, y = mean)) +</span></span>
-<span><span class="co">#   geom_line() +</span></span>
-<span><span class="co">#   geom_point() +</span></span>
-<span><span class="co">#   scale_x_continuous(breaks = seq(0, 2, 0.2)) +</span></span>
-<span><span class="co">#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># set.seed(8584)</span></span>
-<span><span class="co"># nb_final_fit &lt;- fit_best(nb_final_tune)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># nb_final_pred &lt;- predict(nb_final_fit, final_test, type = "class")</span></span>
-<span><span class="co"># nb_final_acc &lt;- accuracy_vec(final_test$Transported, nb_final_pred$.pred_class)</span></span></code></pre></div>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Final Naive Bayes tune.RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">show_best</span><span class="op">(</span><span class="va">nb_final_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">smoothness</span>, y <span class="op">=</span> <span class="va">mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Final tune results"</span>, x <span class="op">=</span> <span class="st">"Cost penalty"</span>, y <span class="op">=</span> <span class="st">"Resample accuracy"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:naive-bayes-final"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/naive-bayes-final-1.png" alt="Tuning results for the Naive Bayes model." width="672"><p class="caption">
+Figure 8.6: Tuning results for the Naive Bayes model.
+</p>
+</div>
+<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">nb_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit_best</span><span class="op">(</span><span class="va">nb_final_tune</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">nb_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">nb_final_fit</span>, <span class="va">final_test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">nb_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy_vec</span><span class="op">(</span><span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="va">nb_final_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div id="knn" class="section level2" number="8.7">
 <h2>
@@ -842,18 +881,18 @@ The Laplace-parameter can be used to add a value to the probability calculations
 <em>Gaussian</em>: This kernel uses the Gaussian function to assign weights. It has a bell shape and does not compactly support, meaning it gives some weight to all points in the dataset, but the weight decreases rapidly as the distance increases.
 <em>Rank</em>: This kernel uses the ranks of the distances rather than the distances themselves.</p>
 <p>For our purposes, we probably want to use the rectangular kernel to keep it simple. I’m not sure if any weighting makes sense for our type of variables and response.</p>
-<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># knn_final_mod &lt;- nearest_neighbor(neighbors = tune(), weight_func = "rectangular") %&gt;%</span></span>
-<span><span class="co">#   set_engine("kknn") %&gt;%</span></span>
-<span><span class="co">#   set_mode("classification")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># knn_final_wf &lt;- glm_final_wf %&gt;%</span></span>
-<span><span class="co">#   update_model(knn_final_mod)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># my_acc &lt;- metric_set(accuracy)</span></span>
-<span><span class="co"># knn_ctrl &lt;- control_grid(save_pred = TRUE, save_workflow = TRUE)</span></span>
-<span><span class="co"># knn_grid &lt;- expand.grid(smoothness = seq(0, 5, 0.5), Laplace = 1)</span></span>
-<span><span class="co"># </span></span>
+<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">knn_final_mod</span> <span class="op">&lt;-</span> <span class="fu">nearest_neighbor</span><span class="op">(</span>neighbors <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, weight_func <span class="op">=</span> <span class="st">"rectangular"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"kknn"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">knn_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">knn_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
+<span><span class="va">knn_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">knn_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>neighbors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">20</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
 <span><span class="co"># registerDoSNOW(my_cluster)</span></span>
 <span><span class="co"># </span></span>
@@ -867,67 +906,79 @@ The Laplace-parameter can be used to add a value to the probability calculations
 <span><span class="co"># </span></span>
 <span><span class="co"># snow::stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># load("Extra/Final KNN tune.RData")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># show_best(knn_final_tune, metric = "accuracy", n = 20) %&gt;%</span></span>
-<span><span class="co">#   ggplot(aes(x = cost, y = mean)) +</span></span>
-<span><span class="co">#   geom_line() +</span></span>
-<span><span class="co">#   geom_point() +</span></span>
-<span><span class="co">#   scale_x_continuous(breaks = seq(0, 2, 0.2)) +</span></span>
-<span><span class="co">#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># set.seed(8584)</span></span>
-<span><span class="co"># knn_final_fit &lt;- fit_best(knn_final_tune)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># knn_final_pred &lt;- predict(knn_final_fit, final_test, type = "class")</span></span>
-<span><span class="co"># knn_final_acc &lt;- accuracy_vec(final_test$Transported, knn_final_pred$.pred_class)</span></span></code></pre></div>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Final KNN tune.RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">show_best</span><span class="op">(</span><span class="va">knn_final_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">neighbors</span>, y <span class="op">=</span> <span class="va">mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Final tune results"</span>, x <span class="op">=</span> <span class="st">"Cost penalty"</span>, y <span class="op">=</span> <span class="st">"Resample accuracy"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:knn-final"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/knn-final-1.png" alt="Tuning results for the KNN model." width="672"><p class="caption">
+Figure 8.7: Tuning results for the KNN model.
+</p>
+</div>
+<div class="sourceCode" id="cb97"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">knn_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit_best</span><span class="op">(</span><span class="va">knn_final_tune</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">knn_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">knn_final_fit</span>, <span class="va">final_test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">knn_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy_vec</span><span class="op">(</span><span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="va">knn_final_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div id="c5" class="section level2" number="8.8">
 <h2>
 <span class="header-section-number">8.8</span> C5<a class="anchor" aria-label="anchor" href="#c5"><i class="fas fa-link"></i></a>
 </h2>
 <p>The C5.0 model for decision trees for has only a single tuning parameter in parsnip: <em>min_n</em>. This parameter sets the minimal node size which is a lower boundary for how many values a node must have if it is to be split further.</p>
-<div class="sourceCode" id="cb93"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># c5.0_final_mod &lt;- decision_tree(min_n = tune()) %&gt;%</span></span>
-<span><span class="co">#   set_mode("classification") %&gt;%</span></span>
-<span><span class="co">#   set_engine("C5.0")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># c5.0_final_wf &lt;- glm_final_wf %&gt;%</span></span>
-<span><span class="co">#   update_model(c5.0_final_mod)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># my_acc &lt;- metric_set(accuracy)</span></span>
-<span><span class="co"># c5.0_ctrl &lt;- control_grid(save_pred = TRUE, save_workflow = TRUE)</span></span>
-<span><span class="co"># c5.0_grid &lt;- expand.grid(min_n = seq(2, 3, 4, 5, 8, 12, 24, 48))</span></span>
-<span><span class="co"># </span></span>
+<div class="sourceCode" id="cb98"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">c5.0_final_mod</span> <span class="op">&lt;-</span> <span class="fu">decision_tree</span><span class="op">(</span>min_n <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"C5.0"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">c5.0_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">c5.0_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
+<span><span class="va">c5.0_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">c5.0_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>min_n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">8</span>, <span class="fl">12</span>, <span class="fl">24</span>, <span class="fl">48</span>, <span class="fl">72</span>, <span class="fl">96</span>, <span class="fl">120</span>, <span class="fl">144</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
 <span><span class="co"># registerDoSNOW(my_cluster)</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># system.time({</span></span>
 <span><span class="co">#   set.seed(8584)</span></span>
-<span><span class="co">#   C5.0_final_tune &lt;- C5.0_final_wf %&gt;%</span></span>
-<span><span class="co">#     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = C5.0_ctrl, grid = C5.0_grid)</span></span>
+<span><span class="co">#   c5.0_final_tune &lt;- c5.0_final_wf %&gt;%</span></span>
+<span><span class="co">#     tune_grid(object = ., resamples = final_folds, metrics = my_acc, control = c5.0_ctrl, grid = c5.0_grid)</span></span>
 <span><span class="co"># })</span></span>
 <span><span class="co"># </span></span>
-<span><span class="co"># save(C5.0_final_tune, file = "Extra/Final C5_0 tune.RData")</span></span>
+<span><span class="co"># save(c5.0_final_tune, file = "Extra/Final C5_0 tune.RData")</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># snow::stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># load("Extra/Final C5_0 tune.RData")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># show_best(C5.0_final_tune, metric = "accuracy", n = 20) %&gt;%</span></span>
-<span><span class="co">#   ggplot(aes(x = cost, y = mean)) +</span></span>
-<span><span class="co">#   geom_line() +</span></span>
-<span><span class="co">#   geom_point() +</span></span>
-<span><span class="co">#   scale_x_continuous(breaks = seq(0, 2, 0.2)) +</span></span>
-<span><span class="co">#   labs(title = "Final tune results", x = "Cost penalty", y = "Resample accuracy")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># set.seed(8584)</span></span>
-<span><span class="co"># C5.0_final_fit &lt;- fit_best(C5.0_final_tune)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># C5.0_final_pred &lt;- predict(C5.0_final_fit, final_test, type = "class")</span></span>
-<span><span class="co"># C5.0_final_acc &lt;- accuracy_vec(final_test$Transported, C5.0_final_pred$.pred_class)</span></span></code></pre></div>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Final C5_0 tune.RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">show_best</span><span class="op">(</span><span class="va">c5.0_final_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">min_n</span>, y <span class="op">=</span> <span class="va">mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Final tune results"</span>, x <span class="op">=</span> <span class="st">"Minimum values in leaf node"</span>, y <span class="op">=</span> <span class="st">"Resample accuracy"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:c5-final"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/c5-final-1.png" alt="Tuning results for the C5.0 model." width="672"><p class="caption">
+Figure 8.8: Tuning results for the C5.0 model.
+</p>
+</div>
+<div class="sourceCode" id="cb99"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">c5.0_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit_best</span><span class="op">(</span><span class="va">c5.0_final_tune</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">c5.0_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">c5.0_final_fit</span>, <span class="va">final_test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">c5.0_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy_vec</span><span class="op">(</span><span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="va">c5.0_final_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div id="randomforest" class="section level2" number="8.9">
 <h2>
@@ -935,46 +986,55 @@ The Laplace-parameter can be used to add a value to the probability calculations
 </h2>
 <p>This model has three tuning parameters: <em>mtry</em>, <em>trees</em> and <em>min_n</em>. The mtry-parameter sets the number of randomly selected predictors used to initiate each tree in the forest while the tree-parameter sets the maximum number of trees that are to be used. The min_n is the same as for the C5.0 model and decides the lowest number of values that must be present in a node so that it is allowed to be split.
 We will leave the mtry-parameter to its default value.</p>
-<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># rf_final_mod &lt;- rand_forest(trees = tune(), min_n = tune()) %&gt;%</span></span>
-<span><span class="co">#   set_mode("classification") %&gt;%</span></span>
-<span><span class="co">#   set_engine("randomForest")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># rf_final_wf &lt;- glm_final_wf %&gt;%</span></span>
-<span><span class="co">#   update_model(rf_final_mod)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># my_acc &lt;- metric_set(accuracy)</span></span>
-<span><span class="co"># rf_ctrl &lt;- control_grid(verbose = TRUE, save_pred = TRUE, save_workflow = TRUE)</span></span>
-<span><span class="co"># rf_grid &lt;- expand.grid(trees = c(500, 1000, 5000, 100000, 20000, 30000, 40000), min_n = select_best(C5.0_final_tune))</span></span>
-<span><span class="co"># </span></span>
+<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_min_n</span> <span class="op">&lt;-</span> <span class="fu">select_best</span><span class="op">(</span><span class="va">c5.0_final_tune</span><span class="op">)</span><span class="op">$</span><span class="va">min_n</span></span>
+<span></span>
+<span><span class="va">rf_final_mod</span> <span class="op">&lt;-</span> <span class="fu">rand_forest</span><span class="op">(</span>trees <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, min_n <span class="op">=</span> <span class="op">!</span><span class="op">!</span><span class="va">my_min_n</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rf_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">rf_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
+<span><span class="va">rf_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span>, parallel_over <span class="op">=</span> <span class="st">"resamples"</span><span class="op">)</span></span>
+<span><span class="va">rf_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>trees <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">300</span>, <span class="fl">800</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
 <span><span class="co"># registerDoSNOW(my_cluster)</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># system.time({</span></span>
 <span><span class="co">#   set.seed(8584)</span></span>
-<span><span class="co">#   rf_final_tune &lt;- rf_final_mod_tune %&gt;%</span></span>
-<span><span class="co">#     tune_grid(rf_final_wf, resamples = final_folds, metrics = my_acc, control = rf_ctrl, grid = rf_grid)</span></span>
+<span><span class="co">#   rf_final_tune &lt;- rf_final_wf %&gt;%</span></span>
+<span><span class="co">#     tune_grid(., resamples = final_folds, metrics = my_acc, control = rf_ctrl, grid = rf_grid)</span></span>
 <span><span class="co"># })</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># save(rf_final_tune, file = "Extra/Final randomForest tune.RData")</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># snow::stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># load("Extra/Final randomForest tune.RData")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># show_best(rf_final_tune, metric = "accuracy", n = 20) %&gt;%</span></span>
-<span><span class="co">#   ggplot(aes(x = trees, y = mean)) +</span></span>
-<span><span class="co">#   geom_line() +</span></span>
-<span><span class="co">#   geom_point() +</span></span>
-<span><span class="co">#   scale_x_log10() +</span></span>
-<span><span class="co">#   labs(title = "Tune results for RandomForest", x = "Number of trees", y = "Resample accuracy")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># set.seed(8584)</span></span>
-<span><span class="co"># rf_final_fit &lt;- fit_best(rf_final_tune)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># rf_final_pred &lt;- predict(rf_final_fit, final_test, type = "class")</span></span>
-<span><span class="co"># rf_final_acc &lt;- accuracy_vec(final_test$Transported, rf_final_pred$.pred_class)</span></span></code></pre></div>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Final randomForest tune.RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">show_best</span><span class="op">(</span><span class="va">rf_final_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">trees</span>, y <span class="op">=</span> <span class="va">mean</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_x_log10</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Tune results for RandomForest"</span>, x <span class="op">=</span> <span class="st">"Number of trees"</span>, y <span class="op">=</span> <span class="st">"Resample accuracy"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:randomForest-tune"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/randomForest-tune-1.png" alt="Tuning results for the RandomForest model." width="672"><p class="caption">
+Figure 8.9: Tuning results for the RandomForest model.
+</p>
+</div>
+<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">rf_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit_best</span><span class="op">(</span><span class="va">rf_final_tune</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rf_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">rf_final_fit</span>, <span class="va">final_test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">rf_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy_vec</span><span class="op">(</span><span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="va">rf_final_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div id="xgboost" class="section level2" number="8.10">
 <h2>
@@ -982,47 +1042,56 @@ We will leave the mtry-parameter to its default value.</p>
 </h2>
 <p>XGBoost is a very complicated tree-based model that uses boosting where each iteration, the results of the previous iteration are used as inputs to tweak the next ensamble of trees. It has 8 tuning parameters in the parsnip package: <em>tree_depth</em>, <em>trees</em>, <em>learn_rate</em>, <em>mtry</em>, <em>min_n</em>, <em>loss_reduction</em>, <em>sample_size</em> and <em>stop_iter</em>. We can use the best values from previous tree-models for some of these and leave others to their defaults.</p>
 <p>The ones we will tune is the tree depth, the learn-rate and the loss reduction. The tree depth sets the maxim number of splits within each tree. The learn-rate determines how large steps between boosting iterations the model takes. The larger the steps, the better the performance but the model may miss an important solution. The loss reduction determines the minimum loss that is required to further split a node of a tree. High values lead to less overfitting but also a higher risk of underfitting while low values increase the risk of overfitting.</p>
-<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># xgb_final_mod &lt;- boost_tree(tree_depth = tune(), learn_rate = tune(), loss_reduction = tune(),</span></span>
-<span><span class="co">#                             min_n = select_best(C5.0_final_tune), trees = select_best(rf_final_tune)) %&gt;%</span></span>
-<span><span class="co">#   set_engine("xgboost") %&gt;%</span></span>
-<span><span class="co">#   set_mode("classification")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># xgb_final_wf &lt;- glm_final_wf %&gt;%</span></span>
-<span><span class="co">#   update_model(xgb_final_mod)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># my_acc &lt;- metric_set(accuracy)</span></span>
-<span><span class="co"># xgb_ctrl &lt;- control_grid(verbose = TRUE, save_pred = TRUE, save_workflow = TRUE)</span></span>
-<span><span class="co"># xgb_grid &lt;- expand.grid(tree_depth = seq(3, 9, 1), learn_rate = seq(0.2, 0.4, 0.1), loss_reduction = seq(0, 0.3, 0.1))</span></span>
-<span><span class="co"># </span></span>
+<div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">my_min_n</span> <span class="op">&lt;-</span> <span class="fu">select_best</span><span class="op">(</span><span class="va">c5.0_final_tune</span><span class="op">)</span><span class="op">$</span><span class="va">min_n</span></span>
+<span><span class="va">my_trees</span> <span class="op">&lt;-</span> <span class="fu">select_best</span><span class="op">(</span><span class="va">rf_final_tune</span><span class="op">)</span><span class="op">$</span><span class="va">trees</span></span>
+<span></span>
+<span><span class="va">xgb_final_mod</span> <span class="op">&lt;-</span> <span class="fu">boost_tree</span><span class="op">(</span>tree_depth <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, learn_rate <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, loss_reduction <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>                            min_n <span class="op">=</span> <span class="op">!</span><span class="op">!</span><span class="va">my_min_n</span>, trees <span class="op">=</span> <span class="op">!</span><span class="op">!</span><span class="va">my_trees</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_engine</span><span class="op">(</span><span class="st">"xgboost"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">set_mode</span><span class="op">(</span><span class="st">"classification"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">xgb_final_wf</span> <span class="op">&lt;-</span> <span class="va">glm_final_wf</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">update_model</span><span class="op">(</span><span class="va">xgb_final_mod</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">my_acc</span> <span class="op">&lt;-</span> <span class="fu">metric_set</span><span class="op">(</span><span class="va">accuracy</span><span class="op">)</span></span>
+<span><span class="va">xgb_ctrl</span> <span class="op">&lt;-</span> <span class="fu">control_grid</span><span class="op">(</span>save_pred <span class="op">=</span> <span class="cn">TRUE</span>, save_workflow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">xgb_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>tree_depth <span class="op">=</span> <span class="fl">3</span>, learn_rate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0.02</span><span class="op">)</span>, loss_reduction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># my_cluster &lt;- snow::makeCluster(detectCores() - 1, type = 'SOCK')</span></span>
 <span><span class="co"># registerDoSNOW(my_cluster)</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># system.time({</span></span>
 <span><span class="co">#   set.seed(8584)</span></span>
-<span><span class="co">#   xgb_final_tune &lt;- xgb_final_mod_tune %&gt;%</span></span>
-<span><span class="co">#     tune_grid(xgb_final_wf, resamples = final_folds, metrics = my_acc, control = xgb_ctrl, grid = xgb_grid)</span></span>
+<span><span class="co">#   xgb_final_tune &lt;- xgb_final_wf %&gt;%</span></span>
+<span><span class="co">#     tune_grid(., resamples = final_folds, metrics = my_acc, control = xgb_ctrl, grid = xgb_grid)</span></span>
 <span><span class="co"># })</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># save(xgb_final_tune, file = "Extra/Final XGBoost tune.RData")</span></span>
 <span><span class="co"># </span></span>
 <span><span class="co"># snow::stopCluster(my_cluster)</span></span>
 <span><span class="co"># unregister()</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># load("Extra/Final XGBoost tune.RData")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># show_best(xgb_final_tune, metric = "accuracy", n = 20) %&gt;%</span></span>
-<span><span class="co">#   ggplot(aes(x = trees, y = mean)) +</span></span>
-<span><span class="co">#   geom_line() +</span></span>
-<span><span class="co">#   geom_point() +</span></span>
-<span><span class="co">#   scale_x_log10() +</span></span>
-<span><span class="co">#   labs(title = "Tune results for RandomForest", x = "Number of trees", y = "Resample accuracy")</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># set.seed(8584)</span></span>
-<span><span class="co"># xgb_final_fit &lt;- fit_best(xgb_final_tune)</span></span>
-<span><span class="co"># </span></span>
-<span><span class="co"># xgb_final_pred &lt;- predict(xgb_final_fit, final_test, type = "class")</span></span>
-<span><span class="co"># xgb_final_acc &lt;- accuracy_vec(final_test$Transported, xgb_final_pred$.pred_class)</span></span></code></pre></div>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"Extra/Final XGBoost tune.RData"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">show_best</span><span class="op">(</span><span class="va">xgb_final_tune</span>, metric <span class="op">=</span> <span class="st">"accuracy"</span>, n <span class="op">=</span> <span class="fl">110</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">learn_rate</span>, y <span class="op">=</span> <span class="va">mean</span>, colour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">loss_reduction</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Tune results for XGBoost"</span>, x <span class="op">=</span> <span class="st">"Learn rate"</span>, y <span class="op">=</span> <span class="st">"Resample accuracy"</span>, colour <span class="op">=</span> <span class="st">"Loss\nreduction"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<span style="display:block;" id="fig:xgboost-final"></span>
+<img src="SpaceshipTitanicBook_files/figure-html/xgboost-final-1.png" alt="Tuning results for the XGBoost model." width="672"><p class="caption">
+Figure 8.10: Tuning results for the XGBoost model.
+</p>
+</div>
+<div class="sourceCode" id="cb103"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">8584</span><span class="op">)</span></span>
+<span><span class="va">xgb_final_fit</span> <span class="op">&lt;-</span> <span class="fu">fit_best</span><span class="op">(</span><span class="va">xgb_final_tune</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">xgb_final_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">xgb_final_fit</span>, <span class="va">final_test</span>, type <span class="op">=</span> <span class="st">"class"</span><span class="op">)</span></span>
+<span><span class="va">xgb_final_acc</span> <span class="op">&lt;-</span> <span class="fu">accuracy_vec</span><span class="op">(</span><span class="va">final_test</span><span class="op">$</span><span class="va">Transported</span>, <span class="va">xgb_final_pred</span><span class="op">$</span><span class="va">.pred_class</span><span class="op">)</span></span></code></pre></div>
 
 </div>
 </div>
@@ -1060,7 +1129,7 @@ We will leave the mtry-parameter to its default value.</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-11.</p>
+    <p>"<strong>Spaceship Titanic - A comprehensive guide</strong>" was written by Vanja Manborg. It was last built on 2024-02-13.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
